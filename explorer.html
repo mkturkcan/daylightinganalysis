@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NYC street treatment explorer: geometry, areas and effects</title>
+<style>
+  :root {
+    --bg:#fbfbf9; --panel:#fff; --ink:#0b0b0b; --ink2:#52514e; --ink3:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --line:#d8d7cf; --blue:#2a78d6;
+    --orange:#eb6834; --green:#1baf7a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14140f; --panel:#1c1c17; --ink:#f4f3ee; --ink2:#b9b7ad;
+            --ink3:#8b8980; --grid:#2e2e26; --axis:#45443a; --line:#2b2b23; }
+  }
+  :root[data-theme="light"]{--bg:#fbfbf9;--panel:#fff;--ink:#0b0b0b;--ink2:#52514e;
+    --ink3:#898781;--grid:#e1e0d9;--axis:#c3c2b7;--line:#d8d7cf;}
+  :root[data-theme="dark"]{--bg:#14140f;--panel:#1c1c17;--ink:#f4f3ee;
+    --ink2:#b9b7ad;--ink3:#8b8980;--grid:#2e2e26;--axis:#45443a;--line:#2b2b23;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14.5px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  .wrap{max-width:1720px;margin:0 auto;padding:20px 18px 60px}
+  header{display:flex;gap:18px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+  h1{font-size:22px;margin:0 0 6px;font-weight:650;letter-spacing:-.01em}
+  p.sub{margin:0;color:var(--ink2);max-width:96ch;font-size:13.6px}
+  p.note{margin:6px 0 0;color:var(--ink3);font-size:12.6px;max-width:100ch}
+  button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--axis);
+    border-radius:7px;padding:5px 10px;font-size:12.4px;cursor:pointer}
+  button.ghost:hover{color:var(--ink);border-color:var(--ink3)}
+  button.ghost[aria-pressed="true"]{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .layout{display:grid;grid-template-columns:290px 1fr 340px;gap:16px;margin-top:16px;align-items:start}
+  @media (max-width:1300px){.layout{grid-template-columns:280px 1fr}}
+  @media (max-width:900px){.layout{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 13px}
+  .panel h3{font-size:12.6px;margin:0 0 8px;text-transform:uppercase;
+    letter-spacing:.05em;color:var(--ink3);font-weight:650}
+  .panel h3:not(:first-child){margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+  label.row{display:flex;align-items:baseline;gap:7px;padding:3px 0;font-size:13px;cursor:pointer}
+  label.row input{margin:0;flex:none;position:relative;top:2px}
+  .sw{width:9px;height:9px;border-radius:50%;flex:none;position:relative;top:3px}
+  .cnt{margin-left:auto;color:var(--ink3);font-size:11.6px;font-variant-numeric:tabular-nums}
+  input[type=text],select{width:100%;background:var(--bg);color:var(--ink);
+    border:1px solid var(--axis);border-radius:6px;padding:5px 8px;font-size:13px}
+  input[type=range]{width:100%}
+  .hint{color:var(--ink3);font-size:11.8px;margin-top:3px}
+  #map{width:100%;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;display:block;cursor:crosshair;touch-action:none}
+  .tip{position:fixed;z-index:50;pointer-events:none;max-width:360px;background:var(--panel);
+    color:var(--ink);border:1px solid var(--axis);border-radius:8px;padding:8px 10px;
+    font-size:12.3px;box-shadow:0 6px 22px rgba(0,0,0,.18);display:none}
+  table{border-collapse:collapse;width:100%;font-size:12.4px}
+  th,td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--ink3);font-weight:620;font-size:11.4px;text-transform:uppercase}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .tag{display:inline-block;padding:1px 6px;border-radius:20px;font-size:11px;
+    border:1px solid var(--axis);color:var(--ink2)}
+  .tag.ok{border-color:var(--green);color:var(--green)}
+  .tag.bad{border-color:var(--orange);color:var(--orange)}
+  .scroll{overflow:auto;max-height:420px}
+  .warn{background:color-mix(in srgb, var(--orange) 12%, transparent);
+    border:1px solid var(--orange);border-radius:8px;padding:9px 11px;
+    font-size:12.6px;color:var(--ink);margin-top:10px}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--grid);
+    padding:1px 4px;border-radius:4px}
+  .stat{display:flex;justify-content:space-between;font-size:12.6px;padding:2px 0}
+  .stat b{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>NYC street treatment explorer</h1>
+    <p class="sub">Every treatment drawn with its published geometry. Three defects
+    in this study came from treating a geometry as something it is not, and each was
+    invisible in a table and obvious on a map. Pick an area by name or by drawing a
+    polygon, choose which sources to show, change the rule that decides what counts
+    as being at a junction, and watch what moves.</p>
+    <p class="note" id="metaline">loading</p>
+  </div>
+  <div style="display:flex;gap:7px">
+    <button class="ghost" id="themebtn" type="button">Dark</button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- ------------------------------------------------------- left controls -->
+  <div class="panel">
+    <h3>Area</h3>
+    <input type="text" id="areasearch" placeholder="Brooklyn, Fort Hamilton, Ocean Pkwy" autocomplete="off">
+    <div class="hint" id="areahint">type a borough or a street name</div>
+    <div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">
+      <button class="ghost" id="polybtn" type="button" aria-pressed="false">Draw polygon</button>
+      <button class="ghost" id="clearbtn" type="button">Clear area</button>
+    </div>
+    <div class="hint">click to add points, double click to close</div>
+
+    <h3>Sources</h3>
+    <div id="layers"></div>
+
+    <h3>Placement</h3>
+    <div id="placements"></div>
+    <div class="hint" id="bandhint"></div>
+
+    <h3>Junction rule</h3>
+    <select id="rule"></select>
+    <div class="hint" id="rulehint"></div>
+
+    <h3>Installed on or before</h3>
+    <input type="range" id="yr" min="1990" max="2026" value="2026" step="1">
+    <div class="hint"><b id="yrlab">2026</b></div>
+  </div>
+
+  <!-- ------------------------------------------------------------- the map -->
+  <div>
+    <canvas id="map" height="640"></canvas>
+    <p class="note">Drag to pan, scroll to zoom, hover for a record. A line is drawn
+    as published. Two sources publish a <b>segment</b> and not a device: VZV speed
+    humps have a median length of 217 m and the Speed Reducer Tracking System 81 m,
+    so a line running through a junction does not mean a hump sits there.</p>
+    <div class="warn" id="geomwarn"></div>
+  </div>
+
+  <!-- ------------------------------------------------------- right results -->
+  <div class="panel">
+    <h3>Selection</h3>
+    <div id="selstats"></div>
+
+    <h3>Crashes in the selection</h3>
+    <canvas id="spark" height="120"></canvas>
+    <div class="hint" id="sparkhint"></div>
+
+    <h3>Effects</h3>
+    <select id="outcome"></select>
+    <div class="hint">estimates from the pipeline, filtered to the visible sources</div>
+    <div class="scroll"><table id="efftab"></table></div>
+  </div>
+</div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const KX = Math.cos(40.7 * Math.PI / 180) * 111320, KY = 111320;
+
+const SRC_COLOR = {
+  list2025:"#2a78d6", list2024:"#7a5bd6", signorders:"#1b9aaf",
+  corrals_escooter:"#eb6834", corrals_bike:"#d64a9e", vzv_turn_calming:"#1baf7a",
+  vzv_speed_humps:"#c9a227", srts:"#8a897f", raised_crosswalks:"#5f7a1b",
+  lpi:"#b0563a", vzv_sip:"#4a4a8a",
+};
+const PLACEMENTS = ["at_junction","on_approach","mid_block","no_position"];
+const FAM_LABEL = {
+  daylighting:"Daylighting, signage", daylighting_hardened:"Daylighting, hardened",
+  turn_calming:"Turn calming", vertical_deflection:"Vertical deflection",
+  signal:"Signal timing", capital_project:"Capital projects",
+};
+
+const S = {
+  meta:null, tre:[], eff:[], areas:[], crashes:{},
+  on:{}, place:{}, rule:null, year:2026, outcome:"n_ped",
+  bbox:null, poly:null, drawing:false, view:null, drag:null, visible:[],
+};
+
+async function load() {
+  const get = async n => (await fetch("data/explorer/" + n)).json();
+  const [meta, tre, eff, areas, crashes] = await Promise.all(
+    ["meta.json","treatments.json","effects.json","areas.json","crashes.json"].map(get));
+  S.meta = meta; S.tre = tre; S.eff = eff; S.areas = areas; S.crashes = crashes;
+  meta.layers.forEach(l => S.on[l.slug] = l.on);
+  PLACEMENTS.forEach(p => S.place[p] = p !== "no_position");
+  S.rule = Object.keys(meta.rules || {})[0] || null;
+  build();
+  draw();
+}
+
+/* ------------------------------------------------------------------- panels */
+function build() {
+  const m = S.meta;
+  const host = $("#layers"); host.textContent = "";
+  const byFam = {};
+  m.layers.forEach(l => (byFam[l.family] = byFam[l.family] || []).push(l));
+  for (const fam of ["daylighting","daylighting_hardened","turn_calming",
+                     "vertical_deflection","signal","capital_project"]) {
+    if (!byFam[fam]) continue;
+    const h = document.createElement("div");
+    h.style.cssText = "font-size:11.2px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin:8px 0 2px;font-weight:650";
+    h.textContent = FAM_LABEL[fam] || fam;
+    host.appendChild(h);
+    for (const l of byFam[fam]) {
+      const n = S.tre.filter(t => t.s === l.slug).length;
+      const lab = document.createElement("label"); lab.className = "row";
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = l.on;
+      cb.addEventListener("change", () => { S.on[l.slug] = cb.checked; draw(); });
+      const sw = document.createElement("span"); sw.className = "sw";
+      sw.style.background = SRC_COLOR[l.slug] || "#8a897f";
+      const tx = document.createElement("span"); tx.textContent = l.label;
+      const c = document.createElement("span"); c.className = "cnt";
+      c.textContent = n.toLocaleString();
+      lab.append(cb, sw, tx, c); host.appendChild(lab);
+    }
+  }
+
+  const ph = $("#placements"); ph.textContent = "";
+  for (const p of PLACEMENTS) {
+    const n = S.tre.filter(t => (t.pl || "no_position") === p).length;
+    const lab = document.createElement("label"); lab.className = "row";
+    const cb = document.createElement("input"); cb.type = "checkbox";
+    cb.checked = S.place[p];
+    cb.addEventListener("change", () => { S.place[p] = cb.checked; draw(); });
+    const tx = document.createElement("span");
+    tx.textContent = p.replace(/_/g, " ");
+    const c = document.createElement("span"); c.className = "cnt";
+    c.textContent = n.toLocaleString();
+    lab.append(cb, tx, c); ph.appendChild(lab);
+  }
+  const b = S.meta.placement_bands_m || {};
+  $("#bandhint").textContent = b.at_junction
+    ? `at junction within ${b.at_junction} m of the centre, on approach to ${b.on_approach} m, mid block beyond`
+    : "";
+
+  const rs = $("#rule"); rs.textContent = "";
+  for (const k of Object.keys(S.meta.rules || {})) {
+    const o = document.createElement("option"); o.value = k; o.textContent = k;
+    rs.appendChild(o);
+  }
+  rs.value = S.rule || "";
+  rs.addEventListener("change", () => { S.rule = rs.value; draw(); });
+  showRule();
+
+  const os = $("#outcome"); os.textContent = "";
+  for (const [k, l] of (S.meta.outcomes || [])) {
+    const o = document.createElement("option"); o.value = k; o.textContent = l;
+    os.appendChild(o);
+  }
+  os.value = S.outcome;
+  os.addEventListener("change", () => { S.outcome = os.value; effects(); });
+
+  $("#geomwarn").textContent = S.meta.geometry_note || "";
+  $("#metaline").textContent =
+    `${S.tre.length.toLocaleString()} treatments, ${S.eff.length} estimates, `
+    + `${S.areas.length.toLocaleString()} searchable areas. `
+    + (S.meta.warning || "");
+
+  const as = $("#areasearch");
+  as.addEventListener("input", () => {
+    const q = as.value.trim().toLowerCase();
+    if (q.length < 3) { $("#areahint").textContent = "type a borough or a street name"; return; }
+    const hits = S.areas.filter(a => a.name.toLowerCase().includes(q)).slice(0, 6);
+    if (!hits.length) { $("#areahint").textContent = "no match"; return; }
+    $("#areahint").textContent = hits.map(h => h.name).join(", ");
+  });
+  as.addEventListener("keydown", ev => {
+    if (ev.key !== "Enter") return;
+    const q = as.value.trim().toLowerCase();
+    const hit = S.areas.find(a => a.name.toLowerCase() === q)
+             || S.areas.find(a => a.name.toLowerCase().includes(q));
+    if (!hit) { $("#areahint").textContent = "no match"; return; }
+    S.bbox = hit.bbox; S.poly = null;
+    $("#areahint").textContent = `${hit.name} (${hit.kind}, ${hit.n} points)`;
+    fitTo(hit.bbox); draw();
+  });
+  $("#polybtn").addEventListener("click", () => {
+    S.drawing = !S.drawing; S.poly = S.drawing ? [] : S.poly;
+    $("#polybtn").setAttribute("aria-pressed", String(S.drawing));
+    draw();
+  });
+  $("#clearbtn").addEventListener("click", () => {
+    S.bbox = null; S.poly = null; S.drawing = false;
+    $("#polybtn").setAttribute("aria-pressed", "false");
+    $("#areasearch").value = ""; $("#areahint").textContent = "cleared";
+    draw();
+  });
+  $("#yr").addEventListener("input", e => {
+    S.year = +e.target.value; $("#yrlab").textContent = S.year; draw();
+  });
+  $("#themebtn").addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme");
+    const dark = cur ? cur === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+    $("#themebtn").textContent = dark ? "Dark" : "Light";
+    draw();
+  });
+  addEventListener("resize", () => { S.view = null; draw(); });
+  wireMap();
+}
+
+function showRule() {
+  const r = (S.meta.rules || {})[S.rule];
+  $("#rulehint").textContent = r
+    ? `junction box ${r.box_m} m, corner end ${r.corner_end_m} m, corner length ${r.corner_len_m} m. ${r.note}`
+    : "no rule sets available";
+}
+
+/* -------------------------------------------------------------- projection */
+function bounds(list) {
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  for (const t of list) {
+    if (t.lon<x0) x0=t.lon; if (t.lon>x1) x1=t.lon;
+    if (t.lat<y0) y0=t.lat; if (t.lat>y1) y1=t.lat;
+  }
+  return [x0,y0,x1,y1];
+}
+function fitTo(bb) {
+  const c = $("#map"), w = c.clientWidth, h = 640, pad = 26;
+  const kx = Math.cos(40.7*Math.PI/180);
+  const s = Math.min((w-2*pad)/Math.max(1e-9,(bb[2]-bb[0])*kx),
+                     (h-2*pad)/Math.max(1e-9,(bb[3]-bb[1])));
+  S.view = { s, kx, cx:(bb[0]+bb[2])/2, cy:(bb[1]+bb[3])/2, dx:w/2, dy:h/2 };
+}
+function proj(lon,lat){const v=S.view;return [v.dx+(lon-v.cx)*v.kx*v.s, v.dy-(lat-v.cy)*v.s];}
+function unproj(px,py){const v=S.view;return [v.cx+(px-v.dx)/(v.kx*v.s), v.cy-(py-v.dy)/v.s];}
+
+function inPoly(lon,lat,poly){
+  let hit=false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const [xi,yi]=poly[i],[xj,yj]=poly[j];
+    if(((yi>lat)!==(yj>lat)) && (lon < (xj-xi)*(lat-yi)/(yj-yi)+xi)) hit=!hit;
+  }
+  return hit;
+}
+function inArea(t){
+  if (S.poly && S.poly.length>=3) return inPoly(t.lon,t.lat,S.poly);
+  if (S.bbox) return t.lon>=S.bbox[0]&&t.lon<=S.bbox[2]&&t.lat>=S.bbox[1]&&t.lat<=S.bbox[3];
+  return true;
+}
+function shown(t){
+  if (!S.on[t.s]) return false;
+  if (!S.place[t.pl || "no_position"]) return false;
+  if (t.y && t.y > S.year) return false;
+  return inArea(t);
+}
+
+/* -------------------------------------------------------------------- draw */
+function draw() {
+  const c = $("#map"), g = c.getContext("2d");
+  const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = 640;
+  if (c.width !== Math.round(w*dpr) || c.height !== Math.round(h*dpr)) {
+    c.width = Math.round(w*dpr); c.height = Math.round(h*dpr);
+    c.style.height = h+"px"; S.view = null;
+  }
+  g.setTransform(dpr,0,0,dpr,0,0);
+  if (!S.view) fitTo(bounds(S.tre));
+  g.clearRect(0,0,w,h);
+
+  S.visible = [];
+  let nSeg = 0;
+  for (const t of S.tre) {
+    if (!shown(t)) continue;
+    const col = SRC_COLOR[t.s] || "#8a897f";
+    const p = proj(t.lon, t.lat);
+    // a line is drawn as published, which is the whole point of this page
+    if (t.g && t.g.length && (t.g[0].length > 1)) {
+      nSeg++;
+      g.strokeStyle = col; g.lineWidth = 2; g.globalAlpha = .55;
+      for (const ln of t.g) {
+        g.beginPath();
+        ln.forEach((pt,i) => { const q = proj(pt[0],pt[1]);
+          i ? g.lineTo(q[0],q[1]) : g.moveTo(q[0],q[1]); });
+        g.stroke();
+      }
+      g.globalAlpha = .9; g.fillStyle = col;
+      for (const ln of t.g) {
+        for (const e of [ln[0], ln[ln.length-1]]) {
+          const q = proj(e[0],e[1]);
+          g.beginPath(); g.arc(q[0],q[1],1.7,0,6.2832); g.fill();
+        }
+      }
+    } else {
+      g.globalAlpha = .75; g.fillStyle = col;
+      g.beginPath(); g.arc(p[0],p[1],2.2,0,6.2832); g.fill();
+    }
+    if (p[0]>-20 && p[1]>-20 && p[0]<w+20 && p[1]<h+20) S.visible.push([p[0],p[1],t]);
+  }
+  g.globalAlpha = 1;
+
+  if (S.poly && S.poly.length) {
+    g.strokeStyle = "#eb6834"; g.lineWidth = 1.8; g.setLineDash([5,4]);
+    g.beginPath();
+    S.poly.forEach((pt,i)=>{const q=proj(pt[0],pt[1]); i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]);});
+    if (S.poly.length>=3) g.closePath();
+    g.stroke(); g.setLineDash([]);
+    g.fillStyle = "#eb6834";
+    S.poly.forEach(pt=>{const q=proj(pt[0],pt[1]);
+      g.beginPath(); g.arc(q[0],q[1],3,0,6.2832); g.fill();});
+  }
+  if (S.bbox && !S.poly) {
+    const a = proj(S.bbox[0],S.bbox[3]), b = proj(S.bbox[2],S.bbox[1]);
+    g.strokeStyle = "#eb6834"; g.lineWidth = 1.4; g.setLineDash([4,4]);
+    g.strokeRect(a[0],a[1],b[0]-a[0],b[1]-a[1]); g.setLineDash([]);
+  }
+  stats(nSeg);
+  spark();
+  effects();
+}
+
+function stats(nSeg) {
+  const sel = S.visible.map(v => v[2]);
+  const byPl = {}, bySrc = {};
+  sel.forEach(t => { byPl[t.pl||"no_position"]=(byPl[t.pl||"no_position"]||0)+1;
+                     bySrc[t.s]=(bySrc[t.s]||0)+1; });
+  const rule = S.rule ? ("lb_"+S.rule) : null;
+  const byLab = {};
+  if (rule) sel.forEach(t => { if (t[rule]) byLab[t[rule]]=(byLab[t[rule]]||0)+1; });
+  let html = `<div class="stat"><span>treatments drawn</span><b>${sel.length.toLocaleString()}</b></div>`;
+  html += `<div class="stat"><span>drawn as a line, not a point</span><b>${nSeg.toLocaleString()}</b></div>`;
+  for (const p of PLACEMENTS) if (byPl[p])
+    html += `<div class="stat"><span>${p.replace(/_/g," ")}</span><b>${byPl[p].toLocaleString()}</b></div>`;
+  if (Object.keys(byLab).length) {
+    html += `<div class="stat" style="margin-top:6px;color:var(--ink3)"><span>under rule <code>${S.rule}</code></span><b></b></div>`;
+    for (const k of Object.keys(byLab).sort())
+      html += `<div class="stat"><span>${k.replace(/_/g," ")}</span><b>${byLab[k].toLocaleString()}</b></div>`;
+  }
+  $("#selstats").innerHTML = html;
+}
+
+/* --------------------------------------------------------------- crash spark */
+function spark() {
+  const c = $("#spark"), g = c.getContext("2d");
+  const dpr = window.devicePixelRatio||1, w = c.clientWidth, h = 120;
+  if (c.width !== Math.round(w*dpr)) { c.width=Math.round(w*dpr); c.height=Math.round(h*dpr); c.style.height=h+"px"; }
+  g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,w,h);
+  // crashes summed over the distinct intersections in the selection, from
+  // explorer/crashes.json which is keyed by intersection id and year
+  const sel = S.visible.map(v=>v[2]);
+  const cs = getComputedStyle(document.documentElement);
+  g.fillStyle = cs.getPropertyValue("--ink3").trim();
+  g.font = "11.5px ui-sans-serif, system-ui, sans-serif";
+  if (!sel.length) { g.fillText("no treatments in the selection", 6, 20);
+    $("#sparkhint").textContent = ""; return; }
+  const ints = new Set();
+  sel.forEach(t => { if (t.ii != null) ints.add(t.ii); });
+  const series = {};
+  for (const id of ints) {
+    const rec = S.crashes[id];
+    if (!rec) continue;
+    for (const y in rec) {
+      const v = rec[y];
+      const a2 = series[y] = series[y] || [0,0,0];
+      a2[0]+=v[0]; a2[1]+=v[1]; a2[2]+=v[2];
+    }
+  }
+  const ys = Object.keys(series).map(Number).filter(y=>y>=2013&&y<=2025).sort();
+  if (!ys.length) {
+    g.fillText(`no crash record for these ${ints.size} intersections`, 6, 20);
+    $("#sparkhint").textContent = ""; return; }
+  const key = S.outcome === "n_ped" ? 1 : (S.outcome === "n_injury" ? 2 : 0);
+  const vals = ys.map(y=>series[y][key]);
+  const mx = Math.max(...vals, 1);
+  const lo = ys[0], hi = ys[ys.length-1];
+  const padL=34, padB=18, padT=8;
+  const x = y => padL + ((y-lo)/Math.max(1,(hi-lo))) * (w-padL-10);
+  const yv = v => h-padB - (v/mx)*(h-padB-padT);
+  g.strokeStyle = cs.getPropertyValue("--grid").trim(); g.lineWidth=1;
+  g.beginPath(); g.moveTo(padL,h-padB); g.lineTo(w-6,h-padB); g.stroke();
+  g.strokeStyle = "#2a78d6"; g.lineWidth = 2; g.beginPath();
+  ys.forEach((y,i)=>{ const px2=x(y), py2=yv(series[y][key]);
+    i?g.lineTo(px2,py2):g.moveTo(px2,py2); });
+  g.stroke();
+  g.fillStyle = "#2a78d6";
+  ys.forEach(y=>{ g.beginPath(); g.arc(x(y),yv(series[y][key]),2.2,0,6.2832); g.fill(); });
+  g.fillStyle = cs.getPropertyValue("--ink3").trim();
+  g.fillText(String(lo), padL-10, h-4); g.fillText(String(hi), w-26, h-4);
+  g.fillText(String(mx), 4, padT+8);
+  const label = S.outcome === "n_ped" ? "pedestrian crashes"
+    : (S.outcome === "n_injury" ? "crashes with an injury" : "all crashes");
+  $("#sparkhint").textContent =
+    `${label} per year across ${ints.size.toLocaleString()} intersections in the `
+    + `selection, ${lo} to ${hi}. This is a raw count and not an estimate: it has `
+    + `no comparison group.`;
+}
+
+/* ------------------------------------------------------------------ effects */
+function fmt(x,d=3){return (x==null||!isFinite(x))?"":Number(x).toFixed(d);}
+function verdictTag(v){
+  if(!v) return "";
+  if(v.startsWith("effect")||v.startsWith("reduction")) return '<span class="tag ok">benefit</span>';
+  if(v.startsWith("harm")||v.startsWith("increase")) return '<span class="tag bad">harm</span>';
+  if(v.startsWith("null")) return '<span class="tag">null</span>';
+  return `<span class="tag">refused</span>`;
+}
+function effects() {
+  const onSrc = Object.keys(S.on).filter(k=>S.on[k]);
+  const rows = S.eff.filter(e => e.out === S.outcome);
+  rows.sort((a,b)=>(a.irr??9)-(b.irr??9));
+  let html = "<thead><tr><th>class</th><th>from</th><th class=num>n</th>"
+    + "<th class=num>ratio</th><th class=num>p</th><th>verdict</th></tr></thead><tbody>";
+  for (const e of rows.slice(0,80)) {
+    html += `<tr><td>${e.cls}</td><td style="color:var(--ink3)">${e.src}</td>`
+      + `<td class=num>${e.n??""}</td>`
+      + `<td class=num>${fmt(e.irr)}<br><span style="color:var(--ink3);font-size:11px">${fmt(e.lo)} to ${fmt(e.hi)}</span></td>`
+      + `<td class=num>${fmt(e.p,3)}</td><td>${verdictTag(e.verdict)}`
+      + (e.plirr!=null?`<br><span style="color:var(--ink3);font-size:10.8px">placebo ${fmt(e.plirr)}</span>`:"")
+      + `</td></tr>`;
+  }
+  $("#efftab").innerHTML = html + "</tbody>";
+}
+
+/* --------------------------------------------------------------- map events */
+function wireMap() {
+  const c = $("#map");
+  c.addEventListener("pointermove", ev => {
+    if (S.drag) {
+      const a = unproj(S.drag.px, S.drag.py), b = unproj(ev.offsetX, ev.offsetY);
+      S.view.cx -= b[0]-a[0]; S.view.cy -= b[1]-a[1];
+      S.drag = {px:ev.offsetX, py:ev.offsetY}; draw(); return;
+    }
+    hover(ev);
+  });
+  c.addEventListener("pointerdown", ev => {
+    if (S.drawing) return;
+    S.drag = {px:ev.offsetX, py:ev.offsetY};
+  });
+  c.addEventListener("pointerup", () => { S.drag = null; });
+  c.addEventListener("pointerleave", () => { S.drag=null; $("#tip").style.display="none"; });
+  c.addEventListener("click", ev => {
+    if (!S.drawing) return;
+    const [lon,lat] = unproj(ev.offsetX, ev.offsetY);
+    (S.poly = S.poly || []).push([lon,lat]); draw();
+  });
+  c.addEventListener("dblclick", ev => {
+    if (!S.drawing) return;
+    S.drawing = false; $("#polybtn").setAttribute("aria-pressed","false");
+    $("#areahint").textContent = `polygon with ${(S.poly||[]).length} points`;
+    draw();
+  });
+  c.addEventListener("wheel", ev => {
+    ev.preventDefault();
+    const before = unproj(ev.offsetX, ev.offsetY);
+    S.view.s *= ev.deltaY < 0 ? 1.2 : 1/1.2;
+    const after = unproj(ev.offsetX, ev.offsetY);
+    S.view.cx += before[0]-after[0]; S.view.cy += before[1]-after[1];
+    draw();
+  }, {passive:false});
+}
+
+function hover(ev) {
+  const c = $("#map"), b = c.getBoundingClientRect();
+  const px = ev.clientX-b.left, py = ev.clientY-b.top;
+  let best=null, bd=110;
+  for (const v of S.visible) {
+    const d=(v[0]-px)**2+(v[1]-py)**2; if(d<bd){bd=d;best=v;}
+  }
+  const tip = $("#tip");
+  if (!best) { tip.style.display="none"; return; }
+  const t = best[2];
+  const rows = [
+    `<b>${t.c.replace(/_/g," ")}</b> <span style="color:var(--ink3)">${t.s}</span>`,
+    t.a ? `at: ${t.a}` : "",
+    `installed: ${t.d || "not recorded"} <span style="color:var(--ink3)">(${t.dp})</span>`,
+    `geometry: ${t.gs.replace(/_/g," ")}${t.L!=null?`, length ${t.L} m`:""}`,
+    t.dc!=null ? `distance to junction centre: ${t.dc} m` : "",
+    t.de!=null ? `nearest endpoint to centre: ${t.de} m` : "",
+    `corner: ${t.cor}   placement: ${(t.pl||"").replace(/_/g," ")}`,
+    S.rule && t["lb_"+S.rule] ? `label under <code>${S.rule}</code>: ${t["lb_"+S.rule].replace(/_/g," ")}` : "",
+    t.L>60 ? `<span style="color:var(--orange)">this is a segment, not a device: the hump is somewhere on this ${t.L} m line</span>` : "",
+  ].filter(Boolean);
+  tip.innerHTML = rows.join("<br>");
+  tip.style.display="block";
+  let l=ev.clientX+14, tp=ev.clientY+14;
+  if(l+tip.offsetWidth>innerWidth-8) l=ev.clientX-tip.offsetWidth-14;
+  if(tp+tip.offsetHeight>innerHeight-8) tp=ev.clientY-tip.offsetHeight-14;
+  tip.style.left=l+"px"; tip.style.top=tp+"px";
+}
+
+addEventListener("error", ev => {
+  const m = $("#metaline");
+  if (m) m.textContent = "This page failed: " + ev.message;
+});
+load().catch(e => { $("#metaline").textContent = "Could not load data: " + e.message
+  + ". The page needs data/explorer/*.json, and a browser will not read them from "
+  + "file:// on some systems; serve the folder with python -m http.server."; });
+</script>
+</body>
+</html>
