@@ -81,6 +81,7 @@
     <p class="note" id="metaline">loading</p>
   </div>
   <div style="display:flex;gap:7px">
+    <button class="ghost" id="basebtn" type="button" aria-pressed="true">Basemap</button>
     <button class="ghost" id="themebtn" type="button">Dark</button>
   </div>
 </header>
@@ -99,6 +100,15 @@
 
     <h3>Sources</h3>
     <div id="layers"></div>
+
+    <h3>Combine records at one corner</h3>
+    <label class="row"><input type="checkbox" id="combine">
+      <span>Combine overlapping records</span></label>
+    <input type="range" id="combineM" min="5" max="60" value="20" step="5">
+    <div class="hint">within <b id="combineMlab">20</b> m. A turn calming record and a
+    record on a published daylighting list can be one physical change filed twice, so
+    counting both overstates how much of the city is treated. A ring marks a corner
+    whose records come from more than one source.</div>
 
     <h3>Placement</h3>
     <div id="placements"></div>
@@ -120,6 +130,7 @@
     as published. Two sources publish a <b>segment</b> and not a device: VZV speed
     humps have a median length of 217 m and the Speed Reducer Tracking System 81 m,
     so a line running through a junction does not mean a hump sits there.</p>
+    <p class="note" id="baseattr"></p>
     <div class="warn" id="geomwarn"></div>
   </div>
 
@@ -153,17 +164,21 @@ const SRC_COLOR = {
   vzv_speed_humps:"#c9a227", srts:"#8a897f", raised_crosswalks:"#5f7a1b",
   lpi:"#b0563a", vzv_sip:"#4a4a8a",
 };
+const CURB_COLOR = { hydrants:"#c2352b", busstops:"#2f6f9f" };
 const PLACEMENTS = ["at_junction","on_approach","mid_block","no_position"];
 const FAM_LABEL = {
   daylighting:"Daylighting, signage", daylighting_hardened:"Daylighting, hardened",
   turn_calming:"Turn calming", vertical_deflection:"Vertical deflection",
   signal:"Signal timing", capital_project:"Capital projects",
+  curb_already_clear:"Curb already clear (context, not treatments)",
 };
 
 const S = {
   meta:null, tre:[], eff:[], areas:[], crashes:{},
   on:{}, place:{}, rule:null, year:2026, outcome:"n_ped",
   bbox:null, poly:null, drawing:false, view:null, drag:null, visible:[],
+  curb:null, basemap:true, tileDirty:false,
+  combine:false, combineM:20, pinned:null,
 };
 
 async function load() {
@@ -172,6 +187,10 @@ async function load() {
     ["meta.json","treatments.json","effects.json","areas.json","crashes.json"].map(get));
   S.meta = meta; S.tre = tre; S.eff = eff; S.areas = areas; S.crashes = crashes;
   meta.layers.forEach(l => S.on[l.slug] = l.on);
+  // context layers are optional: an older payload has no curb.json and the page
+  // must still work, so the failure is swallowed rather than thrown
+  (meta.curb_layers || []).forEach(l => S.on[l.slug] = l.on);
+  try { S.curb = await get("curb.json"); } catch (e) { S.curb = null; }
   PLACEMENTS.forEach(p => S.place[p] = p !== "no_position");
   S.rule = Object.keys(meta.rules || {})[0] || null;
   build();
@@ -184,20 +203,25 @@ function build() {
   const host = $("#layers"); host.textContent = "";
   const byFam = {};
   m.layers.forEach(l => (byFam[l.family] = byFam[l.family] || []).push(l));
+  (m.curb_layers || []).forEach(l => (byFam[l.family] = byFam[l.family] || []).push(l));
   for (const fam of ["daylighting","daylighting_hardened","turn_calming",
-                     "vertical_deflection","signal","capital_project"]) {
+                     "vertical_deflection","signal","capital_project",
+                     "curb_already_clear"]) {
     if (!byFam[fam]) continue;
     const h = document.createElement("div");
     h.style.cssText = "font-size:11.2px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin:8px 0 2px;font-weight:650";
     h.textContent = FAM_LABEL[fam] || fam;
     host.appendChild(h);
     for (const l of byFam[fam]) {
-      const n = S.tre.filter(t => t.s === l.slug).length;
+      const isCurb = fam === "curb_already_clear";
+      const n = isCurb ? ((m.counts || {})[l.slug] || 0)
+                       : S.tre.filter(t => t.s === l.slug).length;
       const lab = document.createElement("label"); lab.className = "row";
       const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = l.on;
       cb.addEventListener("change", () => { S.on[l.slug] = cb.checked; draw(); });
       const sw = document.createElement("span"); sw.className = "sw";
-      sw.style.background = SRC_COLOR[l.slug] || "#8a897f";
+      sw.style.background = isCurb ? CURB_COLOR[l.slug]
+                                   : (SRC_COLOR[l.slug] || "#8a897f");
       const tx = document.createElement("span"); tx.textContent = l.label;
       const c = document.createElement("span"); c.className = "cnt";
       c.textContent = n.toLocaleString();
@@ -278,6 +302,23 @@ function build() {
   $("#yr").addEventListener("input", e => {
     S.year = +e.target.value; $("#yrlab").textContent = S.year; draw();
   });
+  $("#combine").addEventListener("change", e => {
+    S.combine = e.target.checked; S.pinned = null;
+    $("#tip").style.display = "none"; draw();
+  });
+  $("#combineM").addEventListener("input", e => {
+    S.combineM = +e.target.value;
+    $("#combineMlab").textContent = S.combineM;
+    if (S.combine) draw();
+  });
+  $("#basebtn").addEventListener("click", () => {
+    S.basemap = !S.basemap;
+    $("#basebtn").setAttribute("aria-pressed", String(S.basemap));
+    draw();
+  });
+  $("#baseattr").textContent = TILE_ATTR +
+    ". The basemap is fetched from a public tile service, so this page needs a " +
+    "network connection to show it; every layer still draws without one.";
   $("#themebtn").addEventListener("click", () => {
     const cur = document.documentElement.getAttribute("data-theme");
     const dark = cur ? cur === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
@@ -296,7 +337,16 @@ function showRule() {
     : "no rule sets available";
 }
 
-/* -------------------------------------------------------------- projection */
+/* -------------------------------------------------------------- projection
+   Web Mercator, so that raster tiles line up exactly. An earlier version of this
+   page was linear in latitude, which is fine on its own and cannot carry a tile
+   basemap: tiles are Mercator, and over the city's 0.46 degree span the two
+   disagree by enough to put a corner on the wrong side of a street. The x axis is
+   degrees of longitude and the y axis is the Mercator latitude in degrees, and both
+   use one scale, so the aspect ratio needs no cosine correction. */
+const MERC = lat => (180/Math.PI) * Math.log(Math.tan(Math.PI/4 + lat*Math.PI/360));
+const IMERC = my => (360/Math.PI) * Math.atan(Math.exp(my*Math.PI/180)) - 90;
+
 function bounds(list) {
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
   for (const t of list) {
@@ -307,13 +357,59 @@ function bounds(list) {
 }
 function fitTo(bb) {
   const c = $("#map"), w = c.clientWidth, h = 640, pad = 26;
-  const kx = Math.cos(40.7*Math.PI/180);
-  const s = Math.min((w-2*pad)/Math.max(1e-9,(bb[2]-bb[0])*kx),
-                     (h-2*pad)/Math.max(1e-9,(bb[3]-bb[1])));
-  S.view = { s, kx, cx:(bb[0]+bb[2])/2, cy:(bb[1]+bb[3])/2, dx:w/2, dy:h/2 };
+  const m0 = MERC(bb[1]), m1 = MERC(bb[3]);
+  const s = Math.min((w-2*pad)/Math.max(1e-9,(bb[2]-bb[0])),
+                     (h-2*pad)/Math.max(1e-9,(m1-m0)));
+  S.view = { s, cx:(bb[0]+bb[2])/2, cmy:(m0+m1)/2, dx:w/2, dy:h/2 };
 }
-function proj(lon,lat){const v=S.view;return [v.dx+(lon-v.cx)*v.kx*v.s, v.dy-(lat-v.cy)*v.s];}
-function unproj(px,py){const v=S.view;return [v.cx+(px-v.dx)/(v.kx*v.s), v.cy-(py-v.dy)/v.s];}
+function proj(lon,lat){const v=S.view;return [v.dx+(lon-v.cx)*v.s, v.dy-(MERC(lat)-v.cmy)*v.s];}
+function unproj(px,py){const v=S.view;return [v.cx+(px-v.dx)/v.s, IMERC(v.cmy-(py-v.dy)/v.s)];}
+
+/* ----------------------------------------------------------------- basemap
+   Tiles are fetched from a public raster service and cached in memory. The page
+   works without them: a tile that fails to load is skipped and never retried, so
+   an offline copy of this file still draws every layer. */
+const TILE_URL = z => `https://basemaps.cartocdn.com/light_all/${z}/{x}/{y}.png`;
+const TILE_ATTR = "Basemap © OpenStreetMap contributors, © CARTO";
+const tiles = new Map();          // key "z/x/y" -> Image, or "bad"
+function tileFor(z,x,y) {
+  const k = z+"/"+x+"/"+y;
+  if (tiles.has(k)) return tiles.get(k);
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => { S.tileDirty = true; scheduleDraw(); };
+  img.onerror = () => { tiles.set(k, "bad"); };
+  img.src = TILE_URL(z).replace("{x}", x).replace("{y}", y);
+  tiles.set(k, img);
+  return img;
+}
+let drawPending = false;
+function scheduleDraw() {
+  if (drawPending) return;
+  drawPending = true;
+  requestAnimationFrame(() => { drawPending = false; draw(); });
+}
+function drawBasemap(g, w, h) {
+  const v = S.view;
+  // the zoom whose native pixel size is closest to the current scale
+  const z = Math.max(0, Math.min(19, Math.round(Math.log2(v.s*360/256))));
+  const n = Math.pow(2, z), world = 256*n, k = v.s*360/world;
+  const offX = v.dx - (v.cx+180)*v.s;
+  const offY = v.dy + (v.cmy-180)*v.s;
+  const x0 = Math.max(0, Math.floor((-offX)/(256*k)));
+  const x1 = Math.min(n-1, Math.ceil((w-offX)/(256*k)));
+  const y0 = Math.max(0, Math.floor((-offY)/(256*k)));
+  const y1 = Math.min(n-1, Math.ceil((h-offY)/(256*k)));
+  let drawn = 0;
+  for (let x=x0; x<=x1; x++) for (let y=y0; y<=y1; y++) {
+    const img = tileFor(z,x,y);
+    if (img === "bad" || !img.complete || !img.naturalWidth) continue;
+    const px = x*256*k + offX, py = y*256*k + offY, sz = 256*k;
+    g.drawImage(img, px, py, sz+1, sz+1);
+    drawn++;
+  }
+  return drawn;
+}
 
 function inPoly(lon,lat,poly){
   let hit=false;
@@ -335,6 +431,71 @@ function shown(t){
   return inArea(t);
 }
 
+/* ------------------------------------------------------------- combining
+   Records from different sources describe the same corner. A turn calming record and
+   a record on the published daylighting list can be one physical change filed twice,
+   and reading two dots as two corners overstates how much of the city is treated.
+   Combining groups every visible record within combineM metres into one item, using
+   union find over a grid, and the popup then lists what the corner actually carries.
+   This is a display choice and it changes no estimate. */
+function combineVisible(list, radiusM) {
+  const n = list.length, parent = new Int32Array(n);
+  for (let i=0;i<n;i++) parent[i]=i;
+  const find = a => { while(parent[a]!==a){parent[a]=parent[parent[a]];a=parent[a];} return a; };
+  const cell = radiusM, grid = new Map();
+  const key = (gx,gy) => gx+","+gy;
+  for (let i=0;i<n;i++) {
+    const t = list[i], x = t.lon*KX, y = t.lat*KY;
+    const gx = Math.floor(x/cell), gy = Math.floor(y/cell);
+    (grid.get(key(gx,gy)) || grid.set(key(gx,gy),[]).get(key(gx,gy))).push(i);
+  }
+  const r2 = radiusM*radiusM;
+  for (const [k, idx] of grid) {
+    const [gx,gy] = k.split(",").map(Number);
+    for (let dx=-1;dx<=1;dx++) for (let dy=-1;dy<=1;dy++) {
+      const other = grid.get(key(gx+dx,gy+dy));
+      if (!other) continue;
+      for (const i of idx) for (const j of other) {
+        if (j<=i) continue;
+        const a=list[i], b=list[j];
+        const d=((a.lon-b.lon)*KX)**2+((a.lat-b.lat)*KY)**2;
+        if (d<=r2) { const ra=find(i), rb=find(j); if(ra!==rb) parent[Math.max(ra,rb)]=Math.min(ra,rb); }
+      }
+    }
+  }
+  const groups = new Map();
+  for (let i=0;i<n;i++) {
+    const r = find(i);
+    (groups.get(r) || groups.set(r,[]).get(r)).push(list[i]);
+  }
+  return [...groups.values()].map(members => {
+    let lon=0, lat=0;
+    for (const m of members) { lon+=m.lon; lat+=m.lat; }
+    const srcs = [...new Set(members.map(m=>m.s))];
+    return { cluster:true, members, n:members.length,
+             lon:lon/members.length, lat:lat/members.length,
+             srcs, y: Math.min(...members.map(m=>m.y||9999)) };
+  });
+}
+
+function drawArea(g) {
+  if (S.poly && S.poly.length) {
+    g.strokeStyle = "#eb6834"; g.lineWidth = 1.8; g.setLineDash([5,4]);
+    g.beginPath();
+    S.poly.forEach((pt,i)=>{const q=proj(pt[0],pt[1]); i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]);});
+    if (S.poly.length>=3) g.closePath();
+    g.stroke(); g.setLineDash([]);
+    g.fillStyle = "#eb6834";
+    S.poly.forEach(pt=>{const q=proj(pt[0],pt[1]);
+      g.beginPath(); g.arc(q[0],q[1],3,0,6.2832); g.fill();});
+  }
+  if (S.bbox && !S.poly) {
+    const a = proj(S.bbox[0],S.bbox[3]), b = proj(S.bbox[2],S.bbox[1]);
+    g.strokeStyle = "#eb6834"; g.lineWidth = 1.4; g.setLineDash([4,4]);
+    g.strokeRect(a[0],a[1],b[0]-a[0],b[1]-a[1]); g.setLineDash([]);
+  }
+}
+
 /* -------------------------------------------------------------------- draw */
 function draw() {
   const c = $("#map"), g = c.getContext("2d");
@@ -346,9 +507,67 @@ function draw() {
   g.setTransform(dpr,0,0,dpr,0,0);
   if (!S.view) fitTo(bounds(S.tre));
   g.clearRect(0,0,w,h);
+  let nTiles = 0;
+  if (S.basemap) {
+    nTiles = drawBasemap(g, w, h);
+    // the layers must stay legible over the basemap, so it is muted
+    g.fillStyle = "rgba(250,249,245,.35)"; g.fillRect(0,0,w,h);
+  }
+
+  // curb that is already clear, drawn under the treatments because it is context
+  if (S.curb) {
+    for (const key of ["hydrants","busstops"]) {
+      if (!S.on[key] || !S.curb[key]) continue;
+      g.fillStyle = CURB_COLOR[key];
+      g.globalAlpha = .6;
+      for (const p of S.curb[key]) {
+        if (!inArea({lon:p[0], lat:p[1]})) continue;
+        const q = proj(p[0], p[1]);
+        if (q[0]<-6||q[1]<-6||q[0]>w+6||q[1]>h+6) continue;
+        if (key === "hydrants") {
+          g.beginPath(); g.arc(q[0],q[1],1.5,0,6.2832); g.fill();
+        } else {
+          // a bus stop is drawn as a square, and larger when more routes call
+          const r = 1.6 + Math.min(2.4, (p[2]||1)*.35);
+          g.fillRect(q[0]-r, q[1]-r, 2*r, 2*r);
+        }
+      }
+    }
+    g.globalAlpha = 1;
+  }
 
   S.visible = [];
   let nSeg = 0;
+
+  // combined mode draws one item per corner instead of one per record
+  if (S.combine) {
+    const list = S.tre.filter(shown);
+    const groups = combineVisible(list, S.combineM);
+    S.clusters = groups;
+    for (const cl of groups) {
+      const q = proj(cl.lon, cl.lat);
+      if (q[0]<-24||q[1]<-24||q[0]>w+24||q[1]>h+24) continue;
+      const many = cl.srcs.length > 1;
+      g.fillStyle = many ? "#111" : (SRC_COLOR[cl.srcs[0]] || "#8a897f");
+      g.globalAlpha = many ? .9 : .75;
+      const r = 2.2 + Math.min(5, Math.sqrt(cl.n - 1) * 1.7);
+      g.beginPath(); g.arc(q[0], q[1], r, 0, 6.2832); g.fill();
+      if (many) {
+        // a ring marks a corner whose records come from more than one source,
+        // which is the case the combining exists to make visible
+        g.globalAlpha = 1; g.strokeStyle = "#eb6834"; g.lineWidth = 1.4;
+        g.beginPath(); g.arc(q[0], q[1], r + 2.2, 0, 6.2832); g.stroke();
+      }
+      S.visible.push([q[0], q[1], cl]);
+    }
+    g.globalAlpha = 1;
+    drawArea(g);
+    stats(nSeg);
+    spark();
+    effects();
+    return;
+  }
+
   for (const t of S.tre) {
     if (!shown(t)) continue;
     const col = SRC_COLOR[t.s] || "#8a897f";
@@ -378,35 +597,32 @@ function draw() {
   }
   g.globalAlpha = 1;
 
-  if (S.poly && S.poly.length) {
-    g.strokeStyle = "#eb6834"; g.lineWidth = 1.8; g.setLineDash([5,4]);
-    g.beginPath();
-    S.poly.forEach((pt,i)=>{const q=proj(pt[0],pt[1]); i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]);});
-    if (S.poly.length>=3) g.closePath();
-    g.stroke(); g.setLineDash([]);
-    g.fillStyle = "#eb6834";
-    S.poly.forEach(pt=>{const q=proj(pt[0],pt[1]);
-      g.beginPath(); g.arc(q[0],q[1],3,0,6.2832); g.fill();});
-  }
-  if (S.bbox && !S.poly) {
-    const a = proj(S.bbox[0],S.bbox[3]), b = proj(S.bbox[2],S.bbox[1]);
-    g.strokeStyle = "#eb6834"; g.lineWidth = 1.4; g.setLineDash([4,4]);
-    g.strokeRect(a[0],a[1],b[0]-a[0],b[1]-a[1]); g.setLineDash([]);
-  }
+  drawArea(g);
   stats(nSeg);
   spark();
   effects();
 }
 
 function stats(nSeg) {
-  const sel = S.visible.map(v => v[2]);
+  // In combined mode S.visible holds corners, so the per record breakdowns below
+  // are computed over the members and the corner count is reported beside them.
+  const items = S.visible.map(v => v[2]);
+  const sel = S.combine ? items.flatMap(c => c.members) : items;
+  const nCorners = S.combine ? items.length : null;
+  const nMulti = S.combine ? items.filter(c => c.srcs.length > 1).length : 0;
   const byPl = {}, bySrc = {};
   sel.forEach(t => { byPl[t.pl||"no_position"]=(byPl[t.pl||"no_position"]||0)+1;
                      bySrc[t.s]=(bySrc[t.s]||0)+1; });
   const rule = S.rule ? ("lb_"+S.rule) : null;
   const byLab = {};
   if (rule) sel.forEach(t => { if (t[rule]) byLab[t[rule]]=(byLab[t[rule]]||0)+1; });
-  let html = `<div class="stat"><span>treatments drawn</span><b>${sel.length.toLocaleString()}</b></div>`;
+  let html = `<div class="stat"><span>records drawn</span><b>${sel.length.toLocaleString()}</b></div>`;
+  if (nCorners !== null) {
+    html += `<div class="stat"><span>corners after combining</span><b>${nCorners.toLocaleString()}</b></div>`;
+    html += `<div class="stat"><span>corners with several sources</span><b>${nMulti.toLocaleString()}</b></div>`;
+    const dup = sel.length - nCorners;
+    html += `<div class="stat"><span>records that share a corner</span><b>${dup.toLocaleString()}</b></div>`;
+  }
   html += `<div class="stat"><span>drawn as a line, not a point</span><b>${nSeg.toLocaleString()}</b></div>`;
   for (const p of PLACEMENTS) if (byPl[p])
     html += `<div class="stat"><span>${p.replace(/_/g," ")}</span><b>${byPl[p].toLocaleString()}</b></div>`;
@@ -425,8 +641,11 @@ function spark() {
   if (c.width !== Math.round(w*dpr)) { c.width=Math.round(w*dpr); c.height=Math.round(h*dpr); c.style.height=h+"px"; }
   g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,w,h);
   // crashes summed over the distinct intersections in the selection, from
-  // explorer/crashes.json which is keyed by intersection id and year
-  const sel = S.visible.map(v=>v[2]);
+  // explorer/crashes.json which is keyed by intersection id and year. Combining
+  // records changes nothing here, because the sum is already over distinct
+  // intersection ids rather than over records.
+  const items = S.visible.map(v=>v[2]);
+  const sel = S.combine ? items.flatMap(c=>c.members) : items;
   const cs = getComputedStyle(document.documentElement);
   g.fillStyle = cs.getPropertyValue("--ink3").trim();
   g.font = "11.5px ui-sans-serif, system-ui, sans-serif";
@@ -505,8 +724,10 @@ function wireMap() {
   const c = $("#map");
   c.addEventListener("pointermove", ev => {
     if (S.drag) {
+      // the view centre is held in Mercator latitude, so a pan has to be applied
+      // there and not in degrees of latitude
       const a = unproj(S.drag.px, S.drag.py), b = unproj(ev.offsetX, ev.offsetY);
-      S.view.cx -= b[0]-a[0]; S.view.cy -= b[1]-a[1];
+      S.view.cx -= b[0]-a[0]; S.view.cmy -= MERC(b[1])-MERC(a[1]);
       S.drag = {px:ev.offsetX, py:ev.offsetY}; draw(); return;
     }
     hover(ev);
@@ -516,11 +737,21 @@ function wireMap() {
     S.drag = {px:ev.offsetX, py:ev.offsetY};
   });
   c.addEventListener("pointerup", () => { S.drag = null; });
-  c.addEventListener("pointerleave", () => { S.drag=null; $("#tip").style.display="none"; });
+  // the popup deliberately survives a pointer leave; see hover()
+  c.addEventListener("pointerleave", () => { S.drag = null; });
   c.addEventListener("click", ev => {
-    if (!S.drawing) return;
-    const [lon,lat] = unproj(ev.offsetX, ev.offsetY);
-    (S.poly = S.poly || []).push([lon,lat]); draw();
+    if (S.drawing) {
+      const [lon,lat] = unproj(ev.offsetX, ev.offsetY);
+      (S.poly = S.poly || []).push([lon,lat]); draw();
+      return;
+    }
+    // a click over a record shows it and keeps it; a click over nothing dismisses
+    const b = $("#map").getBoundingClientRect();
+    const px = ev.clientX-b.left, py = ev.clientY-b.top;
+    let best=null, bd=110;
+    for (const v of S.visible) { const d=(v[0]-px)**2+(v[1]-py)**2; if(d<bd){bd=d;best=v;} }
+    if (best) { hover(ev); }
+    else { $("#tip").style.display="none"; S.pinned = null; }
   });
   c.addEventListener("dblclick", ev => {
     if (!S.drawing) return;
@@ -533,7 +764,8 @@ function wireMap() {
     const before = unproj(ev.offsetX, ev.offsetY);
     S.view.s *= ev.deltaY < 0 ? 1.2 : 1/1.2;
     const after = unproj(ev.offsetX, ev.offsetY);
-    S.view.cx += before[0]-after[0]; S.view.cy += before[1]-after[1];
+    S.view.cx += before[0]-after[0];
+    S.view.cmy += MERC(before[1])-MERC(after[1]);
     draw();
   }, {passive:false});
 }
@@ -546,8 +778,13 @@ function hover(ev) {
     const d=(v[0]-px)**2+(v[1]-py)**2; if(d<bd){bd=d;best=v;}
   }
   const tip = $("#tip");
-  if (!best) { tip.style.display="none"; return; }
-  const t = best[2];
+  // The popup is sticky. Moving off a record leaves the last one on screen, because
+  // a pen lifted from a tablet fires a leave event and a reader would otherwise
+  // never get to read what they just pointed at. A click on empty map dismisses it.
+  if (!best) return;
+  const payload = best[2];
+  if (payload.cluster) { showTip(clusterRows(payload), ev); S.pinned = payload; return; }
+  const t = payload;
   const rows = [
     `<b>${t.c.replace(/_/g," ")}</b> <span style="color:var(--ink3)">${t.s}</span>`,
     t.a ? `at: ${t.a}` : "",
@@ -559,7 +796,36 @@ function hover(ev) {
     S.rule && t["lb_"+S.rule] ? `label under <code>${S.rule}</code>: ${t["lb_"+S.rule].replace(/_/g," ")}` : "",
     t.L>60 ? `<span style="color:var(--orange)">this is a segment, not a device: the hump is somewhere on this ${t.L} m line</span>` : "",
   ].filter(Boolean);
-  tip.innerHTML = rows.join("<br>");
+  showTip(rows, ev);
+  S.pinned = t;
+}
+
+function clusterRows(cl) {
+  const byFam = {};
+  for (const m of cl.members) (byFam[m.s] = byFam[m.s] || []).push(m);
+  const head = cl.srcs.length > 1
+    ? `<b>one corner, ${cl.n} records from ${cl.srcs.length} sources</b>`
+    : `<b>one corner, ${cl.n} record${cl.n>1?"s":""}</b>`;
+  const lines = [head,
+    `<span style="color:var(--ink3)">records within ${S.combineM} m are combined</span>`];
+  for (const src of Object.keys(byFam)) {
+    const ms = byFam[src];
+    const dates = [...new Set(ms.map(m=>m.d||"not recorded"))].sort().join(", ");
+    const cls = [...new Set(ms.map(m=>m.c.replace(/_/g," ")))].join(", ");
+    lines.push(`<span style="color:${SRC_COLOR[src]||"#8a897f"}">&#9679;</span> `
+      + `${src}: ${ms.length} &middot; ${cls} &middot; ${dates}`);
+  }
+  const a = cl.members.find(m=>m.a);
+  if (a) lines.push(`at: ${a.a}`);
+  if (cl.srcs.length > 1) lines.push(
+    `<span style="color:var(--orange)">counting these as separate corners would `
+    + `overstate how much of the city is treated</span>`);
+  return lines;
+}
+
+function showTip(rows, ev) {
+  const tip = $("#tip");
+  tip.innerHTML = rows.filter(Boolean).join("<br>");
   tip.style.display="block";
   let l=ev.clientX+14, tp=ev.clientY+14;
   if(l+tip.offsetWidth>innerWidth-8) l=ev.clientX-tip.offsetWidth-14;
