@@ -1,0 +1,3346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NYC daylighting and turn calming: statistical companion</title>
+<style>
+  /* ------------------------------------------------------------------ theme
+     The palette and both theme blocks are the ones defined in explorer.html and
+     are reused verbatim so that the two pages match. Only the three column group
+     tints are added here, because only this page carries column groups. Three
+     type sizes are defined and nothing on the page uses any other size; --fs-b is an
+     alias of the body size, under the name the shared bundle asks for. */
+  :root {
+    --bg:#fbfbf9; --panel:#fff; --ink:#0b0b0b; --ink2:#52514e; --ink3:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --line:#d8d7cf; --blue:#2a78d6;
+    --orange:#eb6834; --green:#1baf7a;
+    --g1:#eef4fc; --g2:#e3edfa; --g3:#eaf5f0;
+    --fs:13px; --fs-s:11px; --fs-l:20px; --fs-b:var(--fs);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14140f; --panel:#1c1c17; --ink:#f4f3ee; --ink2:#b9b7ad;
+            --ink3:#8b8980; --grid:#2e2e26; --axis:#45443a; --line:#2b2b23;
+            --g1:#1b2130; --g2:#1e2739; --g3:#18261f; }
+  }
+  :root[data-theme="light"]{--bg:#fbfbf9;--panel:#fff;--ink:#0b0b0b;--ink2:#52514e;
+    --ink3:#898781;--grid:#e1e0d9;--axis:#c3c2b7;--line:#d8d7cf;
+    --g1:#eef4fc;--g2:#e3edfa;--g3:#eaf5f0;}
+  :root[data-theme="dark"]{--bg:#14140f;--panel:#1c1c17;--ink:#f4f3ee;--ink2:#b9b7ad;
+    --ink3:#8b8980;--grid:#2e2e26;--axis:#45443a;--line:#2b2b23;
+    --g1:#1b2130;--g2:#1e2739;--g3:#18261f;}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:var(--fs)/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  .wrap{max-width:1780px;margin:0 auto;padding:16px 16px 60px}
+  header{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;
+    flex-wrap:wrap}
+  .hbtn{display:flex;gap:6px;flex-wrap:wrap}
+  h1{font-size:var(--fs-l);margin:0 0 3px;font-weight:650;letter-spacing:-.01em}
+  h2{font-size:var(--fs);margin:0 0 6px;font-weight:650}
+  h3{font-size:var(--fs-s);margin:12px 0 5px;text-transform:uppercase;
+    letter-spacing:.05em;color:var(--ink3);font-weight:650}
+  h3:first-child{margin-top:0}
+  h4{font-size:var(--fs);margin:0 0 3px;font-weight:650}
+  a{color:var(--blue)}
+  p{margin:0}
+  p.rule{color:var(--ink2);font-size:var(--fs);max-width:140ch;margin:0 0 5px}
+  p.body{color:var(--ink2);font-size:var(--fs);line-height:1.6;max-width:104ch;
+    margin:7px 0 0}
+  p.note{color:var(--ink3);font-size:var(--fs-s);max-width:112ch;margin:6px 0 0}
+  p.hint{color:var(--ink3);font-size:var(--fs-s);margin:3px 0 0}
+  .hint{color:var(--ink3);font-size:var(--fs-s);margin-top:3px}
+  .small{font-size:var(--fs-s);color:var(--ink3);display:block;line-height:1.35}
+  .missing{color:var(--orange);font-size:var(--fs-s)}
+  .pageerr{color:var(--orange);font-size:var(--fs);margin:8px 0 0}
+  .pageerr:empty{display:none}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:var(--fs-s);
+    background:var(--grid);padding:1px 4px;border-radius:4px}
+
+  /* ---------------------------------------------------------------- controls */
+  button.ghost,a.ghost{background:transparent;color:var(--ink2);
+    border:1px solid var(--axis);border-radius:7px;padding:4px 9px;
+    font-size:var(--fs-s);cursor:pointer;text-decoration:none;display:inline-block}
+  button.ghost:hover,a.ghost:hover{color:var(--ink);border-color:var(--ink3)}
+  button.ghost[aria-pressed="true"]{background:var(--blue);color:#fff;
+    border-color:var(--blue)}
+  button.ghost:focus-visible,a.ghost:focus-visible,summary:focus-visible,
+  button.tgl:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  label.row{display:flex;align-items:baseline;gap:6px;padding:1px 0;
+    font-size:var(--fs);cursor:pointer}
+  label.row input{margin:0;flex:none;position:relative;top:2px}
+  .cnt{margin-left:auto;color:var(--ink3);font-size:var(--fs-s);
+    font-variant-numeric:tabular-nums;padding-left:8px}
+  input[type=text],select{width:100%;background:var(--bg);color:var(--ink);
+    border:1px solid var(--axis);border-radius:6px;padding:4px 7px;font-size:var(--fs)}
+  .famhead{font-size:var(--fs-s);text-transform:uppercase;letter-spacing:.05em;
+    color:var(--ink3);margin:10px 0 1px;font-weight:650;display:flex;gap:6px;
+    align-items:baseline}
+  .toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 7px}
+  .toolbar .spacer{flex:1}
+
+  /* ------------------------------------------------- disclosure, one click away */
+  details{margin:7px 0 0}
+  details>summary{cursor:pointer;color:var(--blue);font-size:var(--fs);
+    list-style:none;display:flex;gap:6px;align-items:baseline;padding:2px 0;
+    font-weight:600}
+  details>summary::-webkit-details-marker{display:none}
+  details>summary::before{content:"\25B8";color:var(--ink3);font-size:var(--fs-s);
+    flex:none}
+  details[open]>summary::before{content:"\25BE"}
+  details>summary:hover{text-decoration:underline}
+  details.panel>summary{margin:0}
+  details>.dbody{padding:2px 0 4px 15px}
+
+  /* ------------------------------------------------------------------ layout */
+  .layout{display:grid;grid-template-columns:290px 1fr;gap:14px;margin-top:12px;
+    align-items:start}
+  @media (max-width:1100px){.layout{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:11px 12px;margin-bottom:12px;display:block}
+  .side{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+  @media (max-width:1100px){.side{position:static;max-height:none}}
+
+  /* ------------------------------------------------------------------- tiles */
+  .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));
+    gap:8px;margin:11px 0 5px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:8px}
+  .tile{border:1px solid var(--line);border-radius:9px;padding:7px 10px;
+    background:var(--panel)}
+  .tiles .tile{background:var(--bg)}
+  .tile .v{font-size:var(--fs-l);font-weight:650;font-variant-numeric:tabular-nums;
+    line-height:1.2;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+  .tile .k{font-size:var(--fs-s);color:var(--ink3);line-height:1.3;margin-top:1px}
+  .tile .u{font-size:var(--fs-s);color:var(--ink2);line-height:1.35;margin-top:2px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(262px,1fr));gap:10px}
+  .card{border:1px solid var(--line);border-radius:9px;padding:9px 11px;
+    background:var(--bg)}
+  .card .who{color:var(--ink3);font-size:var(--fs-s);margin:0 0 5px}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:1px 9px;font-size:var(--fs-s)}
+  .kv .k{color:var(--ink3)}
+  ul.plain{margin:5px 0 0;padding-left:19px;font-size:var(--fs-s);color:var(--ink2)}
+  ul.plain li{margin:2px 0;line-height:1.45}
+
+  /* --------------------------------------------------------- tags and meters */
+  .tag{display:inline-block;padding:0 6px;border-radius:20px;font-size:var(--fs-s);
+    border:1px solid var(--axis);color:var(--ink2);white-space:nowrap;line-height:1.5}
+  .tag.ok{border-color:var(--green);color:var(--green)}
+  .tag.bad{border-color:var(--orange);color:var(--orange)}
+  .tag.warn{border-color:var(--orange);color:var(--orange);
+    background:color-mix(in srgb, var(--orange) 12%, transparent)}
+  .tag.mute{border-color:var(--axis);color:var(--ink3)}
+  .gscale{display:inline-block;font-size:var(--fs-s);text-transform:none;
+    letter-spacing:0;color:var(--ink2);border:1px solid var(--axis);border-radius:20px;
+    padding:0 6px;font-weight:600;white-space:nowrap;line-height:1.5}
+  .bar{position:relative;height:4px;background:var(--grid);border-radius:2px;
+    margin:2px 0 0;min-width:44px}
+  .bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:2px;
+    background:var(--blue)}
+  .bar>span.up{background:var(--orange)}
+  .bar>span.mut{background:var(--axis)}
+  .meterwrap{position:relative;height:5px;background:var(--grid);border-radius:3px;
+    margin:2px 0;min-width:64px}
+  .meter{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--blue)}
+  .meter.hi{background:var(--orange)}
+  .mark{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--ink2)}
+  .warnbox{background:color-mix(in srgb, var(--orange) 12%, transparent);
+    border:1px solid var(--orange);border-radius:8px;padding:8px 10px;
+    font-size:var(--fs-s);color:var(--ink);margin:8px 0 0}
+  .infobox{background:color-mix(in srgb, var(--blue) 9%, transparent);
+    border:1px solid color-mix(in srgb, var(--blue) 45%, var(--line));
+    border-radius:8px;padding:8px 10px;font-size:var(--fs-s);margin:8px 0 0}
+  .clash{display:block;font-size:var(--fs-s);color:var(--orange);line-height:1.35;
+    margin-top:2px}
+
+  .detblk h3{font-size:var(--fs-s);margin:0 0 4px;font-weight:650;
+    letter-spacing:.01em}
+  #topics h2,#methodology h2{margin-top:0}
+
+  /* ------------------------------------------------- the row of topic controls
+     One row of short labels, each with the control that opens its topic, so that a
+     reader scans the subjects instead of reading them. */
+  .qrow{display:flex;flex-wrap:wrap;gap:2px 15px;margin:5px 0 2px}
+  .qitem{display:inline-flex;align-items:center;font-size:var(--fs);
+    color:var(--ink2);white-space:nowrap}
+  #methodology h3{margin-top:15px}
+  #methodology .eqwrap{max-width:104ch}
+  #methodology details{margin-top:9px}
+
+  /* ------------------------------------------------------------------ tables */
+  .scroll{overflow:auto;max-width:100%}
+  .scroll.cap{max-height:340px}
+  .scroll.tall{max-height:70vh}
+  table{border-collapse:collapse;width:100%;font-size:var(--fs-s);
+    font-variant-numeric:tabular-nums}
+  th,td{text-align:left;padding:2px 4px;border-bottom:1px solid var(--line);
+    vertical-align:top;line-height:1.3}
+  th{color:var(--ink3);font-weight:650;font-size:var(--fs-s);text-transform:uppercase;
+    letter-spacing:.03em;background:var(--panel);position:relative}
+  td.num,th.num{text-align:right}
+  th.sortable{cursor:pointer;user-select:none}
+  th.sortable:hover{color:var(--ink)}
+  th.sorted{color:var(--ink)}
+  thead th{position:sticky;top:0;z-index:2}
+  thead tr.grouprow th{top:0;z-index:3}
+  /* the sub row is pushed down by the measured height of the group row, which is
+     set from script after the table is laid out, because the group row carries two
+     lines of text and its height is not a constant */
+  thead tr.subrow th{z-index:2}
+  #tablehost tbody tr:not(.det) td:first-child{position:sticky;left:0;
+    background:var(--panel);z-index:1}
+  #tablehost thead tr.grouprow th:first-child{left:0;z-index:4}
+  .g1{background:var(--g1)}.g2{background:var(--g2)}.g3{background:var(--g3)}
+  .gtitle{font-size:var(--fs-s);text-transform:none;letter-spacing:0;color:var(--ink);
+    font-weight:650;display:block}
+  .est{font-weight:650;white-space:nowrap;display:block}
+  .dir{color:var(--ink2);padding-right:3px}
+  .flag{color:var(--orange);padding-left:3px}
+  td.mut .est,td.mut .dir{color:var(--ink3)}
+  .rowlab{font-weight:650;display:block}
+  tbody tr:hover td{background:color-mix(in srgb, var(--blue) 6%, transparent)}
+  #tablehost tbody tr:not(.det):hover td:first-child{background:
+    color-mix(in srgb, var(--blue) 6%, var(--panel))}
+  /* the column widths are minima, and they sum to about 920 pixels against the
+     roughly 1078 a 1440 pixel wide window leaves for the table, so a row is read
+     without horizontal scrolling; the container still scrolls if a narrower window
+     or a wider font stack takes it past that */
+  .c-treat{min-width:148px;max-width:196px}
+  .c-n{min-width:38px}
+  .c-e1{min-width:66px}.c-p1{min-width:52px}
+  .c-est{min-width:52px}.c-p{min-width:58px}.c-pl{min-width:58px}.c-mde{min-width:44px}
+  .c-read{min-width:86px;max-width:114px}
+  button.tgl{flex:none;width:15px;height:15px;padding:0;border-radius:4px;
+    border:1px solid var(--axis);background:transparent;color:var(--ink3);
+    font-size:var(--fs-s);line-height:1;cursor:pointer;margin-right:5px}
+  button.tgl:hover{color:var(--ink);border-color:var(--ink3)}
+  tr.det{display:none}
+  tr.det.on{display:table-row}
+  tr.det>td{background:var(--bg)}
+  .detgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));
+    gap:9px;margin:3px 0}
+  .detblk{border:1px solid var(--line);border-radius:8px;padding:6px 8px;
+    background:var(--panel)}
+  .detblk>b{display:block;margin-bottom:2px}
+
+  @media print {
+    .side,.toolbar,.hbtn,.strip{break-inside:avoid}
+    body{background:#fff}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Daylighting and turn calming: the statistical companion</h1>
+    <p class="rule">Choose an outcome and a set of treatments on the left. A question
+    mark control opens its topic on hover, pins it on click and closes on Escape.</p>
+  </div>
+  <div class="hbtn">
+    <button class="ghost" id="openall" type="button">Open all sections</button>
+    <a class="ghost" href="explorer.html" title="explorer.html, the companion page for
+      the geometry of every treatment and for what a selection on the map contains">Map
+      of the treatments</a>
+    <button class="ghost" id="themebtn" type="button">Dark</button>
+  </div>
+</header>
+<p class="pageerr" id="pageerr"></p>
+
+<!-- ------------------------------------------------------- the summary strip -->
+<div class="strip" id="strip"></div>
+<p class="rule">A cell is one subset on one outcome. The five figures above count
+cells over every subset and every outcome rather than over the current selection.</p>
+
+<!-- ----------------------------------------- the topics, one control for each -->
+<section class="panel" id="topics">
+  <h2>Definitions, cautions and provenance</h2>
+  <div class="qrow">
+    <span class="qitem">the placebo test<button class="qhelp" type="button"
+      data-help="placebo" aria-expanded="false"
+      aria-label="About: the placebo test">?</button></span>
+    <span class="qitem">a flagged decrease<button class="qhelp" type="button"
+      data-help="why_flagged" aria-expanded="false"
+      aria-label="About: why a significant decrease can still be flagged">?</button></span>
+    <span class="qitem">reading a flag<button class="qhelp" type="button"
+      data-help="flagread" aria-expanded="false"
+      aria-label="About: how to read a flag">?</button></span>
+    <span class="qitem">two scales<button class="qhelp" type="button"
+      data-help="scales" aria-expanded="false"
+      aria-label="About: two scales, never comparable in magnitude">?</button></span>
+    <span class="qitem">how sites are chosen<button class="qhelp" type="button"
+      data-help="selection" aria-expanded="false"
+      aria-label="About: how sites are chosen">?</button></span>
+    <span class="qitem">neither design wins<button class="qhelp" type="button"
+      data-help="designs" aria-expanded="false"
+      aria-label="About: neither design is better in general">?</button></span>
+    <span class="qitem">pre treatment drift<button class="qhelp" type="button"
+      data-help="drift" aria-expanded="false"
+      aria-label="About: the pre treatment drift and the admission rule">?</button></span>
+    <span class="qitem">provenance<button class="qhelp" type="button"
+      data-help="provenance" aria-expanded="false"
+      aria-label="About: provenance of the published analyses">?</button></span>
+    <span class="qitem">the reproduction<button class="qhelp" type="button"
+      data-help="reproduction" aria-expanded="false"
+      aria-label="About: what the reproduction establishes">?</button></span>
+    <span class="qitem">the supporting evaluation<button class="qhelp" type="button"
+      data-help="stequote" aria-expanded="false"
+      aria-label="About: the supporting evaluation">?</button></span>
+    <span class="qitem">the published lists<button class="qhelp" type="button"
+      data-help="cohorts" aria-expanded="false"
+      aria-label="About: the two published location lists">?</button></span>
+    <span class="qitem">turn calming classes<button class="qhelp" type="button"
+      data-help="turncalming" aria-expanded="false"
+      aria-label="About: turn calming is eleven treatments">?</button></span>
+    <span class="qitem">recent work<button class="qhelp" type="button"
+      data-help="censoring" aria-expanded="false"
+      aria-label="About: right censoring of recent work">?</button></span>
+    <span class="qitem">curb already clear<button class="qhelp" type="button"
+      data-help="precleared" aria-expanded="false"
+      aria-label="About: curb that was already clear">?</button></span>
+  </div>
+  <details id="orient1">
+    <summary>How to read this page: three specifications on two scales, and what each
+      column group carries</summary>
+    <div class="dbody">
+      <p class="body">Choose a set of treatments and an outcome. Every result appears
+      three times, once under each of the three specifications the manuscript reports,
+      with the statistics that bear on whether it can be believed: the estimate with
+      its 95 per cent interval, the p value, the adjusted p value where one exists, the
+      placebo and its p value, the smallest detectable effect, the unit counts and a
+      verdict. The three specifications sit on two different scales, so each column
+      group carries its own scale and no two of them are comparable in magnitude.</p>
+      <div class="cards" id="speccards"></div>
+    </div>
+  </details>
+  <details id="orient2">
+    <summary>Before reading a number on this page: the cautions that decide how every
+      figure must be read</summary>
+    <div class="dbody" id="orientfacts"></div>
+  </details>
+  <details id="orient3">
+    <summary>Provenance: the crash record, the windows, the radius, the placebo shift
+      and every other setting behind these numbers</summary>
+    <div class="dbody"><p class="note" id="metaline">loading the payloads</p></div>
+  </details>
+</section>
+
+<div class="layout">
+  <!-- ------------------------------------------------------------- selectors -->
+  <aside>
+   <div class="panel side">
+    <h3>Outcome</h3>
+    <div id="outcomes"></div>
+    <details id="outcomenotes">
+      <summary>What each outcome counts, and why an injury count is not a crash
+        count</summary>
+      <div class="dbody" id="outcomenotesbody"></div>
+    </details>
+
+    <h3>Treatments</h3>
+    <input type="text" id="search" placeholder="search a subset, a family or a note"
+           autocomplete="off">
+    <div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">
+      <button class="ghost" id="selall" type="button">All</button>
+      <button class="ghost" id="selnone" type="button">None</button>
+      <button class="ghost" id="selpub" type="button">Published cells</button>
+      <button class="ghost" id="selfam" type="button">One per family</button>
+    </div>
+    <div class="hint" id="selhint"></div>
+    <div id="subsets"></div>
+    <details id="subnotes">
+      <summary>The caution that belongs to each subset</summary>
+      <div class="dbody" id="subnotesbody"></div>
+    </details>
+
+    <h3>Comparison rule for the live estimate</h3>
+    <select id="rule"></select>
+    <div class="hint" id="rulehint"></div>
+
+    <details id="omittedcard">
+      <summary>Subsets that carry no estimate, and why each one carries none</summary>
+      <div class="dbody" id="omitted"></div>
+    </details>
+   </div>
+  </aside>
+
+  <!-- ------------------------------------------------------------------ main -->
+  <main>
+    <section class="panel" id="tablecard">
+      <h2>Every selected subset under the three specifications</h2>
+      <p class="rule" id="orderline"></p>
+      <p class="rule" id="scaleline"></p>
+      <div class="toolbar">
+        <label class="ghost" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="placeboreq" checked>
+          placebo requirement
+          <button class="qhelp" type="button" data-help="placebo_switch"
+            aria-expanded="false" aria-label="About: the placebo requirement switch">?</button>
+        </label>
+        <button class="ghost" id="tsvbtn" type="button">Copy as TSV</button>
+        <button class="ghost" id="linkbtn" type="button">Copy link to this view</button>
+        <button class="ghost" id="sortreset" type="button">Reset sort</button>
+        <span class="spacer"></span>
+        <span class="hint" id="tablestatus"></span>
+      </div>
+      <details id="legendcard">
+        <summary>Legend: every tag, every symbol and the two scales, defined once</summary>
+        <div class="dbody" id="legendbody"></div>
+      </details>
+      <div class="scroll tall" id="tablehost"></div>
+      <details id="tablenotes">
+        <summary>What this table shows, what each column group counts and why the
+          scales are not comparable</summary>
+        <div class="dbody">
+          <p class="body" id="tableintro"></p>
+          <p class="note" id="tablefoot"></p>
+          <div class="warnbox" id="scalewarn"></div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ------------------------------------------- the methodology, with its math -->
+    <section class="panel" id="methodology">
+      <h2>Methodology</h2>
+      <details id="methodology-body" open>
+        <summary>The three specifications, their equations and the placebo
+          displacement</summary>
+        <div class="dbody">
+
+      <h3>1. Published specification</h3>
+      <p class="body">The design NYC DOT published: the crash record 2017 to 2023,
+      installations 2019 to 2021, 24 months on each side of the installation month,
+      corridor comparison locations on the treated corner's own streets, an unweighted
+      mean of per unit changes in annual injuries, and a two sided one sample t test. The
+      scale is a difference in counts per intersection per year, in which zero means no
+      effect.</p>
+      <p class="body">For a site i with installation month t_i, Y_i(a,b) counts the
+      outcome inside 30 m of i over the months from t_i plus a up to t_i plus b, and
+      R_i(a,b) expresses that count as an annual rate. The change at the site is the after
+      rate minus the before rate.</p>
+      <div class="eqwrap" id="eq-rate"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo><mo>=</mo><mfrac><mrow><mn>12</mn><msub><mi>Y</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo></mrow><mrow><mi>b</mi><mo>&#8722;</mo><mi>a</mi></mrow></mfrac></mrow></math><div class="mathfall">R_i(a,b) \;=\; \frac{12\, Y_i(a,b)}{b-a}</div><div class="eqcap">The outcome at one site, as an annual rate over a window of months.</div><details class="eqsrc"><summary>LaTeX source</summary><code>R_i(a,b) \;=\; \frac{12\, Y_i(a,b)}{b-a}</code></details></div>
+      <div class="eqwrap" id="eq-delta"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>=</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo><mo>&#8722;</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><mn>0</mn></mrow><mo>)</mo></mrow></math><div class="mathfall">\Delta_i \;=\; R_i(1,\;\text{post}+1) \;-\; R_i(-\text{pre},\;0)</div><div class="eqcap">The change at one site, after minus before.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\Delta_i \;=\; R_i(1,\;\text{post}+1) \;-\; R_i(-\text{pre},\;0)</code></details></div>
+      <p class="body">The estimate is the unweighted mean over treated sites of the
+      change at the site minus the mean change at that site's own comparison locations,
+      tested against zero on n minus 1 degrees of freedom. Every treated site enters with
+      weight one over n whatever its crash count, so the quantity estimated is the change
+      at the mean treated corner.</p>
+      <div class="eqwrap" id="eq-arith"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class="mathfall">\hat\theta \;=\; \frac{1}{n}\sum_{i=1}^{n}\left(\Delta_i \;-\; \frac{1}{|C_i|}\sum_{j\in C_i}\Delta_j\right)</div><div class="eqcap">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\hat\theta \;=\; \frac{1}{n}\sum_{i=1}^{n}\left(\Delta_i \;-\; \frac{1}{|C_i|}\sum_{j\in C_i}\Delta_j\right)</code></details></div>
+      <div class="eqwrap" id="eq-ttest"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>t</mi><mo>=</mo><mfrac><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mrow><msub><mi>s</mi><mi>d</mi></msub><mo>/</mo><msqrt><mi>n</mi></msqrt></mrow></mfrac></mrow></math><div class="mathfall">t \;=\; \frac{\hat\theta}{s_d/\sqrt{n}}</div><div class="eqcap">The test the published estimator uses, a two sided one sample t test on n minus 1 degrees of freedom.</div><details class="eqsrc"><summary>LaTeX source</summary><code>t \;=\; \frac{\hat\theta}{s_d/\sqrt{n}}</code></details></div>
+
+      <h3>2. Published specification, extended record</h3>
+      <p class="body">The same four components, being the corridor comparison rule, the
+      annual rate, the unweighted mean of per unit changes and the one sample t test,
+      carried to the full crash record 2012-07 to 2026-05, to an installation window of
+      eight years running 2015-07 to 2023-06, and to every subset, with 36 months before
+      and up to 24 months after. It reuses the same four equations, so only the crash
+      record, the installation window, the before period and the set of subsets change.
+      The scale is again a difference in counts per intersection per year.</p>
+
+      <h3>3. Falsification tested specification</h3>
+      <p class="body">The design of this study: three matched comparison intersections
+      per treated unit, a fixed effects Poisson model carrying a unit effect and a
+      calendar month effect, a cluster robust variance of type CRV1 clustered on the match
+      group, 36 months before and up to 24 months after, a placebo on every cell, and
+      Benjamini and Hochberg adjustment within each outcome. The scale is a rate ratio, in
+      which one means no effect.</p>
+      <div class="eqwrap" id="eq-fepois"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant='double-struck'>E</mi><mo>[</mo><msub><mi>Y</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>&#8739;</mo><mi>&#945;</mi><mo>,</mo><mi>&#947;</mi><mo>,</mo><mi>D</mi><mo>]</mo><mo>=</mo><mi>exp</mi><mo>(</mo><mrow><msub><mi>&#945;</mi><mi>k</mi></msub><mo>+</mo><msub><mi>&#947;</mi><mi>t</mi></msub><mo>+</mo><mi>&#946;</mi><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub></mrow><mo>)</mo></mrow></math><div class="mathfall">\mathbb{E}\!\left[Y_{kt} \mid \alpha,\gamma,D\right] \;=\; \exp\!\left(\alpha_k + \gamma_t + \beta\, D_{kt}\right)</div><div class="eqcap">The fixed effects Poisson specification, with a unit effect and a calendar month effect.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\mathbb{E}\!\left[Y_{kt} \mid \alpha,\gamma,D\right] \;=\; \exp\!\left(\alpha_k + \gamma_t + \beta\, D_{kt}\right)</code></details></div>
+      <div class="eqwrap" id="eq-treatind"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>=</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>k</mi><mo>&#160;</mo><mi>treated</mi><mo>}</mo><mo>&#183;</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>t</mi><mo>&gt;</mo><msub><mi>t</mi><mrow><mi>i</mi><mo>(</mo><mi>k</mi><mo>)</mo></mrow></msub><mo>}</mo></mrow></math><div class="mathfall">D_{kt} \;=\; \mathbf{1}\{k \text{ treated}\}\cdot\mathbf{1}\{t &gt; t_{i(k)}\}</div><div class="eqcap">The treatment indicator, one after installation at a treated unit and zero everywhere else.</div><details class="eqsrc"><summary>LaTeX source</summary><code>D_{kt} \;=\; \mathbf{1}\{k \text{ treated}\}\cdot\mathbf{1}\{t &gt; t_{i(k)}\}</code></details></div>
+      <p class="body">The month at event time zero is dropped, because an installation
+      month is partly treated. A match group is a treated unit together with its own
+      comparison intersections, and each match group forms one cluster.</p>
+      <div class="eqwrap" id="eq-irr"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>IRR</mi><mo>=</mo><mi>exp</mi><mo>(</mo><mover><mi>&#946;</mi><mo>&#94;</mo></mover><mo>)</mo></mrow></math><div class="mathfall">\text{IRR} \;=\; \exp(\hat\beta)</div><div class="eqcap">The quantity reported from that specification, a rate ratio in which one means no effect.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\text{IRR} \;=\; \exp(\hat\beta)</code></details></div>
+      <p class="body">Because the specification weights a unit by its expected count,
+      high exposure corners dominate the estimate and the quantity is the proportional
+      change in the total count, while the published estimator gives the change at the
+      mean corner, so the two answer different questions and their magnitudes are not
+      comparable.</p>
+
+      <h3>The placebo displacement, walked through one case</h3>
+      <p class="body">Number the months of a treated site from its own installation month,
+      so that month zero is the month the device was installed. Take a before period of 24
+      months and an after period of 24 months, which are the windows of the published
+      specification. A displacement of 24 months runs the placebo window from month minus
+      48 to month zero, so the last month of the window is the installation month itself,
+      which is partly treated. A displacement of 25 months runs the window from month minus
+      49 to month minus 1, so the window ends at month minus one and every month of it lies
+      strictly before installation. The displacement is therefore the larger of the before
+      period and one month more than the after period: 25 months in this case, and 36
+      months on the falsification tested specification, whose before period is 36 months
+      and whose after period is 24.</p>
+      <div class="eqwrap" id="eq-placebo_shift"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>s</mi><mo>=</mo><mi>max</mi><mo>(</mo><mrow><mi>pre</mi><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo></mrow></math><div class="mathfall">s \;=\; \max\!\left(\text{pre},\; \text{post}+1\right)</div><div class="eqcap">The placebo displacement, chosen so the placebo window ends before installation.</div><details class="eqsrc"><summary>LaTeX source</summary><code>s \;=\; \max\!\left(\text{pre},\; \text{post}+1\right)</code></details></div>
+      <div class="eqwrap" id="eq-placebo_window"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>[</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>]</mo><mo>&#160;</mo><mo>&#160;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>&#8804;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mn>1</mn></mrow></math><div class="mathfall">\left[\,t_i - s - \text{pre},\;\; t_i - s + \text{post}\,\right], \qquad t_i - s + \text{post} \;\le\; t_i - 1</div><div class="eqcap">The placebo window, every month of it before the installation month.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\left[\,t_i - s - \text{pre},\;\; t_i - s + \text{post}\,\right], \qquad t_i - s + \text{post} \;\le\; t_i - 1</code></details></div>
+      <p class="body">The estimate is then recomputed with that one change, holding the
+      corners, the comparison locations, the estimator and the outcome as they were.
+      Because no treatment exists anywhere in the displaced window, the honest answer is
+      no effect, and a cell is read only when its placebo is consistent with no effect at
+      a placebo p of 0.05 or above.</p>
+      <div class="eqwrap" id="eq-placebo_test"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mi>plac</mi></msup><mo>=</mo><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>(</mo><mrow><msub><mi>t</mi><mi>i</mi></msub><mo>&#8594;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi></mrow><mo>)</mo><mo>,</mo><mo>&#160;</mo><msup><mi>p</mi><mi>plac</mi></msup><mo>&#8805;</mo><mn>0.05</mn></mrow></math><div class="mathfall">\hat\theta^{\text{plac}} \;=\; \hat\theta\big(t_i \to t_i - s\big), \qquad \text{admit the cell only if } p^{\text{plac}} \ge 0.05</div><div class="eqcap">The placebo estimate and the condition a cell must satisfy to be read.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\hat\theta^{\text{plac}} \;=\; \hat\theta\big(t_i \to t_i - s\big), \qquad \text{admit the cell only if } p^{\text{plac}} \ge 0.05</code></details></div>
+      <p class="body">A decrease at p below 0.01 whose placebo returns a decrease of
+      similar size is therefore no evidence about the treatment: the placebo window
+      contains no treatment, so the specification produces that decrease at those corners
+      with nothing installed, and the decrease in the real window cannot be attributed to
+      the installation. The p value answers whether a result could have arisen by chance.
+      The placebo answers whether the specification produces that result without a
+      treatment, and those are different questions.</p>
+      <p class="note">Over the 240 cells the placebo test excludes 117 of the 235 that carry a
+      placebo; 39 cells are significant before Benjamini and Hochberg adjustment and 14
+      after it; 13 of those 14 carry a placebo that rejects no effect, and the single
+      cell that survives everything is an increase in the 2025 sign only cohort rather
+      than a reduction. No reduction survives falsification and multiplicity control
+      together.</p>
+
+      <h3>Adjustment for multiple subsets</h3>
+      <p class="body">Each outcome is estimated over m subsets, being 43 here, so a
+      nominal p value does not control the false positive rate across the family.
+      Benjamini and Hochberg adjustment is applied within each outcome, over the subsets,
+      after sorting the p values in ascending order.</p>
+      <div class="eqwrap" id="eq-bh"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><msup><mi>p</mi><mi>BH</mi></msup><mo>(</mo><mi>k</mi><mo>)</mo></msub><mo>=</mo><munder><mi>min</mi><mrow><mi>j</mi><mo>&#8805;</mo><mi>k</mi></mrow></munder><mi>min</mi><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mfrac><mrow><mi>m</mi><msub><mi>p</mi><mo>(</mo><mi>j</mi><mo>)</mo></msub></mrow><mi>j</mi></mfrac></mrow><mo>)</mo></mrow></math><div class="mathfall">p^{\text{BH}}_{(k)} \;=\; \min_{j \ge k}\; \min\!\left(1,\; \frac{m\, p_{(j)}}{j}\right)</div><div class="eqcap">Benjamini and Hochberg adjustment within one outcome over m subsets.</div><details class="eqsrc"><summary>LaTeX source</summary><code>p^{\text{BH}}_{(k)} \;=\; \min_{j \ge k}\; \min\!\left(1,\; \frac{m\, p_{(j)}}{j}\right)</code></details></div>
+      <p class="body">A cell is read only when the adjusted p value falls below 0.05,
+      when the placebo is consistent with no effect, and when at least 25 treated units
+      contribute.</p>
+
+      <h3>The smallest detectable effect</h3>
+      <p class="body">A null is uninformative without the size of the effect the cell
+      could have found, so every cell carries the minimum detectable effect at 80 per cent
+      power, two sided, which follows from the standard error of the log rate ratio. A
+      null with a bound of 6 per cent excludes a moderate benefit. A null with a bound of
+      60 per cent excludes almost nothing.</p>
+      <div class="eqwrap" id="eq-mde"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>MDE</mi><mo>=</mo><mn>100</mn><mo>(</mo><mrow><mn>1</mn><mo>&#8722;</mo><msup><mi>e</mi><mrow><mo>&#8722;</mo><mn>2.802</mn><mover><mi>se</mi><mo>&#94;</mo></mover></mrow></msup></mrow><mo>)</mo></mrow></math><div class="mathfall">\text{MDE} \;=\; 100\left(1 - e^{-2.802\,\widehat{\text{se}}}\right)</div><div class="eqcap">The smallest effect the cell could detect at 80 per cent power, as a percentage.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\text{MDE} \;=\; 100\left(1 - e^{-2.802\,\widehat{\text{se}}}\right)</code></details></div>
+
+      <h3>The live estimate for a selection</h3>
+      <p class="body">A browser cannot fit a fixed effects Poisson specification, so a
+      selection is estimated by the published arithmetic estimator, which is exact
+      arithmetic on the per unit window sums, and a descriptive aggregate rate ratio is
+      reported beside it.</p>
+      <div class="eqwrap" id="eq-aggratio"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>RR</mi><mi>agg</mi></msub><mo>=</mo><mfrac><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>before</mi></msup><mi>i</mi></msub></mrow><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>before</mi></msup><mi>i</mi></msub></mrow></mfrac></mrow></math><div class="mathfall">\text{RR}_{\text{agg}} \;=\; \frac{\sum_i T^{\text{after}}_i \big/ \sum_i T^{\text{before}}_i}{\sum_i C^{\text{after}}_i \big/ \sum_i C^{\text{before}}_i}</div><div class="eqcap">The descriptive aggregate rate ratio a browser can compute for any selection, carrying no unit effect and no calendar month effect.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\text{RR}_{\text{agg}} \;=\; \frac{\sum_i T^{\text{after}}_i \big/ \sum_i T^{\text{before}}_i}{\sum_i C^{\text{after}}_i \big/ \sum_i C^{\text{before}}_i}</code></details></div>
+      <p class="body">That ratio carries no unit effect, no calendar month effect and no
+      cluster robust variance, so it is not the modelled quantity the manuscript reports
+      and it can disagree in sign with it. Comparison intersections were matched once over
+      the union of treated units, because a browser cannot rematch for an arbitrary
+      selection, so a selection that coincides with a published subset differs slightly
+      from the published estimate for it.</p>
+
+      <h3>The admission rule and the published rows</h3>
+      <details id="placebo-detail">
+        <summary>Three conditions for reading a cell</summary>
+        <div class="dbody">
+          <p class="body">The installation date is moved back by the larger of the before
+          period and one month more than the after period. Moving it back only by the before
+          period is not sufficient: with 24 months on each side, that places the final month
+          of the placebo window on the installation month itself, which is partly treated. A
+          displacement of at least the after period plus one month ends the placebo window at
+          month minus one, so every month of it is strictly before installation.</p>
+          <p class="body">A cell is admitted only when three conditions hold together.
+          (i) The placebo is consistent with no effect. (ii) The estimate remains significant
+          after Benjamini and Hochberg adjustment within its outcome, because many subsets are
+          tested on each outcome and a nominal p value does not control the false positive
+          rate over that many tests. (iii) At least 25 treated units contribute, so that a
+          cell resting on a handful of corners is marked underpowered rather than read.</p>
+          <p class="body">Across every subset and outcome, ten cells are significant after
+          adjustment and all ten have a placebo that rejects no effect, so no cell satisfies
+          all three conditions at once. That is a statement about what this record can
+          support rather than a statement that the treatments do nothing.</p>
+        </div>
+      </details>
+      <details id="spec1-absent">
+        <summary>Why is the published specification blank for most rows?</summary>
+        <div class="dbody">
+          <p class="body">The published report contains seven rows: sign only daylighting,
+          hardened daylighting, and the five components of the hardened row. This page reports
+          40 subsets on 6 outcomes, so for most cells there is nothing published to compare
+          against. The blank is therefore usually a fact about the report rather than about
+          the treatment or about the time range, and the tag says which of four reasons
+          applies.</p>
+          <div class="detgrid">
+            <div class="detblk">
+              <b>not in the report</b>
+              <p class="body">The report does not form this subset at all. This covers 240 of
+              the 240 cells. A subset such as turn calming by quick kurb, or the 2025
+              published list split by treatment, has no published counterpart because the
+              report never separated it.</p>
+            </div>
+            <div class="detblk">
+              <b>outcome not published</b>
+              <p class="body">The report forms this arm and reports it only on injuries
+              counted as people. It publishes no crash event outcome for any arm, so a row
+              whose outcome counts crashes has nothing to compare against. This covers 12
+              cells.</p>
+            </div>
+            <div class="detblk">
+              <b>no records in the window</b>
+              <p class="body">The report forms this arm and this project cannot rebuild it,
+              because no record of that treatment carries an installation date inside the
+              published window of 2019 to 2021. This is the case the reader is most likely to
+              guess at, and it applies to Citi Bike stations, whose 5 dated records are dated
+              2025, and to bicycle corrals, of which 2,833 of 2,858 carry no installation date
+              at all and the remaining 25 are dated 2025.</p>
+            </div>
+            <div class="detblk">
+              <b>no inventory published</b>
+              <p class="body">The report forms this arm and no published inventory of that
+              treatment exists to rebuild it from. This applied to neckdowns and to enhanced
+              crossings. The enhanced crossings have since been located, 197 records of which
+              195 carry a date, so that arm is now sourceable; neckdowns remain unsourceable,
+              and the agency's own separate evaluation counts 266 of them without publishing
+              any location.</p>
+            </div>
+          </div>
+          <p class="body">Six cells carry a published value: the three subsets that map onto a
+          published row, each on the two outcomes the report published, being pedestrian
+          injuries and total injuries.</p>
+        </div>
+      </details>
+
+      <h3>Provenance of the record</h3>
+      <details id="prov-detail">
+        <summary>The inventory, the Vision Zero View audit and the 266 curb and sidewalk
+          extensions</summary>
+        <div class="dbody">
+          <p class="body">The inventory does not state what was installed for 907 of 1,491
+          turn calming records, which are recorded only as a left or right turn treatment, and
+          it carries a single imputed installation month for all 271 records of the January to
+          August 2024 daylighting cohort. An audit of Vision Zero View on 2026-07-29 confirmed
+          that neither gap can be closed from that source: it has no daylighting layer at all
+          across 260 map service layers and 45 catalogue assets, and its turn calming layer
+          carries exactly the four fields already held.</p>
+          <p class="body">The 266 curb and sidewalk extensions cannot be added to any
+          inventory. No dataset for bulb-outs, curb extensions or neckdowns exists on the open
+          data portal, no such family exists among the Vision Zero View layers, and of 996
+          street improvement project corridors and 424 intersections only four name a curb
+          extension explicitly.</p>
+          <p class="body">The audit did add the city's own risk criterion. Treated corners are
+          3.6 to 20.2 times more likely to be a designated Vision Zero priority intersection
+          than the comparison pool, and 65.5 per cent of hardened daylighting corners lie
+          within 40 m of a street improvement project corridor against 20.7 per cent of the
+          pool. The selection this study previously had to infer from crash trajectories is
+          therefore directly observable.</p>
+          <p class="body">The hydrant zone idea is the agency's rather than ours. Its January
+          2025 report contains a hydrant zone analysis, defines a hydrant zone as hydrants and
+          bus stops, and reports a 30 per cent higher normalised injury rate at them over
+          7,558 such intersections. That analysis is cross sectional; the subgroup test in
+          this study compares treated corners against other treated corners.</p>
+          <p class="body">The full account, with every figure traced to a file, is in
+          EVIDENCE_PROVENANCE.md in the repository.</p>
+        </div>
+      </details>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel" id="livecard">
+      <h2>The live estimate for this selection<button class="qhelp" type="button"
+        data-help="aggratio" aria-expanded="false"
+        aria-label="About: the live estimate for a selection">?</button></h2>
+      <div class="tiles" id="livetiles"></div>
+      <details id="livecard2">
+        <summary>What the live estimate is computed from, and the sums behind the two
+          figures</summary>
+        <div class="dbody">
+          <p class="body" id="liveintro">loading the per unit sums</p>
+          <div id="livedetail"></div>
+        </div>
+      </details>
+      <div id="livenotes"></div>
+    </section>
+        <section class="panel" id="conclusions">
+      <h2>What each specification concludes</h2>
+      <ol class="pts" style="list-style:decimal;padding-left:24px">
+        <li><b>Published specification.</b> The published values reproduce: 6 of 6
+        comparable estimates fall inside our intervals and agree in sign, so the
+        computation is not in question. The significant group is 70.9 per cent Citi
+        Bike stations, individually not significant; its only individually
+        significant component is 14 neckdowns, which are curb reconstructions; no
+        component is the posts or granite blocks the report defines the treatment
+        as.</li>
+        <li><b>Published specification, extended record.</b> Held fixed and taken to
+        40 subsets on 6 outcomes, the corridor DiD design returns 76 significant
+        reductions in 233 estimable cells, including cells no mechanism connects,
+        and its own placebo rejects: displaced into months before any installation
+        it still reports significant reductions. A reduction from this design is a
+        property of the comparison group rather than evidence about a
+        treatment.</li>
+        <li><b>Falsification tested specification.</b> The placebo test excludes 117
+        of 235 cells; 39 are significant before adjustment, 14 after, and 13 of
+        those 14 fail the placebo test. The single cell surviving everything is an
+        increase in the 2025 sign only cohort on 12 months of follow up, from a
+        design that produces false increases on 78 per cent of null draws under
+        selection on a persistent level. No reduction survives. The defensible
+        summary is that the evidence neither establishes nor excludes a pedestrian
+        injury benefit, and that sign and marking daylighting is a tight null whose
+        own placebo still fails.</li>
+      </ol>
+    </section>
+<section class="panel" id="labcard">
+      <h2>Run the estimator yourself
+        <button class="qhelp" type="button" data-help="lab"
+          aria-expanded="false" aria-label="About: the custom analysis">?</button></h2>
+      <p class="rule">The corridor DiD estimator on a window you choose, computed in
+      this page from monthly counts per treated corner. Choose the installation
+      window, the before and after period, the outcome and the comparison rule; the
+      panel reports the estimate, its placebo, and how many units the window admits.
+      The treatments used are the ones selected in the left column.</p>
+      <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+        <label>outcome <select id="lab-out"></select></label>
+        <label>comparison <select id="lab-rule">
+          <option value="c">corridor DiD comparison group</option>
+          <option value="m">matched comparison group</option>
+        </select></label>
+        <label>before <select id="lab-pre">
+          <option>12</option><option selected>24</option><option>36</option>
+        </select> months</label>
+        <label>after <select id="lab-post">
+          <option>3</option><option>6</option><option>12</option>
+          <option selected>24</option>
+        </select> months</label>
+        <label>installed from <input type="month" id="lab-a" value="2019-01"></label>
+        <label>to <input type="month" id="lab-b" value="2021-12"></label>
+        <button class="ghost" id="lab-run" type="button">Estimate</button>
+      </div>
+      <div id="lab-body" class="dbody"><p class="rule">The monthly payload loads on
+      the first estimate, once, about eight megabytes.</p></div>
+    </section>
+
+    <details class="panel" id="agreecard">
+      <summary>Do the two designs agree? The falsification funnel and the count of
+        cells both designs call a reduction</summary>
+      <div class="dbody" id="agreebody"></div>
+    </details>
+
+    <details class="panel" id="calibcard">
+      <summary>What each design does when the answer is known: each is correctly sized
+        in one regime of site selection and rejects far too often in the other, so
+        neither design is better in general</summary>
+      <div class="dbody" id="calibbody"></div>
+    </details>
+
+    <details class="panel" id="pathcard">
+      <summary>From the published specification to this study, one component at a time:
+        which component carries the result</summary>
+      <div class="dbody" id="pathbody"></div>
+    </details>
+
+    <details class="panel" id="spec1card">
+      <summary>The published specification in full: what it reports, what can be
+        reproduced and why the two samples are not the same sample</summary>
+      <div class="dbody" id="spec1body"></div>
+    </details>
+
+    <details class="panel" id="methodscard">
+      <summary>The three specifications, component by component: neither of them is the
+        correct one</summary>
+      <div class="dbody" id="methodsbody"></div>
+    </details>
+
+    <details class="panel" id="limitcard">
+      <summary>Limitations: right censoring, an imputed installation month, eleven
+        treatments pooled under one name, and a hardened arm its own admission rule refuses</summary>
+      <div class="dbody" id="limitbody"></div>
+    </details>
+
+    <details class="dis" id="aboutsec">
+      <summary>About: author, programme and the companion pages
+        <button class="qhelp" type="button" data-help="provenance"
+          aria-expanded="false"
+          aria-label="About: provenance of the published analyses">?</button>
+      </summary>
+      <div class="dbody" id="aboutbody"></div>
+    </details>
+  </main>
+</div>
+</div>
+
+<script>
+  // Authorship and programme credit. Every page carries the same block, generated
+  // from one string so the three cannot disagree.
+  const CREDIT = '<h3>Author</h3>'
+    + '<p>Mehmet Kerem Turkcan, Associate Research Scientist, Columbia University. '
+    + '<a href="https://keremturkcan.com" target="_blank" rel="noopener">'
+    + 'keremturkcan.com</a>, '
+    + '<a href="mailto:mkt2126@columbia.edu">mkt2126@columbia.edu</a>.</p>'
+    + '<h3>Programme</h3>'
+    + '<p>This project was created for the Research Experience for Teachers '
+    + 'programme of the Center for Smart Streetscapes, a National Science '
+    + 'Foundation Engineering Research Center. '
+    + '<a href="https://center-for-smart-streetscapes-cs3.github.io/ret2026/" '
+    + 'target="_blank" rel="noopener">'
+    + 'center-for-smart-streetscapes-cs3.github.io/ret2026</a>.</p>'
+    + '<h3>Companion pages</h3>'
+    + '<p>Three pages share one set of estimates: the map of the treatments '
+    + '(<a href="explorer.html">explorer.html</a>), the statistical companion '
+    + '(<a href="analysis.html">analysis.html</a>) and the slide deck '
+    + '(<a href="slides.html">slides.html</a>).</p>';
+"use strict";
+// calendar month to the pipeline's month index (months since year zero)
+function ymIndex(ym) {
+  // the pipeline's month index counts months since 2000-01 (v6_panel2012.ym_int)
+  var y = +ym.slice(0, 4), m = +ym.slice(5, 7);
+  return (y - 2000) * 12 + (m - 1);
+}
+var OUTLABELS = { n_ped: "pedestrian crashes", inj_ped: "pedestrian injuries",
+  inj_total: "total injuries, all modes", n_all: "all crashes" };
+var LAB_REC_END = ymIndex("2026-05");
+
+var _ab = document.getElementById("aboutbody");
+if (_ab) _ab.innerHTML = CREDIT;
+const $ = s => document.querySelector(s);
+const el = (t, cls, txt) => {
+  const n = document.createElement(t);
+  if (cls) n.className = cls;
+  if (txt != null) n.textContent = txt;
+  return n;
+};
+const esc = s => String(s == null ? "" : s)
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/* One question mark control, in the shape the shared bundle drives: it opens the
+   named topic of window.HELPTEXT on hover, pins it on click, and closes on Escape
+   or on a click outside. The bundle listens on the document, so a control built
+   after it loaded works without being registered. */
+function qh(topic, title) {
+  const b = el("button", "qhelp", "?");
+  b.type = "button";
+  b.setAttribute("data-help", topic);
+  b.setAttribute("aria-expanded", "false");
+  b.setAttribute("aria-label", "About: " + title);
+  return b;
+}
+
+/* A collapsed disclosure with a one line summary. Every explanatory block longer
+   than about two lines on this page is built through this helper, so that the
+   numbers are visible and the prose is one click away. */
+function dtl(summary, cls) {
+  const d = el("details", cls);
+  d.appendChild(el("summary", null, summary));
+  return d;
+}
+function dbody(d) {
+  const b = el("div", "dbody");
+  d.appendChild(b);
+  return b;
+}
+
+/* Every payload is fetched on its own, so a file that is missing costs the page one
+   panel and never the whole page. P[name].__error carries the reason to display. */
+const FILES = ["meta", "subsets", "outcomes", "cells", "spec1", "calibration",
+               "paths", "agreement", "methods", "limitations"];
+const P = {};
+const S = {
+  placeboReq: true, out: null, rule: "c", sel: new Set(), q: "",
+            sort: { key: "evidence", dir: 1 }, units: null, unitsErr: null,
+            open: new Set() };
+
+function bad(name) {
+  const v = P[name];
+  return (!v || v.__error) ? ((v && v.__error) || "not loaded") : null;
+}
+function say(host, name, file) {
+  const h = typeof host === "string" ? $(host) : host;
+  h.innerHTML = "";
+  h.appendChild(el("p", "missing",
+    `This panel needs data/analysis/${file}, which did not load (${bad(name)}). `
+    + `Rebuild it with python src/make_analysis_data.py. The rest of the page is `
+    + `unaffected.`));
+}
+
+/* ---------------------------------------------------------------- formatting */
+const nf = (x, d) => Number(x).toLocaleString(undefined,
+  { minimumFractionDigits: d, maximumFractionDigits: d });
+function fdiff(x, d) {                       // difference scale, no effect is 0
+  if (x == null || !isFinite(x)) return "n.i.";
+  const s = nf(Math.abs(x), d == null ? 4 : d);
+  if (Number(s) === 0) return s;             // a rounded zero carries no sign
+  return (x < 0 ? "-" : "+") + s;
+}
+function fratio(x) {                         // ratio scale, no effect is 1
+  return (x == null || !isFinite(x)) ? "n.i." : nf(x, 3);
+}
+function fp(p) {
+  if (p == null || !isFinite(p)) return "n.a.";
+  if (p < 0.0001) return "<0.0001";
+  return nf(p, 4);
+}
+function fpct(x, d) {
+  return (x == null || !isFinite(x)) ? "n.a." : nf(x, d == null ? 0 : d) + " per cent";
+}
+const fint = x => (x == null ? "n.a." : Number(x).toLocaleString());
+function fsigned_pct(x) {
+  if (x == null || !isFinite(x)) return "n.a.";
+  const v = Math.abs(x) < 0.05 ? 0 : x;      // a rounded zero carries no sign
+  return (v > 0 ? "+" : v < 0 ? "-" : "") + nf(Math.abs(v), 1) + " per cent";
+}
+
+/* --------------------------------------------------------- the t distribution
+   The live estimate is a one sample t test, so the page needs the t distribution.
+   Two sided p equals the regularised incomplete beta I_x(df/2, 1/2) at
+   x = df / (df + t squared), which is computed here by the continued fraction. */
+function logGamma(z) {
+  const g = [676.5203681218851, -1259.1392167224028, 771.32342877765313,
+             -176.61502916214059, 12.507343278686905, -0.13857109526572012,
+             9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - logGamma(1 - z);
+  z -= 1;
+  let x = 0.99999999999980993;
+  for (let i = 0; i < g.length; i++) x += g[i] / (z + i + 1);
+  const t = z + g.length - 0.5;
+  return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+}
+function betacf(a, b, x) {
+  const FPMIN = 1e-300, EPS = 3e-16;
+  const qab = a + b, qap = a + 1, qam = a - 1;
+  let c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < FPMIN) d = FPMIN;
+  d = 1 / d;
+  let h = d;
+  for (let m = 1; m <= 300; m++) {
+    const m2 = 2 * m;
+    let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    const del = d * c;
+    h *= del;
+    if (Math.abs(del - 1) < EPS) break;
+  }
+  return h;
+}
+function betai(a, b, x) {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  const lbeta = logGamma(a + b) - logGamma(a) - logGamma(b)
+    + a * Math.log(x) + b * Math.log(1 - x);
+  const front = Math.exp(lbeta);
+  return x < (a + 1) / (a + b + 2)
+    ? front * betacf(a, b, x) / a
+    : 1 - Math.exp(logGamma(a + b) - logGamma(a) - logGamma(b)
+        + b * Math.log(1 - x) + a * Math.log(x)) * betacf(b, a, 1 - x) / b;
+}
+function tTwoSided(t, df) {
+  if (!isFinite(t) || !isFinite(df) || df <= 0) return null;
+  return betai(df / 2, 0.5, df / (df + t * t));
+}
+
+/* -------------------------------------------------------------------- loading */
+async function grab(name) {
+  const url = "data/analysis/" + name + ".json";
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  } catch (e) {
+    return { __error: e.message };
+  }
+}
+async function load() {
+  const got = await Promise.all(FILES.map(async n => [n, await grab(n)]));
+  got.forEach(([n, v]) => { P[n] = v; });
+
+  const oks = !bad("subsets"), oko = !bad("outcomes");
+  if (oko) S.out = P.outcomes.outcomes[0].key;
+  readHash();
+  if (oks && !S.sel.size) {
+    // a first view a reader can act on: the three families the manuscript leads with
+    ["turn_calming_all", "daylighting_signage_at_junction",
+     "daylighting_hardened_at_junction", "dot2024", "dot2025"]
+      .filter(n => P.subsets.subsets.some(s => s.name === n))
+      .forEach(n => S.sel.add(n));
+  }
+  buildStrip();
+  buildMeta();
+  buildOrient();
+  if (oko) buildOutcomes(); else say("#outcomes", "outcomes", "outcomes.json");
+  if (oks) buildSubsets(); else say("#subsets", "subsets", "subsets.json");
+  buildRule();
+  renderAll();
+  buildAgreementStatic();
+  buildCalibration();
+  buildPaths();
+  buildSpec1();
+  buildMethods();
+  buildLimitations();
+  wire();
+  writeHash();
+  // the per unit sums are the largest payload, so the page is usable before they
+  // arrive and the live panel fills itself in when they do
+  loadUnits();
+}
+
+async function loadUnits() {
+  try {
+    const r = await fetch("data/explorer/units.json");
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    S.units = await r.json();
+  } catch (e) {
+    S.unitsErr = e.message;
+  }
+  renderLive();
+}
+
+/* --------------------------------------------------------- the summary strip
+   Between four and six numbers, each one deciding how the rest of the page must be
+   read: how many cells were estimated, how many the placebo test excludes, how many are
+   significant after adjustment, how many survive everything, and how many cells the
+   two designs both call a reduction. */
+function buildStrip() {
+  const host = $("#strip");
+  host.innerHTML = "";
+  const F = bad("agreement") ? null : P.agreement.funnel;
+  const O = bad("agreement") ? null : P.agreement.overall;
+  const cells = F ? F.cells : (bad("meta") ? null : P.meta.counts.cells);
+  const rows = [
+    [cells, "cells estimated", null],
+    [F ? F.placebo_refuses : null, "cells the placebo test excludes", "placebo"],
+    [F ? F.significant_after_bh : null, "significant after adjustment", "bh"],
+    [F ? F.surviving_both : null, "surviving placebo and adjustment", "placebo"],
+    [O ? O.both_significant_reduction : null, "a reduction under both designs",
+     "designs"],
+  ];
+  rows.forEach(([v, k, topic]) => {
+    const d = el("div", "tile");
+    d.appendChild(el("div", "v", v == null ? "n.a." : fint(v)));
+    const cap = el("div", "k", k);
+    if (topic) cap.appendChild(qh(topic, k));
+    d.appendChild(cap);
+    host.appendChild(d);
+  });
+}
+
+function buildMeta() {
+  const m = P.meta;
+  if (bad("meta")) {
+    const t = "data/analysis/meta.json did not load (" + bad("meta") + "). Rebuild it "
+      + "with python src/make_analysis_data.py. If this page is open from a file:// "
+      + "path, some browsers refuse to read local JSON, so serve the folder with "
+      + "python -m http.server.";
+    $("#metaline").textContent = t;
+    $("#pageerr").textContent = t;
+    return;
+  }
+  const c = m.counts, st = m.settings;
+  $("#metaline").textContent =
+    `${c.cells} cells, being ${c.subsets} subsets over ${c.outcomes} outcomes; `
+    + `crash record ${st.crash[0]} to ${st.crash[1]}; ${st.pre} months before and up `
+    + `to ${st.post_max} after; attribution radius ${st.radius_m} m; placebo shift `
+    + `${st.placebo_shift} months; a cell with fewer than ${st.min_units} treated `
+    + `units is not read. Generated by ${m.generated_by}.`;
+}
+
+/* ------------------------------------------------------------- orientation */
+function buildOrient() {
+  const host = $("#speccards");
+  host.innerHTML = "";
+  if (bad("methods")) { say("#speccards", "methods", "methods.json"); }
+  else {
+    P.methods.specifications.forEach(s => {
+      const c = el("div", "card");
+      c.appendChild(el("h4", null, s.id + ". " + s.name));
+      c.appendChild(el("p", "who", s.whose));
+      const chip = el("span", "gscale",
+        s.scale === "ratio" ? "a rate ratio, where no effect is 1"
+                            : "a difference in counts per intersection per year, "
+                              + "where no effect is 0");
+      c.appendChild(chip);
+      const ul = el("ul", "plain");
+      s.components.slice(0, 5).forEach(([k, v]) => {
+        const li = el("li");
+        li.appendChild(el("b", null, k + ": "));
+        li.appendChild(document.createTextNode(v));
+        ul.appendChild(li);
+      });
+      c.appendChild(ul);
+      c.appendChild(el("p", "small", "detail in the methods panel below"));
+      host.appendChild(c);
+    });
+  }
+  const f = $("#orientfacts");
+  f.innerHTML = "";
+  const facts = [];
+  if (!bad("methods")) facts.push(P.methods.neither_is_correct);
+  if (!bad("agreement")) { facts.push(P.agreement.reading);
+                           facts.push(P.agreement.funnel_reading); }
+  if (!bad("limitations")) {
+    facts.push(P.limitations.hardened_statement);
+    facts.push(P.limitations.turn_calming_materials.detail);
+  }
+  facts.push("The two published NYC DOT lists are cohorts of locations rather than "
+    + "treatment types, so a row built from one of them mixes several treatments.");
+  const box = el("div", "warnbox");
+  const ul = el("ul", "plain");
+  facts.forEach(t => ul.appendChild(el("li", null, t)));
+  box.appendChild(el("b", null, "Before reading a number on this page"));
+  box.appendChild(ul);
+  f.appendChild(box);
+}
+
+/* ---------------------------------------------------------------- selectors */
+function buildOutcomes() {
+  const host = $("#outcomes");
+  host.innerHTML = "";
+  P.outcomes.outcomes.forEach(o => {
+    const lab = el("label", "row");
+    lab.title = o.description;
+    const r = el("input");
+    r.type = "radio"; r.name = "outcome"; r.value = o.key;
+    r.checked = o.key === S.out;
+    r.addEventListener("change", () => { S.out = o.key; writeHash(); renderAll(); });
+    lab.append(r, el("span", null, o.short));
+    host.appendChild(lab);
+  });
+  // the description of every outcome, and the caution about counting units, kept
+  // whole and one click away rather than five paragraphs deep in the sidebar
+  const nb = $("#outcomenotesbody");
+  nb.innerHTML = "";
+  const kv = el("div", "kv");
+  P.outcomes.outcomes.forEach(o => {
+    kv.appendChild(el("div", "k", o.short));
+    kv.appendChild(el("div", null, o.description));
+  });
+  nb.appendChild(kv);
+  nb.appendChild(el("p", "note",
+    "An injury count sums over people and a crash count counts events, so the two "
+    + "are never interchangeable. The published specification reports injuries, "
+    + "which is the outcome pedestrian injuries here."));
+}
+
+function subsetMatches(s) {
+  if (!S.q) return true;
+  const q = S.q.toLowerCase();
+  return (s.label + " " + s.name + " " + s.note + " " + s.family_label)
+    .toLowerCase().includes(q);
+}
+
+function buildSubsets() {
+  const host = $("#subsets");
+  host.innerHTML = "";
+  const byName = {};
+  P.subsets.subsets.forEach(s => { byName[s.name] = s; });
+  const shown = [];
+  P.subsets.families.forEach(fam => {
+    const members = fam.members.map(n => byName[n]).filter(subsetMatches);
+    if (!members.length) return;
+    const h = el("div", "famhead");
+    h.appendChild(el("span", null, fam.label));
+    h.appendChild(el("span", "cnt", fam.n + " subsets"));
+    host.appendChild(h);
+    const tools = el("div");
+    tools.style.cssText = "display:flex;gap:5px;margin:1px 0 3px";
+    [["all", true], ["none", false]].forEach(([t, v]) => {
+      const b = el("button", "ghost", t);
+      b.type = "button"; b.style.padding = "1px 6px";
+      b.addEventListener("click", () => {
+        members.forEach(s => v ? S.sel.add(s.name) : S.sel.delete(s.name));
+        writeHash(); buildSubsets(); renderAll();
+      });
+      tools.appendChild(b);
+    });
+    host.appendChild(tools);
+    members.forEach(s => {
+      shown.push(s);
+      const lab = el("label", "row");
+      lab.title = s.note;
+      const cb = el("input");
+      cb.type = "checkbox"; cb.checked = S.sel.has(s.name);
+      cb.addEventListener("change", () => {
+        cb.checked ? S.sel.add(s.name) : S.sel.delete(s.name);
+        writeHash(); renderAll(); selHint();
+      });
+      const tx = el("span", null, s.label);
+      const c = el("span", "cnt", fint(s.records) + " rec");
+      lab.append(cb, tx, c);
+      host.appendChild(lab);
+    });
+  });
+  if (!host.children.length) {
+    host.appendChild(el("p", "hint",
+      "No subset matches this search. Clear the box to see all of them."));
+  }
+  // no note is deleted: every one is carried here, and every checkbox also carries
+  // its own note as a hover title
+  const nb = $("#subnotesbody");
+  nb.innerHTML = "";
+  const kv = el("div", "kv");
+  shown.forEach(s => {
+    kv.appendChild(el("div", "k", s.label));
+    kv.appendChild(el("div", null, s.note));
+  });
+  nb.appendChild(kv);
+  selHint();
+  const om = $("#omitted");
+  om.innerHTML = "";
+  (P.subsets.omitted || []).forEach(o => {
+    om.appendChild(el("p", "note",
+      `${o.label} (${fint(o.records)} records): ${o.why}`));
+  });
+  if (!(P.subsets.omitted || []).length) om.textContent = "none";
+}
+
+function selHint() {
+  $("#selhint").textContent =
+    `${S.sel.size} of ${bad("subsets") ? "?" : P.subsets.subsets.length} subsets `
+    + `selected. The caution that belongs to each subset is collected below and on `
+    + `the hover title of its box.`;
+}
+
+function buildRule() {
+  const sel = $("#rule");
+  sel.innerHTML = "";
+  const rules = (bad("meta") ? null : P.meta.rules)
+    || { c: "corridor comparison locations", m: "matched comparison intersections" };
+  Object.keys(rules).forEach(k => {
+    const o = el("option", null, rules[k]);
+    o.value = k;
+    sel.appendChild(o);
+  });
+  sel.value = S.rule;
+  sel.addEventListener("change", () => {
+    S.rule = sel.value; writeHash(); ruleHint(); renderLive();
+  });
+  ruleHint();
+}
+function ruleHint() {
+  $("#rulehint").textContent = S.rule === "c"
+    ? "With corridor comparison locations the live estimate is the city's own "
+      + "estimator, computed exactly."
+    : "With matched comparison intersections the live estimate is the same "
+      + "arithmetic on this study's comparison group, so the estimator is the "
+      + "city's and the comparison group is not.";
+}
+
+/* ------------------------------------------------------------ the main table */
+function cellsFor(outcome) {
+  if (bad("cells")) return [];
+  return P.cells.cells.filter(c => c.outcome === outcome && S.sel.has(c.subset));
+}
+function outcomeMeta(key) {
+  if (bad("outcomes")) return { short: key, unit: "counts", label: key };
+  return P.outcomes.outcomes.find(o => o.key === key) || { short: key, unit: "counts" };
+}
+
+const SORTS = {
+  label: c => c.label,
+  units: c => c.n_units,
+  s1: c => (spec1For(c) || {}).our_did,
+  s1p: c => (spec1For(c) || {}).our_p,
+  s1mde: c => (spec1For(c) || {}).our_mde,
+  s2: c => c.dot_diff,
+  s2p: c => c.dot_p,
+  s2pl: c => c.dot_placebo_p,
+  s2mde: c => c.dot_mde,
+  s3: c => c.irr,
+  s3p: c => c.p_bh == null ? c.p : c.p_bh,
+  s3pl: c => c.placebo_p,
+  s3mde: c => c.mde_pct,
+};
+
+/* The default ordering is by strength of evidence on the falsification tested
+   specification, because that is the specification carrying an adjusted p value and
+   a placebo on every cell. A cell the placebo test excludes is not evidence, so it sits
+   below every admissible cell whatever its p value, and a cell the model could not
+   identify sits below that. */
+function placeboFails3(c) { return c.placebo_p != null && c.placebo_p < 0.05; }
+// The reading consults the switch: with the placebo requirement off, a failing
+// placebo no longer excludes a cell, and the tag says the placebo fails anyway.
+function refuses3(c) { return S.placeboReq && placeboFails3(c); }
+function adm3(c) {
+  if (S.placeboReq) return !!(c.spec3_reading || {}).admissible;
+  return c.p_bh != null && c.p_bh < 0.05 && c.n_units >= 25;
+}
+function adm2(c) {
+  const base = !!(c.spec2_reading || {}).admissible;
+  if (S.placeboReq) return base;
+  return c.dot_p != null && c.dot_p < 0.05;
+}
+function evidenceTier(c) {
+  if (c.irr == null) return 2;
+  return refuses3(c) ? 1 : 0;
+}
+function evidenceCmp(a, b) {
+  const ta = evidenceTier(a), tb = evidenceTier(b);
+  if (ta !== tb) return ta - tb;
+  const pa = a.p_bh == null ? a.p : a.p_bh;
+  const pb = b.p_bh == null ? b.p : b.p_bh;
+  const ka = pa == null ? null : pa, kb = pb == null ? null : pb;
+  if (ka == null && kb == null) return a.label.localeCompare(b.label);
+  if (ka == null) return 1;
+  if (kb == null) return -1;
+  if (ka !== kb) return ka - kb;
+  const ua = a.p == null ? Infinity : a.p, ub = b.p == null ? Infinity : b.p;
+  if (ua !== ub) return ua - ub;
+  return a.label.localeCompare(b.label);
+}
+
+function nmOf(i) {
+  const fallback = ["Published specification",
+                    "Published specification, extended record",
+                    "Falsification tested specification"];
+  if (bad("methods")) return fallback[i];
+  const s = P.methods.specifications[i];
+  return (s && s.name) || fallback[i];
+}
+
+function spec1For(c) {
+  if (bad("spec1")) return null;
+  if (!c.spec1_row || !c.spec1_outcome) return null;
+  return P.spec1.comparison[c.spec1_row + "|" + c.spec1_outcome] || null;
+}
+
+/* Direction and admissibility as one short tag: a symbol, a word and a colour, so
+   that neither the colour nor the symbol carries the meaning on its own. */
+const STATE_TAG = {
+  "reduction":       ["↓", "reduction", "tag ok"],
+  "increase":        ["↑", "increase", "tag bad"],
+  "not admissible":  ["⊘", "refused", "tag warn"],
+  "not identified":  ["·", "not identified", "tag mute"],
+  "not read":        ["·", "not read", "tag mute"],
+};
+function tagFor(reading) {
+  const st = (reading || {}).state;
+  const d = STATE_TAG[st] || ["=", "no effect", "tag mute"];
+  const t = el("span", d[2], d[0] + " " + d[1]);
+  t.title = st + ((reading && reading.why) ? ": " + reading.why : "");
+  return t;
+}
+
+function barFor(frac, up, mut) {
+  const d = el("div", "bar");
+  const b = el("span", (up ? "up" : "") + (mut ? " mut" : ""));
+  b.style.width = Math.max(2, Math.min(100, (frac || 0) * 100)) + "%";
+  d.appendChild(b);
+  return d;
+}
+
+/* One estimate: the number with its direction symbol, a bar for the magnitude
+   scaled inside its own column group, and a muted treatment plus the refusal symbol
+   when the cell is not admissible. */
+function estCell(cls, main, frac, up, adm, refused, small) {
+  const td = el("td", cls + " num" + (adm ? "" : " mut"));
+  const s = el("span", "est");
+  s.appendChild(el("span", "dir", up == null ? "=" : (up ? "↑" : "↓")));
+  s.appendChild(document.createTextNode(main));
+  if (refused) s.appendChild(el("span", "flag", "⊘"));
+  td.appendChild(s);
+  td.appendChild(barFor(frac, up, !adm));
+  if (small) td.appendChild(el("span", "small", small));
+  return td;
+}
+function numCell(cls, main, small) {
+  const td = el("td", cls + " num");
+  td.appendChild(el("span", "est", main));
+  if (small) td.appendChild(el("span", "small", small));
+  return td;
+}
+function spanCell(cls, txt) {
+  const td = el("td", cls);
+  td.colSpan = 4;
+  td.appendChild(el("span", "tag mute", "· " + txt));
+  return td;
+}
+
+function buildLegend(om) {
+  const host = $("#legendbody");
+  host.innerHTML = "";
+  const kv = el("div", "kv");
+  const add = (k, v) => { kv.appendChild(el("div", "k", k));
+                          kv.appendChild(el("div", null, v)); };
+  add("1", nmOf(0) + ", on the difference scale where no effect is 0");
+  add("2", nmOf(1) + ", on the difference scale where no effect is 0");
+  add("3", nmOf(2) + ", on the rate ratio scale where no effect is 1");
+  add("↓", "fewer " + om.short + " at treated corners than at their comparison "
+    + "locations");
+  add("↑", "more " + om.short + " at treated corners than at their comparison "
+    + "locations");
+  add("=", "no effect detected, meaning the interval covers no effect");
+  add("⊘", "the placebo on this cell rejects no effect, so the cell is not "
+    + "admissible and is ordered below every admissible cell");
+  add("reduction", "a reduction the specification returns as admissible");
+  add("increase", "an increase the specification returns as admissible");
+  add("refused", "not admissible, being the state the payload calls not admissible");
+  add("not identified", "the model could not identify the coefficient on this cell");
+  add("not read", "fewer treated units than the minimum a cell is read at");
+  add("no effect", "no effect detected");
+  add("pub.", "the figure exactly as NYC DOT published it; the larger figure above "
+    + "it is the same specification reproduced on the sample this study can build");
+  add("(0.0000)", "in the third column group, the p value adjusted by Benjamini and "
+    + "Hochberg within this outcome; the larger figure above it is unadjusted");
+  add("smallest detectable", "the smallest effect the cell could detect at 80 per cent "
+    + "power, two sided; in groups 1 and 2 it is a difference and in group 3 it is a "
+    + "percentage, which is why the third heading carries per cent and its cells carry "
+    + "a bare number");
+  add("grey and muted", "a cell the specification does not return as an admissible "
+    + "finding");
+  add("the bar", "the magnitude of the estimate, scaled against the largest estimate "
+    + "inside its own column group and never across groups; a difference is scaled on "
+    + "its absolute value and a rate ratio on the absolute value of its logarithm");
+  add("the row arrow", "opens every remaining figure for that row: the intervals, the "
+    + "unit and comparison counts, the pipeline verdict and the reading in words");
+  host.appendChild(kv);
+}
+
+function renderTable() {
+  const host = $("#tablehost");
+  host.innerHTML = "";
+  const om = outcomeMeta(S.out);
+  buildLegend(om);
+  const gateNote = S.placeboReq ? "" :
+    " The placebo requirement is OFF: a failing placebo is shown as a warning" +
+    " rather than an exclusion, and what becomes significant under the matched" +
+    " Poisson design is increases rather than reductions.";
+  $("#orderline").textContent = gateNote +
+    "Order: adjusted p ascending, then unadjusted p, on column group 3, with cells the "
+    + "placebo test excludes last, then cells not identified.";
+  $("#scaleline").textContent =
+    "Scales: groups 1 and 2 are a difference in " + om.unit + " per intersection per "
+    + "year, no effect is 0; group 3 is a rate ratio, no effect is 1, so the two are "
+    + "not comparable in magnitude.";
+  if (bad("cells")) { say(host, "cells", "cells.json"); return; }
+  const rows = cellsFor(S.out);
+  if (S.sort.key === "evidence") {
+    rows.sort((a, b) => S.sort.dir * evidenceCmp(a, b));
+  } else {
+    const key = SORTS[S.sort.key] || SORTS.label;
+    rows.sort((a, b) => {
+      const x = key(a), y = key(b);
+      const xn = (x == null), yn = (y == null);
+      if (xn && yn) return 0;
+      if (xn) return 1;
+      if (yn) return -1;
+      if (typeof x === "string") return S.sort.dir * x.localeCompare(y);
+      return S.sort.dir * (x - y);
+    });
+  }
+
+  // the bar in each column group is scaled against the largest estimate inside that
+  // same group, so that no bar invites a comparison across the two scales
+  const mag = (arr, f) => {
+    let m = 0;
+    arr.forEach(c => { const v = f(c); if (v != null && isFinite(v) && Math.abs(v) > m) m = Math.abs(v); });
+    return m > 0 ? m : 1;
+  };
+  const MX = {
+    s1: mag(rows, c => (spec1For(c) || {}).our_did),
+    s2: mag(rows, c => c.dot_diff),
+    s3: mag(rows, c => (c.irr == null ? null : Math.log(c.irr))),
+  };
+
+  const t = el("table");
+  const thead = el("thead");
+  const gr = el("tr", "grouprow");
+  const th = (txt, cls, span, rspan) => {
+    const n = el("th", cls);
+    if (span) n.colSpan = span;
+    if (rspan) n.rowSpan = rspan;
+    if (txt != null) n.textContent = txt;
+    return n;
+  };
+  const sortTh = (txt, k, cls, topic, topicTitle) => {
+    const n = el("th", (cls || "") + " sortable" + (S.sort.key === k ? " sorted" : ""));
+    n.textContent = txt + (S.sort.key === k ? (S.sort.dir > 0 ? " ↑" : " ↓") : "");
+    n.title = "sort on this column";
+    if (topic) n.appendChild(qh(topic, topicTitle || txt));
+    n.addEventListener("click", ev => {
+      // a click on the control opens its topic, so it must not also sort the column
+      if (ev.target.closest && ev.target.closest(".qhelp")) return;
+      if (S.sort.key === k) S.sort.dir *= -1; else { S.sort.key = k; S.sort.dir = 1; }
+      writeHash(); renderTable();
+    });
+    return n;
+  };
+  // every column group header carries the topic of its estimator, and its scale chip
+  // carries the topic of the two scales
+  const groupHead = (n, title, scaleTxt, cls, span, topic) => {
+    const x = th(null, cls, span);
+    const t = el("span", "gtitle", n + ". " + title);
+    t.appendChild(qh(topic, title));
+    x.appendChild(t);
+    const sc = el("span", "gscale", scaleTxt);
+    sc.appendChild(qh("scales", "two scales, never comparable in magnitude"));
+    x.appendChild(sc);
+    return x;
+  };
+  gr.appendChild(sortTh("Treatment", "label", "c-treat"));
+  gr.lastChild.rowSpan = 2;
+  gr.appendChild(sortTh("Units", "units", "num c-n"));
+  gr.lastChild.rowSpan = 2;
+  gr.appendChild(groupHead(1, nmOf(0), "difference, no effect is 0", "g1", 4,
+    "arith"));
+  gr.appendChild(groupHead(2, nmOf(1), "difference, no effect is 0", "g2", 4,
+    "arith"));
+  gr.appendChild(groupHead(3, nmOf(2), "rate ratio, no effect is 1", "g3", 4,
+    "fepois"));
+  const rd = th("Reading", "c-read", null, 2);
+  gr.appendChild(rd);
+  thead.appendChild(gr);
+
+  const sr = el("tr", "subrow");
+  // the unit of the third group's smallest detectable effect sits in its heading, so
+  // that the cell below it carries a bare number and the column stays narrow. The p
+  // column of the third group is the one carrying an adjusted p value, so only that
+  // heading carries the topic of the adjustment, while the placebo column and the
+  // smallest detectable column carry theirs in every group.
+  [["g1", "s1", "s1p", null, "s1mde", "c-e1", "c-p1", "Smallest detectable", null],
+   ["g2", "s2", "s2p", "s2pl", "s2mde", "c-est", "c-p", "Smallest detectable", null],
+   ["g3", "s3", "s3p", "s3pl", "s3mde", "c-est", "c-p",
+    "Smallest detectable, per cent", "bh"]]
+   .forEach(([cls, k, kp, kpl, kmde, ce, cp, mdelab, ptopic]) => {
+    sr.appendChild(sortTh("Estimate", k, cls + " num " + ce));
+    sr.appendChild(sortTh("p", kp, cls + " num " + cp, ptopic,
+      "adjustment for multiple subsets"));
+    const pl = kpl ? sortTh("Placebo", kpl, cls + " num c-pl", "placebo",
+                            "the placebo test")
+                   : th("Placebo", cls + " num c-pl");
+    if (!kpl) pl.appendChild(qh("placebo", "the placebo test"));
+    sr.appendChild(pl);
+    sr.appendChild(sortTh(mdelab, kmde, cls + " num c-mde", "mde",
+      "the smallest detectable effect"));
+  });
+  thead.appendChild(sr);
+  t.appendChild(thead);
+
+  const tb = el("tbody");
+  if (!rows.length) {
+    const tr = el("tr");
+    const td = el("td", null, "No subset is selected. Choose one on the left.");
+    td.colSpan = 15;
+    tr.appendChild(td); tb.appendChild(tr);
+  }
+  rows.forEach(c => addRow(tb, c, om, MX));
+  t.appendChild(tb);
+  host.appendChild(t);
+  // the two header rows both stay visible while the table scrolls, so the sub row
+  // is offset by whatever height the group row turned out to have
+  requestAnimationFrame(() => {
+    const h = gr.offsetHeight || 40;
+    sr.querySelectorAll("th").forEach(x => { x.style.top = h + "px"; });
+  });
+
+  $("#tablefoot").textContent =
+    "The third column group reports the pool of candidate intersections the matcher "
+    + "drew from, because the count of matched comparison intersections for each "
+    + "subset is not carried in data/subset_estimates.csv; the rule is three matched "
+    + "comparison intersections per treated unit. The first two column groups report "
+    + "corridor comparison locations, which are counted in the payload.";
+  $("#tablestatus").textContent =
+    `${rows.length} rows, one per selected subset, on ${om.short}. `
+    + `Click a column heading to sort, or a row arrow for the rest of its figures.`;
+  $("#tableintro").textContent =
+    "One row per selected subset. The first column group is the city's published "
+    + "specification, which reports only the arms it published, so most rows carry "
+    + "nothing there. The second is the same design components carried to the full "
+    + "record and to every subset. The third is this study's specification, which "
+    + "carries a placebo on every cell and an adjusted p value.";
+  $("#scalewarn").innerHTML =
+    "<b>The first two column groups and the third are not comparable in magnitude.</b> "
+    + esc("Specifications 1 and 2 estimate a difference in " + om.unit
+      + " per intersection per year, where no effect is 0, so -0.14 means 0.14 "
+      + "fewer per intersection per year. Specification 3 estimates a rate ratio, "
+      + "where no effect is 1, so 0.90 means 10 per cent fewer. A value of 0.90 on "
+      + "the third scale and a value of -0.14 on the first two describe "
+      + "different quantities in different units.");
+}
+
+/* Every figure that is not one of the nine dense columns is carried here, one click
+   away, together with the reading in words. Nothing is dropped. */
+function detailFor(c, om, s1) {
+  const td = el("td");
+  td.colSpan = 15;
+  const grid = el("div", "detgrid");
+
+  const blk = (n, title, scale) => {
+    const b = el("div", "detblk");
+    b.appendChild(el("b", null, n + ". " + title));
+    b.appendChild(el("span", "gscale", scale));
+    return b;
+  };
+  const kvOf = b => { const k = el("div", "kv"); b.appendChild(k); return k; };
+  const put = (k, key, val) => { k.appendChild(el("div", "k", key));
+                                 k.appendChild(el("div", null, val)); };
+
+  // ---- specification 1
+  const b1 = blk(1, nmOf(0), "difference, no effect is 0");
+  const k1 = kvOf(b1);
+  if (!s1) {
+    // four distinct reasons, carried per cell as spec1_absent, because one
+    // undifferentiated label hid the difference between a subset the report never
+    // formed and an arm this project could not rebuild
+    const a = c.spec1_absent || {};
+    put(k1, a.tag || "no published value",
+        a.why || "The published specification carries no value for this cell.");
+  } else {
+    const ratio = (P.spec1.unit_count_ratio || {})[s1.row];
+    put(k1, "estimate", fdiff(s1.dot_did, 2) + ", as published, no interval published");
+    put(k1, "reproduced", fdiff(s1.our_did) + ", 95 per cent interval "
+      + fdiff(s1.our_lo) + " to " + fdiff(s1.our_hi));
+    put(k1, "p", fp(s1.dot_p) + " as published, " + fp(s1.our_p) + " reproduced");
+    put(k1, "placebo", fdiff(s1.placebo_did) + ", p " + fp(s1.placebo_p)
+      + "; no placebo is published, so this one is run on the reproduction");
+    put(k1, "smallest detectable", fdiff(s1.our_mde)
+      + ", the smallest difference the reproduction could detect at 80 per cent power");
+    put(k1, "units", fint(s1.dot_n) + " locations as published, " + fint(s1.our_n)
+      + " units reproduced, " + fint(s1.our_control_locations)
+      + " comparison locations");
+    if (ratio != null) {
+      const w = el("div");
+      w.appendChild(el("span", "tag warn",
+        nf(ratio, 2) + " times the published unit count"));
+      k1.appendChild(el("div", "k", "sample"));
+      k1.appendChild(w);
+    }
+  }
+  grid.appendChild(b1);
+
+  // ---- specification 2
+  const b2 = blk(2, nmOf(1), "difference, no effect is 0");
+  const k2 = kvOf(b2);
+  if (c.dot_diff == null) {
+    put(k2, "not identified", "not identified on this cell");
+  } else {
+    put(k2, "estimate", fdiff(c.dot_diff) + ", 95 per cent interval "
+      + fdiff(c.dot_lo) + " to " + fdiff(c.dot_hi));
+    put(k2, "p", fp(c.dot_p) + ", with no adjustment for multiplicity");
+    put(k2, "placebo", fdiff(c.dot_placebo) + ", p " + fp(c.dot_placebo_p)
+      + (c.dot_placebo_p != null && c.dot_placebo_p < 0.05
+          ? "; the placebo rejects no effect" : ""));
+    put(k2, "smallest detectable", fdiff(c.dot_mde)
+      + ", at 80 per cent power, two sided");
+    put(k2, "units", fint(c.dot_n) + " units with a comparison, "
+      + fint(c.dot_controls) + " corridor comparison locations");
+  }
+  grid.appendChild(b2);
+
+  // ---- specification 3
+  const b3 = blk(3, nmOf(2), "rate ratio, no effect is 1");
+  const k3 = kvOf(b3);
+  if (c.irr == null) {
+    put(k3, "not identified",
+      "not identified: the model could not identify the coefficient on this cell");
+  } else {
+    put(k3, "estimate", fratio(c.irr) + ", 95 per cent interval " + fratio(c.lo)
+      + " to " + fratio(c.hi) + "; " + fsigned_pct(c.spec3_pct));
+    put(k3, "p", fp(c.p) + ", adjusted " + fp(c.p_bh)
+      + " by Benjamini and Hochberg within this outcome");
+    put(k3, "placebo", fratio(c.placebo_irr) + ", p " + fp(c.placebo_p)
+      + (c.placebo_p != null && c.placebo_p < 0.05
+          ? "; the placebo rejects no effect" : ""));
+    put(k3, "smallest detectable", fpct(c.mde_pct) + ", at 80 per cent power, "
+      + "two sided");
+    put(k3, "units", fint(c.n_units) + " treated units, three matched comparison "
+      + "intersections each, drawn from " + fint(c.pool_candidates) + " candidates");
+    put(k3, "pipeline verdict", c.verdict);
+  }
+  grid.appendChild(b3);
+  td.appendChild(grid);
+
+  // ---- the reading in words, which is prose and therefore one more click away
+  const words = dtl("Direction and admissibility in words, one line per specification");
+  const wb = dbody(words);
+  const lines = [];
+  if (s1) {
+    lines.push([nmOf(0),
+      (s1.our_did == null ? "not identified"
+        : (s1.our_did < 0 ? "fewer " : "more ") + om.short
+          + " at treated corners than at their comparison locations"),
+      (s1.placebo_p != null && s1.placebo_p < 0.05)
+        ? "not admissible: the placebo on the reproduction rejects no effect"
+        : (s1.our_p != null && s1.our_p < 0.05
+            ? "significant at 5 per cent in the reproduction, with a placebo "
+              + "consistent with no effect"
+            : "not significant at 5 per cent in the reproduction")]);
+  }
+  lines.push([nmOf(1), c.spec2_direction, c.spec2_reading.why]);
+  lines.push([nmOf(2), c.spec3_direction, c.spec3_reading.why]);
+  lines.forEach(([nmx, dirw, why]) => {
+    const d = el("div");
+    d.style.marginBottom = "4px";
+    d.appendChild(el("b", null, nmx + ": "));
+    d.appendChild(document.createTextNode(dirw + "."));
+    d.appendChild(el("span", "small", why + "."));
+    wb.appendChild(d);
+  });
+  // which specifications, by name, return an admissible finding on this cell. Naming
+  // them matters: a reduction admissible under the published specification and
+  // refused under the falsification tested one is not a finding of this study.
+  const adm = admissibleUnder(c, s1);
+  wb.appendChild(el("span", adm.length ? "tag ok" : "tag mute",
+    adm.length ? "admissible under: " + adm.join("; ")
+               : "no specification returns an admissible finding here"));
+  td.appendChild(words);
+
+  // ---- the subset itself
+  const sub = el("div", "kv");
+  sub.appendChild(el("div", "k", "the subset"));
+  sub.appendChild(el("div", null, c.note));
+  sub.appendChild(el("div", "k", "the sample"));
+  sub.appendChild(el("div", null,
+    `${fint(c.records_catalogue)} records in the subset; installs `
+    + `${c.install_first} to ${c.install_last}; ${c.pre} months before and `
+    + `${c.post} after; ${fint(c.records_censored)} of ${fint(c.records_total)} `
+    + `records set aside because ${c.post} months of record do not exist after them`));
+  if (c.one_install_date) {
+    sub.appendChild(el("div", "k", "caution"));
+    const w = el("div");
+    w.appendChild(el("span", "tag warn", "one installation month for every unit"));
+    sub.appendChild(w);
+  }
+  td.appendChild(sub);
+  return td;
+}
+
+function admissibleUnder(c, s1) {
+  const adm = [];
+  if (s1 && s1.our_p != null && s1.our_p < 0.05
+      && !(s1.placebo_p != null && s1.placebo_p < 0.05)) adm.push(nmOf(0));
+  if (adm2(c)) adm.push(nmOf(1));
+  if (adm3(c)) adm.push(nmOf(2));
+  return adm;
+}
+
+function addRow(tb, c, om, MX) {
+  const tr = el("tr");
+  const det = el("tr", "det");
+  const s1 = spec1For(c);
+
+  // -------- the subset itself, sticky, with its disclosure
+  const td0 = el("td", "c-treat");
+  const tg = el("button", "tgl", "▸");
+  tg.type = "button";
+  tg.setAttribute("aria-expanded", "false");
+  tg.title = "show every remaining figure for this row";
+  const lab = el("span", "rowlab", c.label);
+  lab.title = c.note;
+  td0.appendChild(tg);
+  td0.appendChild(lab);
+  if (c.one_install_date) {
+    td0.appendChild(el("span", "tag warn", "! one install month"));
+  }
+  tg.addEventListener("click", () => {
+    const on = det.classList.toggle("on");
+    tg.textContent = on ? "▾" : "▸";
+    tg.setAttribute("aria-expanded", on ? "true" : "false");
+    if (on) S.open.add(c.subset); else S.open.delete(c.subset);
+  });
+  tr.appendChild(td0);
+
+  // -------- sample
+  tr.appendChild(numCell("c-n", fint(c.n_units)));
+
+  // -------- specification 1, the published one
+  if (!s1) {
+    const a = c.spec1_absent || {};
+    const cell = spanCell("g1", a.tag || "no published value");
+    if (a.why) cell.title = a.why;
+    cell.classList.add("missing");
+    tr.appendChild(cell);
+  } else {
+    const adm1 = s1.our_p != null && s1.our_p < 0.05
+      && !(s1.placebo_p != null && s1.placebo_p < 0.05);
+    const ref1 = s1.placebo_p != null && s1.placebo_p < 0.05;
+    tr.appendChild(estCell("g1 c-e1", fdiff(s1.our_did),
+      Math.abs(s1.our_did || 0) / MX.s1,
+      s1.our_did == null ? null : s1.our_did > 0, adm1, ref1,
+      "pub. " + fdiff(s1.dot_did, 2)));
+    tr.appendChild(numCell("g1 c-p1", fp(s1.our_p), "pub. " + fp(s1.dot_p)));
+    tr.appendChild(numCell("g1 c-pl", fdiff(s1.placebo_did), "p " + fp(s1.placebo_p)));
+    tr.appendChild(numCell("g1 c-mde", fdiff(s1.our_mde)));
+  }
+
+  // -------- specification 2, the same components on the extended record
+  if (c.dot_diff == null) {
+    tr.appendChild(spanCell("g2", "not identified"));
+  } else {
+    const r2 = c.spec2_reading || {};
+    const ref2 = c.dot_placebo_p != null && c.dot_placebo_p < 0.05;
+    tr.appendChild(estCell("g2 c-est", fdiff(c.dot_diff),
+      Math.abs(c.dot_diff) / MX.s2, c.dot_diff > 0, adm2(c), S.placeboReq && ref2));
+    tr.appendChild(numCell("g2 c-p", fp(c.dot_p)));
+    tr.appendChild(numCell("g2 c-pl", fdiff(c.dot_placebo), "p " + fp(c.dot_placebo_p)));
+    tr.appendChild(numCell("g2 c-mde", fdiff(c.dot_mde)));
+  }
+
+  // -------- specification 3, the falsification tested one
+  if (c.irr == null) {
+    tr.appendChild(spanCell("g3", "not identified"));
+  } else {
+    const r3 = c.spec3_reading || {};
+    tr.appendChild(estCell("g3 c-est", fratio(c.irr),
+      Math.abs(Math.log(c.irr)) / MX.s3, c.irr > 1, adm3(c), refuses3(c)));
+    tr.appendChild(numCell("g3 c-p", fp(c.p), "(" + fp(c.p_bh) + ")"));
+    tr.appendChild(numCell("g3 c-pl", fratio(c.placebo_irr), "p " + fp(c.placebo_p)));
+    tr.appendChild(numCell("g3 c-mde",
+      c.mde_pct == null || !isFinite(c.mde_pct) ? "n.a." : nf(c.mde_pct, 0)));
+  }
+
+  // -------- the reading, as visual state rather than as sentences
+  const rd = el("td", "c-read");
+  if (S.placeboReq) {
+    rd.appendChild(tagFor(c.spec3_reading));
+  } else {
+    const st = adm3(c) ? (c.irr > 1 ? "increase" : "reduction")
+                       : (c.spec3_reading || {}).state === "underpowered"
+                         ? "underpowered" : "null";
+    rd.appendChild(tagFor({ state: st, why: "read with the placebo requirement "
+      + "switched off; multiplicity control and the unit floor still apply" }));
+    if (placeboFails3(c)) {
+      const w = el("span", "tag warn", "placebo fails");
+      w.title = "the placebo on the withheld year rejects no effect at "
+        + fp(c.placebo_p) + "; with the requirement on, this row is excluded";
+      rd.appendChild(w);
+    }
+  }
+  const adm = admissibleUnder(c, s1);
+  const nums = [];
+  if (adm.indexOf(nmOf(0)) >= 0) nums.push("1");
+  if (adm.indexOf(nmOf(1)) >= 0) nums.push("2");
+  if (adm.indexOf(nmOf(2)) >= 0) nums.push("3");
+  const a = el("span", "small",
+    nums.length ? "admissible under " + nums.join(", ") : "none admissible");
+  a.title = adm.length ? "admissible under: " + adm.join("; ")
+                       : "no specification returns an admissible finding here";
+  rd.appendChild(a);
+  tr.appendChild(rd);
+  tb.appendChild(tr);
+
+  det.appendChild(detailFor(c, om, s1));
+  if (S.open.has(c.subset)) {
+    det.classList.add("on");
+    tg.textContent = "▾";
+    tg.setAttribute("aria-expanded", "true");
+  }
+  tb.appendChild(det);
+}
+
+/* ------------------------------------------------------------ live estimate */
+function liveEstimate() {
+  if (!S.units || bad("subsets") || bad("meta")) return null;
+  const byName = {};
+  P.subsets.subsets.forEach(s => { byName[s.name] = s; });
+  const idx = new Set([...S.sel].map(n => (byName[n] || {}).catalogue_index)
+    .filter(i => i != null));
+  const pre = P.meta.settings.live_pre, post = P.meta.settings.live_post;
+  const rule = S.rule, y = S.out;
+  const d = [], q = [];
+  let tp = 0, ta = 0, cp = 0, ca = 0, slots = 0, inSel = 0, noCmp = 0;
+  let qtp = 0, qta = 0, qcp = 0, qca = 0;
+  for (const u of S.units) {
+    if (!u.s || !u.s.some(i => idx.has(i))) continue;
+    inSel++;
+    const blk = (u.d || {})[y];
+    if (!blk) { noCmp++; continue; }
+    const m = blk.m, pb = blk.p;
+    if (m && m[rule]) {
+      const cc = m[rule];
+      d.push(12 * (m.ta / post - m.tp / pre) - 12 * (cc.ca / post - cc.cp / pre));
+      tp += m.tp; ta += m.ta; cp += cc.cp; ca += cc.ca; slots += cc.n;
+    } else noCmp++;
+    if (pb && pb[rule]) {
+      const cc = pb[rule];
+      q.push(12 * (pb.ta / post - pb.tp / pre) - 12 * (cc.ca / post - cc.cp / pre));
+      qtp += pb.tp; qta += pb.ta; qcp += cc.cp; qca += cc.ca;
+    }
+  }
+  const stat = a => {
+    const n = a.length;
+    if (n < 2) return null;
+    const mean = a.reduce((s, x) => s + x, 0) / n;
+    const v = a.reduce((s, x) => s + (x - mean) * (x - mean), 0) / (n - 1);
+    const se = Math.sqrt(v / n);
+    const t = se > 0 ? mean / se : null;
+    return { n, est: mean, se,
+             lo: mean - 1.96 * se, hi: mean + 1.96 * se,
+             t, df: n - 1, p: t == null ? null : tTwoSided(t, n - 1),
+             mde: 2.802 * se };
+  };
+  const ratio = (a, b, cc, dd) =>
+    (a > 0 && cc > 0 && dd > 0 && b >= 0) ? (b / a) / (dd / cc) : null;
+  return {
+    inSel, noCmp, slots, main: stat(d), placebo: stat(q),
+    sums: { tp, ta, cp, ca }, psums: { tp: qtp, ta: qta, cp: qcp, ca: qca },
+    rr: ratio(tp, ta, cp, ca), rrPlacebo: ratio(qtp, qta, qcp, qca),
+    pre, post,
+  };
+}
+
+/* The aggregate rate ratio pools counts across corners, so it carries no unit level
+   adjustment and can point the other way from the modelled rate ratio for the same
+   selection. Where it does, it is said beside the number. */
+function aggSignClash(L) {
+  if (!L || L.rr == null || bad("cells")) return null;
+  const cs = cellsFor(S.out).filter(c => c.irr != null);
+  if (!cs.length) return null;
+  const aggUp = L.rr > 1;
+  const opp = cs.filter(c => (c.irr > 1) !== aggUp);
+  if (opp.length !== cs.length) return null;
+  const word = u => u ? "an increase" : "a reduction";
+  const which = cs.length === 1
+    ? "the modelled rate ratio for the same selection is " + fratio(cs[0].irr)
+      + ", which reads as " + word(!aggUp)
+    : "all " + fint(cs.length) + " modelled cells in this selection read as "
+      + word(!aggUp);
+  return "This pooled ratio reads as " + word(aggUp) + " while " + which
+    + ", because pooling counts across corners carries no unit level adjustment.";
+}
+
+function renderLive() {
+  const tiles = $("#livetiles"), det = $("#livedetail"), notes = $("#livenotes");
+  tiles.innerHTML = ""; det.innerHTML = ""; notes.innerHTML = "";
+  const om = outcomeMeta(S.out);
+  if (S.unitsErr) {
+    $("#liveintro").textContent = "";
+    tiles.appendChild(el("p", "missing",
+      "The live estimate needs data/explorer/units.json, which did not load ("
+      + S.unitsErr + "). Every other panel on this page is unaffected. Rebuild it "
+      + "with python src/make_unit_effects.py, or serve the folder with "
+      + "python -m http.server if this page was opened from a file:// path."));
+    return;
+  }
+  if (!S.units) {
+    tiles.appendChild(el("p", "hint",
+      "loading the per unit window sums, which is the largest payload on this page"));
+    return;
+  }
+  if (bad("meta") || bad("subsets")) {
+    $("#liveintro").textContent = "";
+    say(tiles, bad("meta") ? "meta" : "subsets",
+        bad("meta") ? "meta.json" : "subsets.json");
+    return;
+  }
+  const L = liveEstimate();
+  const rules = (bad("meta") ? {} : P.meta.rules) || {};
+  $("#liveintro").textContent =
+    `Computed in the browser from the per unit window sums, over the treated units `
+    + `of the current selection, on ${om.short}, against `
+    + `${rules[S.rule] || S.rule}. The installation window here is `
+    + `${(P.meta.settings.live_install_window || []).join(" to ")}, with `
+    + `${L ? L.pre : ""} months before and ${L ? L.post : ""} after.`;
+  if (!L || !L.main) {
+    tiles.appendChild(el("p", "hint",
+      "The selection holds too few treated units with a comparison group for an "
+      + "estimate. Add a subset on the left."));
+    return;
+  }
+  const tile = (k, v, u, extra, clash) => {
+    const d = el("div", "tile");
+    const val = el("div", "v");
+    val.appendChild(document.createTextNode(v));
+    if (extra) val.appendChild(extra);
+    d.appendChild(val);
+    if (clash) d.appendChild(el("span", "clash", clash));
+    d.appendChild(el("div", "k", k));
+    if (u) d.appendChild(el("div", "u", u));
+    return d;
+  };
+  tiles.appendChild(tile("Treated units in the selection", fint(L.inSel),
+    `${fint(L.main.n)} carry a comparison group under this rule, `
+    + `${fint(L.slots)} comparison slots in total`));
+  tiles.appendChild(tile(
+    S.rule === "c" ? "The city's published estimator, computed exactly"
+                   : "The city's estimator on matched comparison intersections",
+    fdiff(L.main.est),
+    `95 per cent interval ${fdiff(L.main.lo)} to ${fdiff(L.main.hi)}; difference in `
+    + `${om.unit} per intersection per year, where no effect is 0`));
+  tiles.appendChild(tile("Its t statistic and p value",
+    nf(L.main.t, 3), `on ${fint(L.main.df)} degrees of freedom, p `
+    + fp(L.main.p) + `; one sample t test against zero`));
+  tiles.appendChild(tile("Its placebo",
+    L.placebo ? fdiff(L.placebo.est) : "n.a.",
+    L.placebo ? `p ${fp(L.placebo.p)} on the same units with the installation month `
+      + `moved back ${P.meta.settings.placebo_shift} months`
+      : "not computable on this selection"));
+  const clash = aggSignClash(L);
+  tiles.appendChild(tile("Aggregate rate ratio, descriptive",
+    fratio(L.rr),
+    "ratio of summed counts; this is NOT the fixed effects Poisson estimate of the "
+    + "manuscript",
+    clash ? el("span", "tag warn", "↕ disagrees in sign") : null,
+    clash));
+  tiles.appendChild(tile("Smallest difference detectable here",
+    fdiff(L.main.mde), "at 80 per cent power, two sided"));
+
+  // the sums the two figures are built from, so a reader can recompute them
+  const tb = el("table");
+  tb.innerHTML =
+    "<thead><tr><th>window</th><th class=num>treated before</th>"
+    + "<th class=num>treated after</th><th class=num>comparison before</th>"
+    + "<th class=num>comparison after</th><th class=num>aggregate rate ratio</th>"
+    + "</tr></thead><tbody>"
+    + `<tr><td>the real installation month</td><td class=num>${nf(L.sums.tp, 0)}</td>`
+    + `<td class=num>${nf(L.sums.ta, 0)}</td><td class=num>${nf(L.sums.cp, 1)}</td>`
+    + `<td class=num>${nf(L.sums.ca, 1)}</td><td class=num>${fratio(L.rr)}</td></tr>`
+    + `<tr><td>the placebo month</td><td class=num>${nf(L.psums.tp, 0)}</td>`
+    + `<td class=num>${nf(L.psums.ta, 0)}</td><td class=num>${nf(L.psums.cp, 1)}</td>`
+    + `<td class=num>${nf(L.psums.ca, 1)}</td>`
+    + `<td class=num>${fratio(L.rrPlacebo)}</td></tr></tbody>`;
+  const wrap = el("div", "scroll");
+  wrap.appendChild(tb);
+  det.appendChild(el("h3", null, "The sums behind the two figures"));
+  det.appendChild(wrap);
+  det.appendChild(el("p", "note",
+    "A comparison column is the mean over that unit's comparison locations, summed "
+    + "over units, so the two sides are on one footing. The aggregate rate ratio is "
+    + "the after over before ratio at treated corners divided by the same ratio at "
+    + "the comparison locations."));
+
+  // one selected subset: show the published figures for it beside the live ones
+  if (S.sel.size === 1 && !bad("cells")) {
+    const c = P.cells.cells.find(x => x.outcome === S.out
+      && x.subset === [...S.sel][0]);
+    if (c) {
+      const box = el("div", "infobox");
+      box.appendChild(el("b", null, "This selection is one published subset, so the "
+        + "two numbers can be read side by side"));
+      const ul = el("ul", "plain");
+      ul.appendChild(el("li", null, S.rule === "c"
+        ? `Published specification on the extended record, from the pipeline: `
+          + `${fdiff(c.dot_diff)} with p ${fp(c.dot_p)} on ${fint(c.dot_n)} units. `
+          + `The live figure above is ${fdiff(L.main.est)} on `
+          + `${fint(L.main.n)} units, on the same estimator and the same comparison `
+          + `rule.`
+        : `The live figure above stands on matched comparison intersections, so it `
+          + `is not the design of the published specification on the extended `
+          + `record, which stands on corridor comparison locations and gives `
+          + `${fdiff(c.dot_diff)} with p ${fp(c.dot_p)} on ${fint(c.dot_n)} units. `
+          + `Set the comparison rule to corridor comparison locations to put the two `
+          + `on one design.`));
+      ul.appendChild(el("li", null,
+        `Falsification tested specification, from the pipeline: a rate ratio of `
+        + `${fratio(c.irr)} with p ${fp(c.p)}. The aggregate rate ratio above is `
+        + `${fratio(L.rr)}, which carries no unit effects, no calendar month effects `
+        + `and no cluster robust variance, so the two are different quantities.`));
+      ul.appendChild(el("li", null,
+        "A live figure and a published figure for one subset differ for two reasons: "
+        + "(i) the comparison locations here were assigned once over the union of "
+        + "every treated unit, while the pipeline assigns them separately for each "
+        + "subset, and (ii) the installation window here is fixed at "
+        + `${(P.meta.settings.live_install_window || []).join(" to ")}, while the `
+        + "pipeline chooses one per subset by right censoring."));
+      box.appendChild(ul);
+      det.appendChild(box);
+    }
+  }
+
+  const un = (bad("meta") ? {} : P.meta.unit_notes) || {};
+  const pairs = [["What the arithmetic figure is", un.estimator_note],
+                 ["What the rate ratio is not", un.ratio_note],
+                 ["Why it differs from a published subset estimate", un.matching_note],
+                 ["What is absent from every selection", un.censoring_note]]
+                .filter(([, v]) => v);
+  if (pairs.length) {
+    const d = dtl("What this figure is, what the rate ratio is not, and what is "
+      + "absent from every selection");
+    const b = dbody(d);
+    const box = el("div", "warnbox");
+    const ul = el("ul", "plain");
+    pairs.forEach(([k, v]) => {
+      const li = el("li");
+      li.appendChild(el("b", null, k + ". "));
+      li.appendChild(document.createTextNode(v));
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+    b.appendChild(box);
+    notes.appendChild(d);
+  }
+}
+
+/* --------------------------------------------------------------- agreement */
+function selectionAgreement(cs) {
+  const comparable = cs.filter(c => c.irr != null && c.dot_diff != null);
+  const agree = comparable.filter(c => c.agree_on_sign);
+  const dotRed = cs.filter(c => c.dot_p != null && c.dot_p < 0.05 && c.dot_diff < 0);
+  const ourRed = cs.filter(c => c.p != null && c.p < 0.05 && c.irr < 1);
+  const both = dotRed.filter(c => ourRed.some(o => o.subset === c.subset
+    && o.outcome === c.outcome));
+  return {
+    cells: cs.length, comparable: comparable.length, agree: agree.length,
+    dotRed: dotRed.length, ourRed: ourRed.length, both: both.length,
+    plOur: cs.filter(c => c.placebo_p != null && c.placebo_p < 0.05).length,
+    plDot: cs.filter(c => c.dot_placebo_p != null && c.dot_placebo_p < 0.05).length,
+    bh: cs.filter(c => c.p_bh != null && c.p_bh < 0.05).length,
+  };
+}
+
+function buildAgreementStatic() {
+  const host = $("#agreebody");
+  host.innerHTML = "";
+  if (bad("agreement") || bad("cells")) {
+    say(host, bad("agreement") ? "agreement" : "cells",
+        bad("agreement") ? "agreement.json" : "cells.json");
+    return;
+  }
+  const g0 = P.agreement.overall;
+  const tiles = el("div", "tiles");
+  const tile = (k, v, u) => {
+    const d = el("div", "tile");
+    d.appendChild(el("div", "v", v));
+    d.appendChild(el("div", "k", k));
+    if (u) d.appendChild(el("div", "u", u));
+    return d;
+  };
+  tiles.appendChild(tile("Cells called a significant reduction by both designs",
+    fint(g0.both_significant_reduction),
+    `of ${fint(g0.comparable)} cells that both designs identified`));
+  tiles.appendChild(tile("Agree on the sign of the estimate",
+    fint(g0.agree_on_sign) + " of " + fint(g0.comparable),
+    "which is what independent coin flips would give"));
+  tiles.appendChild(tile("Significant reductions, one design at a time",
+    fint(g0.spec2_significant_reduction) + " and "
+    + fint(g0.spec3_significant_reduction),
+    "the published specification on the extended record, then the falsification "
+    + "tested specification"));
+  host.appendChild(tiles);
+  host.appendChild(el("div", null)).id = "agreetab";
+  const funnel = P.agreement.funnel;
+  const f = el("div", "warnbox");
+  f.appendChild(el("b", null, "The falsification funnel, over all "
+    + fint(funnel.cells) + " cells"));
+  const ul = el("ul", "plain");
+  [[`${fint(funnel.placebo_refuses)} cells are refused because their placebo `
+    + `rejects no effect`],
+   [`${fint(funnel.significant_before_bh)} cells are significant before Benjamini `
+    + `and Hochberg`],
+   [`${fint(funnel.significant_after_bh)} cells are significant after it`],
+   [`${fint(funnel.after_bh_with_failing_placebo)} of those ${fint(funnel.significant_after_bh)} `
+    + `have a failing placebo`],
+   [`${fint(funnel.surviving_both)} cells survive falsification and multiplicity `
+    + `control together`]].forEach(([t]) => ul.appendChild(el("li", null, t)));
+  f.appendChild(ul);
+  host.appendChild(f);
+  const d = dtl("Why a sign agreement is the weakest test two designs can pass");
+  const b = dbody(d);
+  b.appendChild(el("p", "body",
+    "A sign agreement is the weakest test two designs can pass: it asks only "
+    + "whether they point the same way. The counts below are over the cells the "
+    + "table can show."));
+  b.appendChild(el("p", "note", P.agreement.reading));
+  host.appendChild(d);
+  renderAgreement();
+}
+
+function renderAgreement() {
+  const host = $("#agreetab");
+  if (!host) return;
+  host.innerHTML = "";
+  if (bad("cells") || bad("agreement")) return;
+  const om = outcomeMeta(S.out);
+  const selOne = selectionAgreement(cellsFor(S.out));
+  const selAll = selectionAgreement(P.cells.cells.filter(c => S.sel.has(c.subset)));
+  const g = P.agreement.overall;
+  const rows = [
+    [`this selection on ${om.short}`, selOne],
+    ["this selection over all five outcomes", selAll],
+    ["every subset over all five outcomes", {
+      cells: g.cells, comparable: g.comparable, agree: g.agree_on_sign,
+      dotRed: g.spec2_significant_reduction, ourRed: g.spec3_significant_reduction,
+      both: g.both_significant_reduction, plOur: g.spec3_placebo_refuses,
+      plDot: g.spec2_placebo_refuses, bh: g.spec3_significant_after_bh }],
+  ];
+  const t = el("table");
+  t.innerHTML = "<thead><tr><th>cells counted</th><th class=num>cells</th>"
+    + "<th class=num>both identified</th><th class=num>agree on sign</th>"
+    + "<th class=num>significant reduction, extended record</th>"
+    + "<th class=num>significant reduction, falsification tested</th>"
+    + "<th class=num>a significant reduction under both</th>"
+    + "<th class=num>placebo test excludes, extended record</th>"
+    + "<th class=num>placebo test excludes, falsification tested</th></tr></thead>";
+  const tb = el("tbody");
+  rows.forEach(([lab, r]) => {
+    const tr = el("tr");
+    tr.innerHTML = `<td>${esc(lab)}</td><td class=num>${fint(r.cells)}</td>`
+      + `<td class=num>${fint(r.comparable)}</td>`
+      + `<td class=num>${fint(r.agree)}</td>`
+      + `<td class=num>${fint(r.dotRed)}</td>`
+      + `<td class=num>${fint(r.ourRed)}</td>`
+      + `<td class=num><b>${fint(r.both)}</b></td>`
+      + `<td class=num>${fint(r.plDot)}</td>`
+      + `<td class=num>${fint(r.plOur)}</td>`;
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+  const wrap = el("div", "scroll");
+  wrap.appendChild(t);
+  host.appendChild(wrap);
+  host.appendChild(el("p", "note",
+    "The column of cells called a significant reduction by both designs is the one "
+    + "to read first. Across every subset and every outcome it holds "
+    + fint(P.agreement.overall.both_significant_reduction) + " cells."));
+}
+
+/* ------------------------------------------------------------- calibration */
+function meter(rate, warnAbove) {
+  const d = el("div", "meterwrap");
+  const b = el("div", "meter" + (warnAbove != null && rate > warnAbove ? " hi" : ""));
+  b.style.width = Math.max(2, Math.min(100, rate * 100)) + "%";
+  d.appendChild(b);
+  const m = el("div", "mark");
+  m.style.left = "5%";
+  d.appendChild(m);
+  return d;
+}
+function rateCell(v, warnAbove) {
+  const td = el("td", "num");
+  if (!v) { td.appendChild(el("span", "small", "n.a.")); return td; }
+  const hot = warnAbove != null && v.reject > warnAbove;
+  const s = el("span", "est", fpct(v.reject * 100, 1));
+  td.appendChild(s);
+  if (hot) td.appendChild(el("span", "flag", "!"));
+  td.appendChild(meter(v.reject, warnAbove));
+  if (v.reject_ci && v.reject_ci.length === 2) {
+    td.appendChild(el("span", "small",
+      `${fpct(v.reject_ci[0] * 100, 1)} to ${fpct(v.reject_ci[1] * 100, 1)}, `
+      + `${fint(v.n)} draws`));
+  }
+  return td;
+}
+
+function buildCalibration() {
+  const host = $("#calibbody");
+  host.innerHTML = "";
+  if (bad("calibration")) { say(host, "calibration", "calibration.json"); return; }
+  const C = P.calibration;
+  const w = el("div", "warnbox");
+  w.appendChild(el("b", null, "The two regimes of site selection"));
+  w.appendChild(el("p", null, C.two_regimes));
+  host.appendChild(w);
+
+  const t = el("table");
+  const wins = C.select_windows;
+  let head = "<thead><tr><th>design</th>"
+    + "<th class=num>false positives, random installation month</th>";
+  wins.forEach(w2 => {
+    head += `<th class=num>selection on a spike, window ${esc(w2.replace("_", " to "))}`
+      + `</th>`;
+  });
+  head += "<th class=num>false positives, selection on a level</th>"
+    + "<th class=num>power against a true reduction of 20 per cent</th>"
+    + "<th class=num>size corrected power</th>"
+    + "<th class=num>mean estimate</th></tr></thead>";
+  t.innerHTML = head;
+  const tb = el("tbody");
+  C.designs.forEach(d => {
+    const tr = el("tr");
+    const td0 = el("td");
+    td0.appendChild(el("span", "rowlab", d.label));
+    if (d.is_validation) td0.appendChild(el("span", "tag mute", "validation only"));
+    td0.appendChild(el("span", "small", d.role));
+    tr.appendChild(td0);
+    tr.appendChild(rateCell(d.exp1, 0.10));
+    wins.forEach(w2 => tr.appendChild(rateCell(d.exp2[w2], 0.10)));
+    tr.appendChild(rateCell(d.exp3null, 0.10));
+    tr.appendChild(rateCell(d.exp3, null));
+    const sc = el("td", "num");
+    sc.appendChild(el("span", "est", d.exp3 && d.exp3.reject_sizecorrected != null
+      ? fpct(d.exp3.reject_sizecorrected * 100, 1) : "n.a."));
+    tr.appendChild(sc);
+    const me = el("td", "num");
+    me.appendChild(el("span", "est", !d.exp3 ? "n.a."
+      : (d.scale === "ratio" ? fratio(d.exp3.mean_est) : fdiff(d.exp3.mean_est))));
+    me.appendChild(el("span", "gscale", d.scale === "ratio"
+      ? "rate ratio, no effect is 1" : "difference, no effect is 0"));
+    tr.appendChild(me);
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+  const wrap = el("div", "scroll");
+  wrap.appendChild(t);
+  host.appendChild(wrap);
+
+  const d1 = dtl("How each design was scored, and what each of the three experiments "
+    + "does");
+  const b1 = dbody(d1);
+  b1.appendChild(el("p", "body",
+    "The three specifications rest on two pairs of components: the first two use "
+    + "corridor comparison locations with an unweighted arithmetic mean of per unit "
+    + "changes, and the third uses matched comparison intersections with fixed "
+    + "effects Poisson. The rows above score those pairs, and the crossed rows "
+    + "between them separate the contribution of the comparison group from the "
+    + "contribution of the estimator."));
+  b1.appendChild(el("p", "body",
+    `Each design was given data in which the true answer is known, on the `
+    + `${C.class} class and the outcome ${C.outcome}, and scored on what it `
+    + `reported. A design with correct size rejects no effect on 5 per cent of `
+    + `draws, which is marked on every bar above.`));
+  const ex = el("div", "cards");
+  Object.keys(C.experiments).forEach(k => {
+    const e = C.experiments[k];
+    const c = el("div", "card");
+    c.appendChild(el("h4", null, e.name));
+    c.appendChild(el("p", "who", "the truth is " + e.truth));
+    c.appendChild(el("p", "small", e.detail));
+    ex.appendChild(c);
+  });
+  b1.appendChild(ex);
+  b1.appendChild(el("p", "note",
+    "A bar is drawn in the warning colour and marked with an exclamation mark when a "
+    + "false positive rate exceeds 10 per cent, being twice the nominal 5, and the "
+    + "thin vertical mark on every bar is the nominal 5 per cent. The power columns "
+    + "are not coloured that way, because a high value there is the wanted behaviour. "
+    + C.size_correction_note));
+  host.appendChild(d1);
+}
+
+/* ------------------------------------------------------- specification path */
+function buildPaths() {
+  const host = $("#pathbody");
+  host.innerHTML = "";
+  if (bad("paths")) { say(host, "paths", "paths.json"); return; }
+  P.paths.classes.forEach(cl => {
+    host.appendChild(el("h3", null, cl.class));
+    const t = el("table");
+    t.innerHTML = "<thead><tr><th>step</th><th>what changed</th>"
+      + "<th class=num>treated units</th><th class=num>comparison locations</th>"
+      + "<th class=num>estimate</th><th class=num>p</th><th class=num>placebo</th>"
+      + "<th>verdict</th></tr></thead>";
+    const tb = el("tbody");
+    cl.steps.forEach(s => {
+      const tr = el("tr");
+      const isRatio = s.scale === "ratio";
+      const est = isRatio ? fratio(s.est) : fdiff(s.est);
+      const pl = isRatio ? fratio(s.placebo_est) : fdiff(s.placebo_est);
+      const td0 = el("td");
+      td0.appendChild(el("span", "rowlab", s.name));
+      td0.appendChild(el("span", "small",
+        `crash ${(s.crash || []).join(" to ")}; installs `
+        + `${(s.install || []).join(" to ")}; ${s.pre} before and ${s.post} after; `
+        + `${s.controls}; ${s.estimator}`));
+      tr.appendChild(td0);
+      tr.appendChild(el("td", null, s.changed));
+      tr.appendChild(el("td", "num", fint(s.units)));
+      tr.appendChild(el("td", "num", fint(s.controls_n)));
+      const e = el("td", "num");
+      e.appendChild(el("span", "est", est));
+      e.appendChild(el("span", "small", `${isRatio ? fratio(s.lo) : fdiff(s.lo)} to `
+        + `${isRatio ? fratio(s.hi) : fdiff(s.hi)}`));
+      e.appendChild(el("span", "gscale", isRatio
+        ? "rate ratio, no effect is 1"
+        : "difference per intersection per year, no effect is 0"));
+      tr.appendChild(e);
+      tr.appendChild(el("td", "num", fp(s.p)));
+      const p = el("td", "num");
+      p.appendChild(el("span", "est", pl));
+      p.appendChild(el("span", "small", "p " + fp(s.placebo_p)));
+      tr.appendChild(p);
+      const v = el("td");
+      const failing = /PLACEBO FAILS/.test(s.verdict || "");
+      v.appendChild(el("span", "tag " + (failing ? "warn" : "mute"),
+        (failing ? "⊘ " : "· ") + s.verdict));
+      tr.appendChild(v);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    const wrap = el("div", "scroll");
+    wrap.appendChild(t);
+    host.appendChild(wrap);
+  });
+  const d = dtl("What a path shows and what it does not show, and why the scale "
+    + "changes inside it");
+  const b = dbody(d);
+  b.appendChild(el("p", "body", P.paths.reading));
+  b.appendChild(el("p", "note",
+    "The scale changes inside each path, because step 5 changes the estimator from "
+    + "an arithmetic mean of differences to a multiplicative rate model. Every row "
+    + "therefore carries its own scale, and two rows on different scales are not "
+    + "comparable in magnitude."));
+  host.appendChild(d);
+}
+
+/* --------------------------------------------- the published specification */
+function buildSpec1() {
+  const host = $("#spec1body");
+  host.innerHTML = "";
+  if (bad("spec1")) { say(host, "spec1", "spec1.json"); return; }
+  const S1 = P.spec1;
+
+  // published estimates against the reproduction
+  const t = el("table");
+  t.innerHTML = "<thead><tr><th>published row</th><th>outcome</th>"
+    + "<th class=num>locations as published</th><th class=num>estimate as published</th>"
+    + "<th class=num>p as published</th><th class=num>units reproduced</th>"
+    + "<th class=num>estimate reproduced</th><th class=num>p reproduced</th>"
+    + "<th class=num>placebo on the reproduction</th><th>reading</th></tr></thead>";
+  const tb = el("tbody");
+  Object.keys(S1.comparison).forEach(k => {
+    const v = S1.comparison[k];
+    const tr = el("tr");
+    const notReproduced = v.our_did == null;
+    tr.innerHTML =
+      `<td>${esc(v.row.replace(/_/g, " "))}</td>`
+      + `<td>${esc(v.dot_outcome_label)}</td>`
+      + `<td class=num>${fint(v.dot_n)}</td>`
+      + `<td class=num>${fdiff(v.dot_did, 2)}</td>`
+      + `<td class=num>${fp(v.dot_p)}</td>`
+      + `<td class=num>${notReproduced ? "n.a." : fint(v.our_n)}</td>`
+      + `<td class=num>${notReproduced ? "n.a." : fdiff(v.our_did)
+          + "<span class=small>" + fdiff(v.our_lo) + " to " + fdiff(v.our_hi)
+          + "</span>"}</td>`
+      + `<td class=num>${notReproduced ? "n.a." : fp(v.our_p)}</td>`
+      + `<td class=num>${notReproduced ? "n.a." : fdiff(v.placebo_did)
+          + "<span class=small>p " + fp(v.placebo_p) + "</span>"}</td>`;
+    const rd = el("td");
+    if (notReproduced) {
+      const acc = (S1.accounting || {})[v.row] || {};
+      rd.appendChild(el("span", "tag mute", "· not reproducible"));
+      rd.appendChild(el("span", "small", acc.reason || ""));
+    } else {
+      rd.appendChild(el("span", "tag mute", v.same_sign ? "= the two agree on sign"
+        : "≠ the two disagree on sign"));
+      rd.appendChild(el("span", "small", v.dot_inside_our_interval
+        ? "the published figure lies inside the reproduction's interval"
+        : "the published figure lies outside the reproduction's interval"));
+      if (v.placebo_p != null && v.placebo_p < 0.05) {
+        rd.appendChild(el("span", "tag warn", "⊘ the placebo rejects no effect"));
+      }
+    }
+    tr.appendChild(rd);
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+  const wrap = el("div", "scroll cap");
+  wrap.appendChild(t);
+  host.appendChild(el("h3", null, "The published estimates, and the same specification "
+    + "reproduced on the sample this study can build"));
+  host.appendChild(wrap);
+  const cn = S1.counts;
+  host.appendChild(el("p", "note",
+    `${fint(cn.comparable)} of the published estimates can be reproduced at all; the `
+    + `published figure lies inside the reproduction's interval in `
+    + `${fint(cn.dot_inside_our_interval)} of them and the two agree on sign in `
+    + `${fint(cn.same_sign)}; the placebo on the reproduction rejects no effect in `
+    + `${fint(cn.placebo_fails)}. Reproducing a figure is not the same as `
+    + `confirming it, because the sample is reconstructed rather than published.`));
+  const dc = dtl("What the published specification covers, and what it reports "
+    + "nothing for");
+  dbody(dc).appendChild(el("p", "body", S1.coverage_note));
+  host.appendChild(dc);
+
+  // the accounting: why the samples differ
+  const at = el("table");
+  at.innerHTML = "<thead><tr><th>published row</th><th>what this study counts as "
+    + "that row</th><th class=num>locations as published</th>"
+    + "<th class=num>records</th><th class=num>units</th>"
+    + "<th class=num>units with a comparison group</th>"
+    + "<th class=num>ratio of our units to theirs</th></tr></thead>";
+  const atb = el("tbody");
+  Object.keys(S1.accounting || {}).forEach(k => {
+    const a = S1.accounting[k];
+    const tr = el("tr");
+    const rat = a.our_n_over_dot_n;
+    tr.innerHTML = `<td>${esc(k.replace(/_/g, " "))}</td>`
+      + `<td>${esc(a.our_definition)}${a.reason ? "<span class=small>"
+          + esc(a.reason) + "</span>" : ""}</td>`
+      + `<td class=num>${fint(a.dot_n)}</td><td class=num>${fint(a.records)}</td>`
+      + `<td class=num>${fint(a.units)}</td>`
+      + `<td class=num>${fint(a.units_with_control)}</td>`
+      + `<td class=num>${rat == null ? "n.a." : nf(rat, 2)}</td>`;
+    atb.appendChild(tr);
+  });
+  at.appendChild(atb);
+  const aw = el("div", "scroll cap");
+  aw.appendChild(at);
+  host.appendChild(el("h3", null, "Why the two samples are not the same sample"));
+  host.appendChild(aw);
+
+  // the hardened arm holds different objects under the same name
+  const hc = S1.hardened_composition || {};
+  const hb = el("div", "warnbox");
+  hb.appendChild(el("b", null, "The hardened arm carries the same name and different "
+    + "objects"));
+  const hul = el("ul", "plain");
+  hul.appendChild(el("li", null, "as published, "
+    + fint(hc.dot_total) + " locations: "
+    + Object.keys(hc.dot || {}).map(k => `${k.replace(/_/g, " ")} ${hc.dot[k]}`)
+      .join(", ")));
+  hul.appendChild(el("li", null, "in this study, "
+    + fint(hc.ours_total) + " units: "
+    + Object.keys(hc.ours_by_class || {})
+      .map(k => `${k.replace(/_/g, " ")} ${hc.ours_by_class[k]}`).join(", ")));
+  if (hc.read_as) hul.appendChild(el("li", null, hc.read_as));
+  hb.appendChild(hul);
+  host.appendChild(hb);
+
+  // the mismatches, each with what it is and how to read it
+  const dm = dtl("What stands between the published figures and the reproduction, one "
+    + "mismatch at a time");
+  const mb = dbody(dm);
+  Object.keys(S1.mismatches || {}).forEach(k => {
+    const m = S1.mismatches[k];
+    const c = el("div", "card");
+    c.style.marginBottom = "8px";
+    c.appendChild(el("h4", null, k.replace(/_/g, " ")));
+    c.appendChild(el("p", "small", m.what));
+    if (m.read_as) c.appendChild(el("p", "small", "Read as: " + m.read_as));
+    const cons = m.consequence;
+    if (cons && typeof cons === "object") {
+      const kv = el("div", "kv");
+      Object.keys(cons).forEach(kk => {
+        kv.appendChild(el("div", "k", kk.replace(/_/g, " ")));
+        const v = cons[kk];
+        kv.appendChild(el("div", null, typeof v === "object"
+          ? Object.keys(v).map(x => `${x.replace(/_/g, " ")} `
+              + (typeof v[x] === "number" ? nf(v[x], 4) : v[x])).join("; ")
+          : (typeof v === "number" ? nf(v, 4) : String(v))));
+      });
+      c.appendChild(kv);
+    }
+    mb.appendChild(c);
+  });
+  host.appendChild(dm);
+}
+
+/* ----------------------------------------------------------------- methods */
+function buildMethods() {
+  const host = $("#methodsbody");
+  host.innerHTML = "";
+  if (bad("methods")) { say(host, "methods", "methods.json"); return; }
+  const M = P.methods;
+  const w = el("div", "warnbox");
+  w.appendChild(el("b", null, "Neither specification is the correct one"));
+  w.appendChild(el("p", null, M.neither_is_correct));
+  host.appendChild(w);
+  host.appendChild(el("p", "note", M.scales.warning + " " + M.scales.difference.reading
+    + " " + M.scales.ratio.reading));
+
+  M.specifications.forEach(s => {
+    const d = dtl(s.id + ". " + s.name + ": " + s.whose + ", "
+      + (s.scale === "ratio" ? "a rate ratio where no effect is 1"
+                             : "a difference where no effect is 0"));
+    const c = dbody(d);
+    c.appendChild(el("p", "who", s.whose + ". " + s.coverage + "."));
+    const t = el("table");
+    const tb = el("tbody");
+    s.components.forEach(([k, v]) => {
+      const tr = el("tr");
+      tr.innerHTML = `<td style="width:200px;color:var(--ink3)">${esc(k)}</td>`
+        + `<td>${esc(v)}</td>`;
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    c.appendChild(t);
+    const add = (h, b) => {
+      if (!b) return;
+      c.appendChild(el("h3", null, h));
+      c.appendChild(el("p", "small", b));
+    };
+    add("the estimator, step by step", s.estimator_detail);
+    add("the comparison rule", s.comparison_rule);
+    add("the exclusion screen", s.comparison_exclusion);
+    add("the placebo", s.placebo_detail);
+    add("how this specification differs from the published one", s.differs_from_1);
+    add("when a cell is read as a finding", s.gate);
+    if ((s.vulnerable_to || []).length) {
+      c.appendChild(el("h3", null, "what this comparison rule is vulnerable to"));
+      const ul = el("ul", "plain");
+      s.vulnerable_to.forEach(x => ul.appendChild(el("li", null, x)));
+      c.appendChild(ul);
+    }
+    if ((s.ambiguities || []).length) {
+      c.appendChild(el("h3", null, "choices the published text leaves open, and what "
+        + "was done about each"));
+      const ul = el("ul", "plain");
+      s.ambiguities.forEach(a => {
+        const li = el("li");
+        li.appendChild(el("b", null, a.ambiguity + " "));
+        li.appendChild(document.createTextNode(a.choice));
+        ul.appendChild(li);
+      });
+      c.appendChild(ul);
+    }
+    if (s.comparison_parameters) {
+      const ps = Object.keys(s.comparison_parameters)
+        .map(k => `${k.replace(/_/g, " ")} ${s.comparison_parameters[k]}`).join("; ");
+      c.appendChild(el("p", "small", "parameters: " + ps));
+    }
+    c.appendChild(el("p", "small", "reimplement from " + s.reimplement));
+    host.appendChild(d);
+  });
+}
+
+/* ------------------------------------------------------------- limitations */
+function buildLimitations() {
+  const host = $("#limitbody");
+  host.innerHTML = "";
+  if (bad("limitations")) { say(host, "limitations", "limitations.json"); return; }
+  const L = P.limitations;
+
+  const im = L.installation_month_2024;
+  const b1 = el("div", "warnbox");
+  b1.appendChild(el("b", null, "The installation month of the "
+    + im.cohort + " is imputed"));
+  b1.appendChild(el("p", null, im.detail));
+  b1.appendChild(el("p", "note", "Subsets affected: " + im.subsets.join(", ") + "."));
+  host.appendChild(b1);
+
+  const b2 = el("div", "warnbox");
+  b2.appendChild(el("b", null, "Turn calming is eleven distinct treatments"));
+  b2.appendChild(el("p", null, L.turn_calming_materials.detail));
+  host.appendChild(b2);
+
+  const b3 = el("div", "warnbox");
+  b3.appendChild(el("b", null, "The hardened daylighting cells of this study are "
+    + "refused by its own admission rule"));
+  b3.appendChild(el("p", null, L.hardened_statement));
+  const g = L.grid;
+  const ht = el("table");
+  ht.innerHTML = "<thead><tr><th>subset</th><th>outcome</th>"
+    + "<th class=num>rate ratio</th><th class=num>p</th>"
+    + "<th class=num>placebo</th><th class=num>placebo p</th>"
+    + "<th>what the admission rule did</th></tr></thead>";
+  const htb = el("tbody");
+  (g.hardened || []).forEach(r => {
+    const tr = el("tr");
+    tr.innerHTML = `<td>${esc(r.subset)}</td><td>${esc(r.outcome)}</td>`
+      + `<td class=num>${fratio(r.estimate)}</td><td class=num>${fp(r.p)}</td>`
+      + `<td class=num>${fratio(r.placebo_estimate)}</td>`
+      + `<td class=num>${fp(r.placebo_p)}</td><td>${esc(r.gate_verdict)}</td>`;
+    htb.appendChild(tr);
+  });
+  ht.appendChild(htb);
+  const hw = el("div", "scroll cap");
+  hw.appendChild(ht);
+  b3.appendChild(hw);
+  host.appendChild(b3);
+
+  // ---- right censoring
+  const dc = dtl("Right censoring, per subset: how many records are set aside and "
+    + "what after period each subset can fill");
+  const cb = dbody(dc);
+  cb.appendChild(el("p", "body",
+    "A record is set aside when the crash record does not run far enough past its "
+    + "installation month to fill the after period. The after period is the longest "
+    + "one the subset can fill, so a recent cohort is reported on a short window "
+    + "rather than not at all, and the window used is carried in every row."));
+  const t = el("table");
+  t.innerHTML = "<thead><tr><th>subset</th><th class=num>records in the subset</th>"
+    + "<th class=num>records with a usable month</th><th class=num>records kept</th>"
+    + "<th class=num>records set aside</th><th class=num>after period, months</th>"
+    + "<th>installations</th><th class=num>treated units</th></tr></thead>";
+  const tb = el("tbody");
+  L.censoring.forEach(s => {
+    const tr = el("tr");
+    tr.innerHTML = `<td>${esc(s.label)}</td>`
+      + `<td class=num>${fint(s.records_catalogue)}</td>`
+      + `<td class=num>${fint(s.records_total)}</td>`
+      + `<td class=num>${fint(s.records_kept)}</td>`
+      + `<td class=num>${fint(s.records_censored)}</td>`
+      + `<td class=num>${fint(s.post)}</td>`
+      + `<td>${esc(s.install_first)} to ${esc(s.install_last)}`
+      + (s.one_install_date
+          ? " <span class=\"tag warn\">! one month for every unit</span>" : "")
+      + `</td><td class=num>${fint(s.n_units)}</td>`;
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+  const wrap = el("div", "scroll cap");
+  wrap.appendChild(t);
+  cb.appendChild(wrap);
+  host.appendChild(dc);
+
+  // ---- the corner that was already clear
+  const dk = dtl("The corner that was already clear: what a fire hydrant already "
+    + "did before any sign was posted");
+  const kb = dbody(dk);
+  kb.appendChild(el("p", "body", L.curb_detail));
+  const ct = el("table");
+  ct.innerHTML = "<thead><tr><th>family</th><th>what counts as already clear</th>"
+    + "<th class=num>already clear</th><th class=num>newly cleared</th>"
+    + "<th class=num>difference, z</th><th class=num>p</th>"
+    + "<th class=num>units, already clear</th><th class=num>units, newly cleared</th>"
+    + "</tr></thead>";
+  const ctb = el("tbody");
+  (L.curb.contrasts || []).forEach(c => {
+    const tr = el("tr");
+    tr.innerHTML = `<td>${esc(c.family)}</td><td>${esc(c.split)}</td>`
+      + `<td class=num>${fratio(c.already_clear)}</td>`
+      + `<td class=num>${fratio(c.newly_cleared)}</td>`
+      + `<td class=num>${nf(c.z, 2)}</td><td class=num>${fp(c.p)}</td>`
+      + `<td class=num>${fint(c.n_already)}</td>`
+      + `<td class=num>${fint(c.n_newly)}</td>`;
+    ctb.appendChild(tr);
+  });
+  ct.appendChild(ctb);
+  const cw = el("div", "scroll cap");
+  cw.appendChild(ct);
+  kb.appendChild(cw);
+  kb.appendChild(el("p", "note",
+    "Both arms are rate ratios on " + L.curb.outcome + " where no effect is 1, "
+    + "so the two columns are comparable with each other and with the third column "
+    + "group of the main table. Several of these arms fail their own placebo, which "
+    + "is reported in the payload and which is why the contrast is offered as a "
+    + "direction rather than as a measured effect."));
+  host.appendChild(dk);
+
+  // ---- the wider grid
+  const dg = dtl("The wider specification grid, " + fint(g.rows)
+    + " cells, and what its gate did to each");
+  const gb = dbody(dg);
+  const gt = el("table");
+  gt.innerHTML = "<thead><tr><th>what the admission rule did</th><th class=num>cells</th>"
+    + "</tr></thead>";
+  const gtb = el("tbody");
+  Object.keys(g.gate).sort((a, b) => g.gate[b] - g.gate[a]).forEach(k => {
+    const tr = el("tr");
+    tr.innerHTML = `<td>${esc(k)}</td><td class=num>${fint(g.gate[k])}</td>`;
+    gtb.appendChild(tr);
+  });
+  gt.appendChild(gtb);
+  const gw = el("div", "scroll cap");
+  gw.appendChild(gt);
+  gb.appendChild(gw);
+  gb.appendChild(el("p", "note",
+    "The wider grid adds a fourth refusal reason to the admission rule, being a drift before "
+    + "installation large enough to account for the estimate. It runs over six "
+    + "outcomes and a different subset list, so its cells are not the cells of the "
+    + "main table."));
+  host.appendChild(dg);
+
+  const un = (bad("meta") ? {} : P.meta.unit_notes) || {};
+  if (un.matching_note) {
+    const d4 = dtl("A selection in the live panel is not a published subset");
+    const b4 = dbody(d4);
+    const box = el("div", "warnbox");
+    box.appendChild(el("p", null, un.matching_note));
+    box.appendChild(el("p", null, un.censoring_note || ""));
+    b4.appendChild(box);
+    host.appendChild(d4);
+  }
+
+  if (!bad("meta")) {
+    const d5 = dtl("Where every number on this page comes from, file by file");
+    const b5 = dbody(d5);
+    const st = el("table");
+    st.innerHTML = "<thead><tr><th>file</th><th class=num>size, kB</th></tr></thead>";
+    const stb = el("tbody");
+    P.meta.sources.forEach(s => {
+      const tr = el("tr");
+      tr.innerHTML = `<td><code>${esc(s.file)}</code></td>`
+        + `<td class=num>${s.bytes == null ? "absent" : nf(s.bytes / 1000, 0)}</td>`;
+      stb.appendChild(tr);
+    });
+    st.appendChild(stb);
+    const sw = el("div", "scroll cap");
+    sw.appendChild(st);
+    b5.appendChild(sw);
+    b5.appendChild(el("p", "note",
+      "The payloads this page reads are written by " + P.meta.generated_by
+      + " from the files above. No figure on this page is typed by hand."));
+    host.appendChild(d5);
+  }
+}
+
+/* ---------------------------------------------------------- TSV and the link */
+function tsv() {
+  const om = outcomeMeta(S.out);
+  const cols = [
+    ["subset", c => c.subset], ["family", c => c.family], ["label", c => c.label],
+    ["outcome", c => c.outcome], ["n_units", c => c.n_units],
+    ["install_first", c => c.install_first], ["install_last", c => c.install_last],
+    ["pre_months", c => c.pre], ["post_months", c => c.post],
+    ["records_total", c => c.records_total], ["records_kept", c => c.records_kept],
+    ["records_censored", c => c.records_censored],
+    ["one_install_date", c => c.one_install_date],
+    ["spec1_row", c => c.spec1_row || ""],
+    ["spec1_dot_did_published", c => (spec1For(c) || {}).dot_did],
+    ["spec1_dot_p_published", c => (spec1For(c) || {}).dot_p],
+    ["spec1_dot_n_published", c => (spec1For(c) || {}).dot_n],
+    ["spec1_our_did", c => (spec1For(c) || {}).our_did],
+    ["spec1_our_lo", c => (spec1For(c) || {}).our_lo],
+    ["spec1_our_hi", c => (spec1For(c) || {}).our_hi],
+    ["spec1_our_p", c => (spec1For(c) || {}).our_p],
+    ["spec1_our_n", c => (spec1For(c) || {}).our_n],
+    ["spec1_placebo_did", c => (spec1For(c) || {}).placebo_did],
+    ["spec1_placebo_p", c => (spec1For(c) || {}).placebo_p],
+    ["spec2_dot_diff", c => c.dot_diff], ["spec2_dot_lo", c => c.dot_lo],
+    ["spec2_dot_hi", c => c.dot_hi], ["spec2_dot_p", c => c.dot_p],
+    ["spec2_dot_se", c => c.dot_se], ["spec2_dot_mde", c => c.dot_mde],
+    ["spec2_dot_n", c => c.dot_n], ["spec2_dot_controls", c => c.dot_controls],
+    ["spec2_dot_placebo", c => c.dot_placebo],
+    ["spec2_dot_placebo_p", c => c.dot_placebo_p],
+    ["spec2_state", c => c.spec2_reading.state],
+    ["spec3_irr", c => c.irr], ["spec3_lo", c => c.lo], ["spec3_hi", c => c.hi],
+    ["spec3_p", c => c.p], ["spec3_p_bh", c => c.p_bh], ["spec3_se", c => c.se],
+    ["spec3_mde_pct", c => c.mde_pct],
+    ["spec3_placebo_irr", c => c.placebo_irr],
+    ["spec3_placebo_p", c => c.placebo_p],
+    ["spec3_pool_candidates", c => c.pool_candidates],
+    ["spec3_verdict", c => c.verdict],
+    ["spec3_state", c => c.spec3_reading.state],
+    ["agree_on_sign", c => c.agree_on_sign],
+  ];
+  const head = [
+    "# specification 1 and specification 2 are a difference in " + om.unit
+    + " per intersection per year, where no effect is 0",
+    "# specification 3 is a rate ratio, where no effect is 1",
+    "# specification 1 is the published specification, 2 is the same design "
+    + "components on the extended record, 3 is the falsification tested "
+    + "specification of this study",
+    cols.map(c => c[0]).join("\t"),
+  ];
+  const rows = cellsFor(S.out).map(c => cols.map(([, f]) => {
+    const v = f(c);
+    return v == null ? "" : String(v);
+  }).join("\t"));
+  return head.concat(rows).join("\n");
+}
+
+function copyText(txt, btn) {
+  const done = ok => {
+    const old = btn.textContent;
+    btn.textContent = ok ? "copied" : "copy failed, select the text instead";
+    setTimeout(() => { btn.textContent = old; }, 1800);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(() => done(true), () => fallback());
+  } else fallback();
+  function fallback() {
+    // a page opened from file:// may have no clipboard permission, so the text is
+    // put in a textarea and copied from there
+    const ta = document.createElement("textarea");
+    ta.value = txt;
+    ta.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    done(ok);
+  }
+}
+
+function writeHash() {
+  const parts = [
+    "out=" + encodeURIComponent(S.out || ""),
+    "rule=" + encodeURIComponent(S.rule),
+    "sort=" + encodeURIComponent(S.sort.key + ":" + (S.sort.dir > 0 ? "1" : "-1")),
+    "sel=" + [...S.sel].map(encodeURIComponent).join(","),
+  ];
+  const h = "#" + parts.join("&");
+  try {
+    history.replaceState(null, "", h);
+  } catch (e) {
+    // a document opened from a file:// path is refused a history rewrite by several
+    // browsers, so the hash is set directly and the event it raises is ignored
+    S.hashSelf = true;
+    location.hash = h;
+  }
+}
+function readHash() {
+  const h = location.hash.replace(/^#/, "");
+  if (!h) return;
+  const kv = {};
+  h.split("&").forEach(p => {
+    const i = p.indexOf("=");
+    if (i > 0) kv[p.slice(0, i)] = decodeURIComponent(p.slice(i + 1));
+  });
+  if (kv.out) S.out = kv.out;
+  if (kv.rule) S.rule = kv.rule;
+  if (kv.sort) {
+    const [k, d] = kv.sort.split(":");
+    if (SORTS[k] || k === "evidence") S.sort = { key: k, dir: d === "-1" ? -1 : 1 };
+  }
+  if (kv.sel != null) {
+    S.sel = new Set(kv.sel.split(",").filter(Boolean));
+  }
+}
+
+/* ------------------------------------------------------------------- wiring */
+function renderAll() {
+  renderTable();
+  renderAgreement();
+  renderLive();
+  ruleHint();
+  selHint();
+}
+
+function wire() {
+  $("#search").addEventListener("input", e => {
+    S.q = e.target.value.trim();
+    buildSubsets();
+  });
+  $("#selall").addEventListener("click", () => {
+    if (bad("subsets")) return;
+    P.subsets.subsets.forEach(s => S.sel.add(s.name));
+    writeHash(); buildSubsets(); renderAll();
+  });
+  $("#selnone").addEventListener("click", () => {
+    S.sel.clear(); writeHash(); buildSubsets(); renderAll();
+  });
+  $("#selpub").addEventListener("click", () => {
+    if (bad("subsets")) return;
+    S.sel.clear();
+    P.subsets.subsets.filter(s => s.spec1_row).forEach(s => S.sel.add(s.name));
+    writeHash(); buildSubsets(); renderAll();
+  });
+  $("#selfam").addEventListener("click", () => {
+    if (bad("subsets")) return;
+    S.sel.clear();
+    P.subsets.families.forEach(f => S.sel.add(f.members[0]));
+    writeHash(); buildSubsets(); renderAll();
+  });
+  $("#placeboreq").addEventListener("change", ev => {
+    S.placeboReq = ev.target.checked;
+    renderAll();
+  });
+  $("#tsvbtn").addEventListener("click", e => copyText(tsv(), e.target));
+  $("#linkbtn").addEventListener("click", e => {
+    writeHash();
+    copyText(location.href, e.target);
+  });
+  $("#sortreset").addEventListener("click", () => {
+    S.sort = { key: "evidence", dir: 1 }; writeHash(); renderTable();
+  });
+  $("#openall").addEventListener("click", () => {
+    // one control for printing and for reading the page end to end, because a
+    // browser cannot open a collapsed disclosure from a print stylesheet
+    const ds = document.querySelectorAll("details");
+    const anyClosed = [...ds].some(d => !d.open);
+    ds.forEach(d => { d.open = anyClosed; });
+    $("#openall").textContent = anyClosed ? "Close all sections"
+                                          : "Open all sections";
+  });
+  $("#themebtn").addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme");
+    const dark = cur ? cur === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+    $("#themebtn").textContent = dark ? "Dark" : "Light";
+  });
+  addEventListener("hashchange", () => {
+    if (S.hashSelf) { S.hashSelf = false; return; }
+    readHash();
+    if (!bad("outcomes")) buildOutcomes();
+    if (!bad("subsets")) buildSubsets();
+    $("#rule").value = S.rule;
+    renderAll();
+  });
+}
+
+addEventListener("error", ev => {
+  const m = $("#pageerr");
+  if (m) m.textContent = "This page failed: " + ev.message;
+});
+load().catch(e => {
+  $("#pageerr").textContent = "Could not build this page: " + e.message
+    + ". It needs data/analysis/*.json, written by python src/make_analysis_data.py, "
+    + "and a browser will not read them from a file:// path on some systems, so "
+    + "serve the folder with python -m http.server.";
+});
+</script>
+
+<!-- The shared bundle, generated by src/make_web_assets.py and inlined
+     verbatim: the equation styles, the one popover every control reuses, and
+     window.HELPTEXT with its 16 topics. -->
+<!-- generated by src/make_web_assets.py: do not edit -->
+<style>/* ---------------------------------------------------------------- equations */
+.eqwrap{margin:10px 0;padding:8px 10px;border:1px solid var(--line);
+  border-radius:8px;background:color-mix(in srgb, var(--ink) 3%, transparent)}
+.eqwrap math{font-size:1.12em;display:block;width:max-content;max-width:100%;
+  margin:2px auto 4px;overflow-x:auto;overflow-y:hidden;padding-bottom:2px;
+  scrollbar-width:thin}
+.eqcap{font-size:var(--fs-s);color:var(--ink2);line-height:1.4}
+.eqsrc{margin-top:4px}
+.eqsrc summary{font-size:var(--fs-s);color:var(--ink3);cursor:pointer}
+.eqsrc code{display:block;margin-top:4px;padding:6px 8px;background:var(--grid);
+  border-radius:6px;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12px;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+.mathfall{display:none;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12.5px;color:var(--ink);white-space:pre-wrap}
+.nomathml .eqwrap math{display:none}
+.nomathml .mathfall{display:block}
+
+/* ------------------------------------------------------------------ popover */
+.qhelp{display:inline-flex;align-items:center;justify-content:center;
+  width:15px;height:15px;margin-left:5px;border-radius:50%;
+  border:1px solid var(--axis);background:transparent;color:var(--ink3);
+  font-size:10.5px;line-height:1;font-weight:700;cursor:help;padding:0;
+  vertical-align:middle;flex:none}
+.qhelp:hover,.qhelp:focus-visible{color:var(--ink);border-color:var(--ink3);
+  background:color-mix(in srgb, var(--ink) 8%, transparent);outline:none}
+.qhelp[aria-expanded="true"]{background:var(--blue);border-color:var(--blue);
+  color:#fff}
+#pop{position:fixed;z-index:120;max-width:min(560px, 92vw);display:none;
+  background:var(--panel);color:var(--ink);border:1px solid var(--axis);
+  border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.26);
+  padding:12px 14px;font-size:var(--fs-s);line-height:1.5}
+#pop h4{margin:0 0 6px;font-size:var(--fs-b);font-weight:650}
+#pop p{margin:0 0 7px}
+#pop p:last-child{margin-bottom:0}
+#pop .pin{position:absolute;top:7px;right:9px;font-size:11px;color:var(--ink3)}
+#pop.pinned{border-color:var(--blue)}
+#popscrim{position:fixed;inset:0;z-index:119;display:none;background:transparent}</style>
+<div id="popscrim"></div>
+<div id="pop" role="dialog" aria-live="polite"></div>
+<script>window.HELPTEXT = {"placebo":{"title":"The placebo test","body":"<p>The estimate is recomputed with one change: the installation date of every treated\nsite is moved back in time, far enough that the whole analysis window falls in months\nbefore anything was built. The corners, the comparison locations, the estimator and the\noutcome all stay as they were. Because no treatment exists anywhere in that window, the\nhonest answer is no effect.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_shift\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>s</mi><mo>=</mo><mi>max</mi><mo>(</mo><mrow><mi>pre</mi><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">s \\;=\\; \\max\\!\\left(\\text{pre},\\; \\text{post}+1\\right)</div><div class=\"eqcap\">The placebo displacement, chosen so the placebo window ends before installation.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>s \\;=\\; \\max\\!\\left(\\text{pre},\\; \\text{post}+1\\right)</code></details></div>\n<p>Moving the date back only by the length of the before period is not sufficient. Under\na before period of 24 months and an after period of 24 months, that displacement puts\nthe final month of the placebo window on the installation month itself, which is partly\ntreated. Taking the larger of the before period and one month more than the after period\nends the placebo window at month minus one, so every month of it lies strictly before\ninstallation.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_window\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mo>[</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>]</mo><mo>&#160;</mo><mo>&#160;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>&#8804;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mn>1</mn></mrow></math><div class=\"mathfall\">\\left[\\,t_i - s - \\text{pre},\\;\\; t_i - s + \\text{post}\\,\\right], \\qquad t_i - s + \\text{post} \\;\\le\\; t_i - 1</div><div class=\"eqcap\">The placebo window, every month of it before the installation month.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\left[\\,t_i - s - \\text{pre},\\;\\; t_i - s + \\text{post}\\,\\right], \\qquad t_i - s + \\text{post} \\;\\le\\; t_i - 1</code></details></div>\n<p>A cell is read only when the placebo is consistent with no effect.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_test\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msup><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mi>plac</mi></msup><mo>=</mo><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>(</mo><mrow><msub><mi>t</mi><mi>i</mi></msub><mo>&#8594;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi></mrow><mo>)</mo><mo>,</mo><mo>&#160;</mo><msup><mi>p</mi><mi>plac</mi></msup><mo>&#8805;</mo><mn>0.05</mn></mrow></math><div class=\"mathfall\">\\hat\\theta^{\\text{plac}} \\;=\\; \\hat\\theta\\big(t_i \\to t_i - s\\big), \\qquad \\text{admit the cell only if } p^{\\text{plac}} \\ge 0.05</div><div class=\"eqcap\">The placebo estimate and the condition a cell must satisfy to be read.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta^{\\text{plac}} \\;=\\; \\hat\\theta\\big(t_i \\to t_i - s\\big), \\qquad \\text{admit the cell only if } p^{\\text{plac}} \\ge 0.05</code></details></div>\n<p>Because a decrease can appear in a window that contains no treatment, a decrease in\nthe real window with a failing placebo is reliably present and reliably not caused by the\ninstallation. The p value answers whether a result could have arisen by chance. The\nplacebo answers whether the specification produces that result without a treatment, and\nthose are different questions.</p>"},"why_flagged":{"title":"Why a significant decrease can still be flagged","body":"<p>Suppose a cell returns a decrease at p below 0.01, and the placebo on months\ncontaining no treatment also returns a decrease of similar size. Both cannot be caused by\nthe treatment, because in the placebo window there was no treatment. So the\nspecification produces decreases at these corners whether or not anything is installed,\nand the decrease in the real window cannot be attributed to the installation.</p>\n<p>The city selects sites on a deteriorating crash record, and it selects them on its own\npublished risk criterion: treated corners are 3.6 to 20.2 times more likely to be a\ndesignated Vision Zero priority intersection than an intersection carrying no device. A\ncorner chosen because its count is high tends to fall afterwards whether or not it is\ntreated, which is regression to the mean, and a before and after comparison attributes\nthat fall to whatever was installed.</p>\n<p>A flagged cell is evidence of no effect and it is evidence of an effect in neither\ndirection. It is a cell in which the design cannot separate the treatment from the reason\nthe site was chosen.</p>"},"arith":{"title":"The published estimator","body":"<p>For a site i with installation month t_i, Y_i(a,b) counts the outcome inside 30 m of\ni over the months from t_i plus a up to t_i plus b, and R_i(a,b) expresses that count as\nan annual rate.</p>\n<div class=\"eqwrap\" id=\"eq-rate\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo><mo>=</mo><mfrac><mrow><mn>12</mn><msub><mi>Y</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo></mrow><mrow><mi>b</mi><mo>&#8722;</mo><mi>a</mi></mrow></mfrac></mrow></math><div class=\"mathfall\">R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</div><div class=\"eqcap\">The outcome at one site, as an annual rate over a window of months.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</code></details></div>\n<div class=\"eqwrap\" id=\"eq-delta\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>=</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo><mo>&#8722;</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><mn>0</mn></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</div><div class=\"eqcap\">The change at one site, after minus before.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</code></details></div>\n<p>The estimate is the unweighted mean over treated sites of the change at the site minus\nthe mean change at that site's own comparison locations, tested against zero.</p>\n<div class=\"eqwrap\" id=\"eq-arith\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</div><div class=\"eqcap\">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</code></details></div>\n<div class=\"eqwrap\" id=\"eq-ttest\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>t</mi><mo>=</mo><mfrac><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mrow><msub><mi>s</mi><mi>d</mi></msub><mo>/</mo><msqrt><mi>n</mi></msqrt></mrow></mfrac></mrow></math><div class=\"mathfall\">t \\;=\\; \\frac{\\hat\\theta}{s_d/\\sqrt{n}}</div><div class=\"eqcap\">The test the published estimator uses, a two sided one sample t test on n minus 1 degrees of freedom.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>t \\;=\\; \\frac{\\hat\\theta}{s_d/\\sqrt{n}}</code></details></div>\n<p>Every treated site enters with weight one over n whatever its crash count, so the\nquantity estimated is the change at the mean treated corner. The scale is a difference in\ncounts per intersection per year, in which zero means no effect.</p>"},"fepois":{"title":"The fixed effects Poisson specification","body":"<p>The panel holds every unit k, treated and comparison together, and every calendar\nmonth t. A unit effect absorbs the level at a corner and a calendar month effect absorbs\na citywide shock common to that month.</p>\n<div class=\"eqwrap\" id=\"eq-fepois\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi mathvariant='double-struck'>E</mi><mo>[</mo><msub><mi>Y</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>&#8739;</mo><mi>&#945;</mi><mo>,</mo><mi>&#947;</mi><mo>,</mo><mi>D</mi><mo>]</mo><mo>=</mo><mi>exp</mi><mo>(</mo><mrow><msub><mi>&#945;</mi><mi>k</mi></msub><mo>+</mo><msub><mi>&#947;</mi><mi>t</mi></msub><mo>+</mo><mi>&#946;</mi><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\mathbb{E}\\!\\left[Y_{kt} \\mid \\alpha,\\gamma,D\\right] \\;=\\; \\exp\\!\\left(\\alpha_k + \\gamma_t + \\beta\\, D_{kt}\\right)</div><div class=\"eqcap\">The fixed effects Poisson specification, with a unit effect and a calendar month effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\mathbb{E}\\!\\left[Y_{kt} \\mid \\alpha,\\gamma,D\\right] \\;=\\; \\exp\\!\\left(\\alpha_k + \\gamma_t + \\beta\\, D_{kt}\\right)</code></details></div>\n<div class=\"eqwrap\" id=\"eq-treatind\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>=</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>k</mi><mo>&#160;</mo><mi>treated</mi><mo>}</mo><mo>&#183;</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>t</mi><mo>&gt;</mo><msub><mi>t</mi><mrow><mi>i</mi><mo>(</mo><mi>k</mi><mo>)</mo></mrow></msub><mo>}</mo></mrow></math><div class=\"mathfall\">D_{kt} \\;=\\; \\mathbf{1}\\{k \\text{ treated}\\}\\cdot\\mathbf{1}\\{t &gt; t_{i(k)}\\}</div><div class=\"eqcap\">The treatment indicator, one after installation at a treated unit and zero everywhere else.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>D_{kt} \\;=\\; \\mathbf{1}\\{k \\text{ treated}\\}\\cdot\\mathbf{1}\\{t &gt; t_{i(k)}\\}</code></details></div>\n<p>The month at event time zero is excluded, because an installation month is partly\ntreated. Inference uses the CRV1 cluster robust variance estimator with standard errors\nclustered by match group, in which a match group is a treated unit together with its own\ncomparison locations. The reported quantity is a rate ratio.</p>\n<div class=\"eqwrap\" id=\"eq-irr\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>IRR</mi><mo>=</mo><mi>exp</mi><mo>(</mo><mover><mi>&#946;</mi><mo>&#94;</mo></mover><mo>)</mo></mrow></math><div class=\"mathfall\">\\text{IRR} \\;=\\; \\exp(\\hat\\beta)</div><div class=\"eqcap\">The quantity reported from that specification, a rate ratio in which one means no effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{IRR} \\;=\\; \\exp(\\hat\\beta)</code></details></div>\n<p>Because the specification weights a unit by its expected count, high exposure corners\ndominate the estimate, and the quantity is the proportional change in the total count.\nThe published estimator gives the change at the mean corner instead, so the two answer\ndifferent questions and their magnitudes are not comparable.</p>"},"bh":{"title":"Adjustment for multiple subsets","body":"<p>Each outcome is estimated over m subsets, so a nominal p value does not control the\nfalse positive rate across the family. Benjamini and Hochberg adjustment is applied\nwithin each outcome, over the subsets, after sorting the p values in ascending order.</p>\n<div class=\"eqwrap\" id=\"eq-bh\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><msup><mi>p</mi><mi>BH</mi></msup><mo>(</mo><mi>k</mi><mo>)</mo></msub><mo>=</mo><munder><mi>min</mi><mrow><mi>j</mi><mo>&#8805;</mo><mi>k</mi></mrow></munder><mi>min</mi><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mfrac><mrow><mi>m</mi><msub><mi>p</mi><mo>(</mo><mi>j</mi><mo>)</mo></msub></mrow><mi>j</mi></mfrac></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">p^{\\text{BH}}_{(k)} \\;=\\; \\min_{j \\ge k}\\; \\min\\!\\left(1,\\; \\frac{m\\, p_{(j)}}{j}\\right)</div><div class=\"eqcap\">Benjamini and Hochberg adjustment within one outcome over m subsets.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>p^{\\text{BH}}_{(k)} \\;=\\; \\min_{j \\ge k}\\; \\min\\!\\left(1,\\; \\frac{m\\, p_{(j)}}{j}\\right)</code></details></div>\n<p>A cell is read only when the adjusted p value falls below 0.05, when the placebo is\nconsistent with no effect, and when at least 25 treated units contribute.</p>"},"mde":{"title":"The smallest detectable effect","body":"<p>A null is uninformative without the size of the effect the cell could have found. The\nminimum detectable effect at 80 per cent power follows from the standard error of the log\nrate ratio.</p>\n<div class=\"eqwrap\" id=\"eq-mde\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>MDE</mi><mo>=</mo><mn>100</mn><mo>(</mo><mrow><mn>1</mn><mo>&#8722;</mo><msup><mi>e</mi><mrow><mo>&#8722;</mo><mn>2.802</mn><mover><mi>se</mi><mo>&#94;</mo></mover></mrow></msup></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\text{MDE} \\;=\\; 100\\left(1 - e^{-2.802\\,\\widehat{\\text{se}}}\\right)</div><div class=\"eqcap\">The smallest effect the cell could detect at 80 per cent power, as a percentage.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{MDE} \\;=\\; 100\\left(1 - e^{-2.802\\,\\widehat{\\text{se}}}\\right)</code></details></div>\n<p>A null with a bound of 6 per cent excludes a moderate benefit. A null with a bound of\n60 per cent excludes almost nothing.</p>"},"aggratio":{"title":"The live estimate for a selection","body":"<p>A browser cannot fit a fixed effects Poisson specification, so a selection is\nestimated by the published arithmetic estimator, which is an exact computation from the per site\nsums the page carries.</p>\n<div class=\"eqwrap\" id=\"eq-arith\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</div><div class=\"eqcap\">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</code></details></div>\n<p>A descriptive aggregate rate ratio is shown beside it.</p>\n<div class=\"eqwrap\" id=\"eq-aggratio\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>RR</mi><mi>agg</mi></msub><mo>=</mo><mfrac><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>before</mi></msup><mi>i</mi></msub></mrow><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>before</mi></msup><mi>i</mi></msub></mrow></mfrac></mrow></math><div class=\"mathfall\">\\text{RR}_{\\text{agg}} \\;=\\; \\frac{\\sum_i T^{\\text{after}}_i \\big/ \\sum_i T^{\\text{before}}_i}{\\sum_i C^{\\text{after}}_i \\big/ \\sum_i C^{\\text{before}}_i}</div><div class=\"eqcap\">The descriptive aggregate rate ratio a browser can compute for any selection, carrying no unit effect and no calendar month effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{RR}_{\\text{agg}} \\;=\\; \\frac{\\sum_i T^{\\text{after}}_i \\big/ \\sum_i T^{\\text{before}}_i}{\\sum_i C^{\\text{after}}_i \\big/ \\sum_i C^{\\text{before}}_i}</code></details></div>\n<p>That ratio carries no unit effect, no calendar month effect and no cluster robust\nvariance, so it is not the modelled quantity the manuscript reports and it can disagree\nin sign with it. For hardened daylighting at a junction the aggregate ratio is about 0.72\nand the modelled estimate is about 1.15.</p>\n<p>Comparison intersections were matched once over the union of treated units, because a\nbrowser cannot rematch for an arbitrary selection, so a selection that coincides with a\npublished subset differs slightly from the published estimate for it.</p>"},"drift":{"title":"The pre treatment drift and the admission rule","body":"<p>The crash record at treated sites falls before installation, at 0.464 per cent per\nmonth at physical sites. Compounded over the 24 months of an after period, that drift\nalone produces a factor.</p>\n<div class=\"eqwrap\" id=\"eq-drift\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>trend</mi><mn>24</mn></msub><mo>=</mo><msup><mo>(</mo><mrow><mn>1</mn><mo>+</mo><mi>&#948;</mi></mrow><mo>)</mo><mn>24</mn></msup><mo>,</mo><mo>&#160;</mo><mi>share</mi><mo>=</mo><mfrac><mrow><mi>log</mi><msub><mi>trend</mi><mn>24</mn></msub></mrow><mrow><mi>log</mi><mover><mi>&#952;</mi><mo>&#94;</mo></mover></mrow></mfrac></mrow></math><div class=\"mathfall\">\\text{trend}_{24} = (1+\\delta)^{24}, \\qquad \\text{share} = \\frac{\\log \\text{trend}_{24}}{\\log \\hat\\theta}</div><div class=\"eqcap\">The compounded pre treatment drift, and the share of an estimate it accounts for.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{trend}_{24} = (1+\\delta)^{24}, \\qquad \\text{share} = \\frac{\\log \\text{trend}_{24}}{\\log \\hat\\theta}</code></details></div>\n<p>A cell is refused when the drift accounts for 60 per cent or more of the estimate, and\nwhen the placebo rejects no effect, and it is marked underpowered when the smallest\ndetectable effect exceeds 25 per cent.</p>"},"scales":{"title":"Two scales, never comparable in magnitude","body":"<p>The published specification and its extension to the full record report a difference in\ncounts per intersection per year, in which zero means no effect and a negative value\nmeans fewer crashes. The falsification tested specification reports a rate ratio, in\nwhich one means no effect and a value below one means fewer crashes.</p>\n<p>A value of 0.9 on the ratio scale and a value of minus 0.14 on the difference scale\ncannot be compared, ordered or averaged together. Each column group on this page carries\nits own scale in its header for that reason.</p>"},"cohorts":{"title":"The two published location lists","body":"<p>The city has published two location lists, a document covering January to August 2024\nand a spreadsheet covering 2025. Each is a cohort of locations rather than a treatment\ntype. The 2025 list holds sign only daylighting at 278 locations, e scooter corrals at\n190, street improvement projects at 141, turn calming outside a street improvement project\nat 88, bicycle corrals at 25, bikeshare at 5 and a direction change at 1.</p>\n<p>The 2024 list publishes no treatment type for any of its 271 records, so the class\nshown for a 2024 record is recovered from the inventory at the same corner. Tested against\nthe 2025 list, where the type is published, that recovery reproduces turn calming exactly\nand sign only daylighting on 80.6 per cent of records, and it fails on street improvement\nprojects at 7.1 per cent.</p>\n<p>The two lists are almost disjoint: 13 of the 271 records of the 2024 list lie within 50\nm of a 2025 record.</p>"},"turncalming":{"title":"Turn calming is eleven treatments","body":"<p>The inventory publishes eleven classes of turn calming, which differ in mechanism: a\nplastic curb line, a raised centre line, a lengthened median, a channelising island, a\nrubber bump, vertical posts of two kinds, a surface treatment, paint alone, and two\nclasses that record only the direction of the turn.</p>\n<p>Those last two classes carry the material string generic turn treatment and account for\n907 of 1491 records, which is 61 per cent. For most of the programme the city records that\na turn was treated and does not record what was installed. Any turn calming result is an\nestimate for that mixture.</p>"},"censoring":{"title":"Right censoring of recent work","body":"<p>An after period of a stated length can only be filled where that many months of crash\nrecord exist after an installation. The crash record ends 2026-05, so an installation in\n2025 cannot support 24 months of follow up.</p>\n<p>Each subset therefore receives the longest after period its own records can fill, and\nthat value is reported in every row. The 2025 published list supports 12 months and\nretains 173 of its 728 records. The 2024 list supports 24 months and retains all 271,\nwhile carrying a single imputed installation month for every one of them, so that design\ncannot separate the treatment from a citywide shock in that month except through the\ncomparison group.</p>"},"precleared":{"title":"Curb that was already clear","body":"<p>New York State law prohibits parking within 15 feet of a fire hydrant, and a bus stop\nis a no standing zone as long as a bus, so a corner carrying either was already daylighted\nin part before the programme reached it. At the working radius of 12 m, 20.5 per cent of\ndaylighted corners at a junction were already clear, against 16.6 per cent of\nintersections carrying no device.</p>\n<p>The observation belongs to the agency rather than to this study. Its January 2025 report\ncontains a hydrant zone analysis, defines a hydrant zone as hydrants and bus stops, and\nreports a 30 per cent higher normalised injury rate at 7558 such intersections. That\nanalysis compares intersections that have a hydrant zone against those that do not, so it\ncannot separate cleared curb from whatever caused a hydrant to be sited there. The test in\nthis study compares treated corners against other treated corners.</p>"},"provenance":{"title":"Provenance of the published analyses","body":"<p>No published analysis of daylighting carries a comparison group, a significance test\nand published locations at the same time. The January 2025 report has a comparison group\nand a significance test and publishes no locations. The Safety Treatment Evaluation it\nrelies on has neither a comparison group nor a significance test. The four case study\ncities in the report have published nothing.</p>\n<p>The analysis reproduced here is an agency report with no journal article and no\npreprint. Its comparison rule is given in one sentence, and resolving it into something\nimplementable required settling eight separate ambiguities. No attribution radius is\nstated, no confidence interval accompanies any estimate, and neither code nor data is\nreleased.</p>\n<p>The 756 analysed locations are not published, so the cohort reproduced here is rebuilt\nfrom other inventories: 98 hardened units against their 189, holding different objects.\nTheirs is 134 Citi Bike stations, 3 bicycle corrals, 33 turn calming projects, 14\nneckdowns and 5 enhanced crossings. Ours is 84 e scooter corrals, 15 rubber speed bumps\nand 4 bicycle islands. The reproduction shows that the published values are what the\npublished specification produces, and it does not show that the published locations were\nanalysed again.</p>"},"selection":{"title":"How sites are chosen","body":"<p>The city designates 304 Vision Zero priority intersections, being the intersections\nthat cumulatively account for 15 per cent of a borough's pedestrian killed or seriously\ninjured total. Treated corners are far more likely to be one than an intersection carrying\nno device: signage only at 3.6 times the rate of the comparison pool, hardened at 5.8\ntimes, and turn calming at 20.2 times.</p>\n<p>Co treatment is larger still. 65.5 per cent of hardened daylighting corners lie within\n40 m of a street improvement project corridor, against 20.7 per cent of the comparison\npool, and 76.8 per cent of turn calming corners lie on a retimed corridor against 19.7 per\ncent.</p>\n<p>A comparison group balanced on crash history and geometry is unbalanced on both of\nthese.</p>"},"designs":{"title":"The two designs, and which analysis uses which","body":"<p>Two designs appear throughout these pages, and each one is a pair of a comparison\ngroup and an estimator.</p>\n<p><b>The corridor DiD design</b> is the city's: the comparison group is up to three\nintersections carrying no daylighting along each street of the treated intersection\nwithin one mile, and the estimator is the unweighted mean of per unit changes in an\nannual rate, tested with a one sample t test. Specification 1, the published analysis,\nand specification 2, the same analysis on the extended record, both use it. Its\nestimate is a difference, so zero means no effect.</p>\n<p><b>The matched Poisson design</b> is this study's: the comparison group is three\nintersections per treated unit chosen by Mahalanobis matching on borough, geometry and\ntwo blocks of pre treatment crash history with the final pre year withheld, and the\nestimator is fixed effects Poisson with unit and calendar month effects, clustered on\nthe match group. Specification 3 uses it. Its estimate is a rate ratio, so one means no\neffect.</p>\n<p>Neither is the better instrument in general. Calibration on this crash record shows\neach attains roughly the nominal false positive rate in one regime of site selection\nand rejects far too often in the other, and each design's bias runs in the direction of\nthe estimate it reports: the corridor group produces false reductions on 34 to 88 per\ncent of null draws under selection on a transient increase, and the matched group\nproduces false increases on 78 per cent of null draws under selection on a persistent\nlevel. Across 40 subsets and 6 outcomes the two agree on direction in 118 of 233\nestimable cells, which is chance; the corridor DiD design returns 76 significant\nreductions, the matched Poisson design returns 0 significant reductions, and no cell is\ncalled a significant reduction by both.</p>"}};</script>
+<script>/* ---------------------------------------------------- help popovers and math
+   One popover element is reused by every control. Hovering opens it, clicking pins
+   it so a reader can select the text inside, Escape and a click outside close it.
+   The content comes from HELPTEXT, which is inlined above, so the page needs no
+   network to explain itself. */
+(function () {
+  "use strict";
+  var pop = document.getElementById("pop");
+  var scrim = document.getElementById("popscrim");
+  if (!pop) return;
+  var pinned = false, current = null, hideTimer = null;
+
+  function place(anchor) {
+    var r = anchor.getBoundingClientRect();
+    pop.style.display = "block";
+    pop.style.visibility = "hidden";
+    var w = pop.offsetWidth, h = pop.offsetHeight;
+    var left = Math.min(Math.max(8, r.left - 8), innerWidth - w - 8);
+    var top = r.bottom + 8;
+    if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 8);
+    pop.style.left = left + "px";
+    pop.style.top = top + "px";
+    pop.style.visibility = "visible";
+  }
+
+  function open(anchor, pin) {
+    var key = anchor.getAttribute("data-help");
+    var t = (window.HELPTEXT || {})[key];
+    if (!t) {
+      pop.innerHTML = "<h4>No description available</h4><p>This control names "
+        + "the topic " + key + ", for which no text has been written.</p>";
+    } else {
+      pop.innerHTML = "<h4>" + t.title + "</h4>" + t.body
+        + (pin ? "<span class='pin'>click away or press Escape to close</span>" : "");
+    }
+    if (current && current !== anchor) current.setAttribute("aria-expanded", "false");
+    current = anchor;
+    anchor.setAttribute("aria-expanded", "true");
+    pinned = !!pin;
+    pop.classList.toggle("pinned", pinned);
+    scrim.style.display = pinned ? "block" : "none";
+    place(anchor);
+  }
+
+  function close() {
+    if (current) current.setAttribute("aria-expanded", "false");
+    pop.style.display = "none";
+    scrim.style.display = "none";
+    pinned = false; current = null;
+  }
+
+  document.addEventListener("pointerover", function (ev) {
+    var a = ev.target.closest ? ev.target.closest(".qhelp") : null;
+    if (!a || pinned) return;
+    clearTimeout(hideTimer);
+    open(a, false);
+  });
+  document.addEventListener("pointerout", function (ev) {
+    var a = ev.target.closest ? ev.target.closest(".qhelp") : null;
+    if (!a || pinned) return;
+    hideTimer = setTimeout(function () { if (!pinned) close(); }, 220);
+  });
+  pop.addEventListener("pointerenter", function () { clearTimeout(hideTimer); });
+  pop.addEventListener("pointerleave", function () {
+    if (!pinned) hideTimer = setTimeout(close, 160);
+  });
+  document.addEventListener("click", function (ev) {
+    var a = ev.target.closest ? ev.target.closest(".qhelp") : null;
+    if (a) { ev.preventDefault(); open(a, true); return; }
+    if (pinned && !pop.contains(ev.target)) close();
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") close();
+    if ((ev.key === "Enter" || ev.key === " ")
+        && document.activeElement
+        && document.activeElement.classList
+        && document.activeElement.classList.contains("qhelp")) {
+      ev.preventDefault();
+      open(document.activeElement, true);
+    }
+  });
+
+  /* A browser without MathML shows the LaTeX source instead of empty space. */
+  try {
+    var probe = document.createElement("div");
+    probe.innerHTML = "<math><mfrac><mn>1</mn><mn>2</mn></mfrac></math>";
+    document.body.appendChild(probe);
+    var ok = probe.firstChild && probe.firstChild.getBoundingClientRect().height > 12;
+    document.body.removeChild(probe);
+    if (!ok) document.documentElement.classList.add("nomathml");
+  } catch (e) { document.documentElement.classList.add("nomathml"); }
+})();</script>
+<!-- Three topics belong to this page alone. They are merged into the shared object
+     after the bundle has defined it. -->
+<script>
+Object.assign(window.HELPTEXT, { lab: { title:
+  "The custom analysis",
+  body: "<p>The pipeline right censors: an installation must carry the whole " +
+  "after period inside the crash record, which ends 2026-05, so a 24 month " +
+  "after period excludes everything installed after 2024-05 and most of the " +
+  "2025 cohort drops out of the standard tables. This panel runs the corridor " +
+  "DiD estimator on a window you choose, so a shorter after period can admit " +
+  "the recent cohort and the cost in precision is visible.</p>" +
+  "<p>What runs in the browser is the published estimator: per unit, the " +
+  "change in the annual rate at the corner minus the mean change at its " +
+  "comparison locations, averaged and tested with a one sample t test, plus " +
+  "the placebo with the installation displaced max(pre, post+1) months back. " +
+  "Fixed effects Poisson with clustered variance is not recomputed here.</p>" +
+  "<p>Comparison locations were assigned once over the union of treated " +
+  "units, so a selection that coincides with a pipeline subset differs at the " +
+  "margin from the table above.</p>" } });
+Object.assign(window.HELPTEXT, { placebo_switch: { title:
+  "The placebo requirement switch",
+  body: "<p>On, which is the default, a cell whose placebo rejects no effect is " +
+  "excluded from reading, whatever its p value. Off, the placebo becomes a " +
+  "warning tag and the reading keeps multiplicity control and the 25 unit floor " +
+  "only.</p><p>The switch exists because a test that excludes 117 of 235 cells " +
+  "deserves suspicion. What it shows is one sided: with the requirement off, 14 " +
+  "cells are significant after adjustment under the matched Poisson design, 13 " +
+  "of those 14 have a placebo that rejects no effect, and the significant cells " +
+  "are increases rather than reductions, including 1.439 for the posts and " +
+  "granite blocks programme on pedestrian crashes. Neither switch position " +
+  "yields a defensible reduction: on, nothing survives; off, what survives is " +
+  "an increase from a design that produces false increases on 78 per cent of " +
+  "null draws under selection on a persistently high level.</p>" } });
+Object.assign(window.HELPTEXT, {
+  flagread: {
+    title: "How to read a flag",
+    body:
+      "<p>Under the published specification on the extended record many cells return a "
+      + "decrease with a p value below 0.01 and are refused all the same. The refusal "
+      + "concerns what the number measures rather than the arithmetic that produced "
+      + "it.</p>"
+      + "<p>A placebo consistent with no effect means the specification reports nothing "
+      + "when there is nothing to report. A placebo that returns an effect means the "
+      + "specification reports something when there is nothing to report.</p>"
+      + "<p>A placebo window sits entirely inside the period before installation, so on "
+      + "its own it measures the fall at a corner that was chosen on a high count.</p>"
+      + "<p>Cells whose placebo is consistent with no effect are ordered above refused "
+      + "cells in the table, so no direction is read from an excluded cell.</p>"
+  },
+  reproduction: {
+    title: "What the reproduction establishes",
+    body:
+      "<p>The agency performed the analysis and published the values, and this study "
+      + "reproduces them, so their arithmetic is not disputed anywhere in this "
+      + "project.</p>"
+      + "<p>The 756 analysed locations are not published, because location level "
+      + "publication begins with calendar 2025 under the same law that required the "
+      + "report. The reproduction therefore establishes that the published values are "
+      + "what the published specification produces on the city's crash record, and it "
+      + "does not establish that the published locations were analysed again.</p>"
+  },
+  stequote: {
+    title: "The supporting evaluation",
+    body:
+      "<p>The Safety Treatment Evaluation 2005 to 2018 is the source of the treatment "
+      + "effects the January 2025 report leans on, including its 266 curb and sidewalk "
+      + "extensions. It compares an average of three years before installation against "
+      + "two to three years after, with no comparison group, no confidence interval and "
+      + "no significance test anywhere in the document, and it reports a citywide "
+      + "background trend in a separate section rather than differencing against it.</p>"
+      + "<p>That evaluation reports turn calming as a 17.5 per cent reduction in "
+      + "pedestrian injuries, which the daylighting report quotes, alongside a 13.6 per "
+      + "cent increase in motor vehicle occupant injuries and a 50.7 per cent increase "
+      + "in motor vehicle occupants killed or severely injured, from the same table, "
+      + "which it does not quote. The evaluation attaches a caution to the latter on "
+      + "grounds of a small count, and that caution is fair; the asymmetry in what was "
+      + "carried forward is the point.</p>"
+      + "<p>No location list for the 266 curb and sidewalk extensions is published "
+      + "anywhere.</p>"
+  }
+});
+
+/* ------------------------------------------------------------------ the lab
+   The corridor DiD estimator on reader chosen windows, from sparse monthly
+   series. The payload is loaded once, on demand. */
+(function () {
+  var M = null, loading = false;
+
+  function tcdf(t, df) {
+    // two sided p for a t statistic: incomplete beta, continued fraction
+    var x = df / (df + t * t);
+    function betacf(a, b, x) {
+      var qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap;
+      if (Math.abs(d) < 1e-30) d = 1e-30;
+      d = 1 / d;
+      var h = d;
+      for (var m = 1; m <= 200; m++) {
+        var m2 = 2 * m;
+        var aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+        d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30;
+        c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30;
+        d = 1 / d; h *= d * c;
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+        d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30;
+        c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30;
+        d = 1 / d;
+        var del = d * c;
+        h *= del;
+        if (Math.abs(del - 1) < 3e-9) break;
+      }
+      return h;
+    }
+    function lgamma(z) {
+      var g = [676.5203681218851, -1259.1392167224028, 771.32342877765313,
+               -176.61502916214059, 12.507343278686905, -0.13857109526572012,
+               9.9843695780195716e-6, 1.5056327351493116e-7];
+      if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lgamma(1 - z);
+      z -= 1;
+      var a = 0.99999999999980993, t = z + 7.5;
+      for (var i = 0; i < 8; i++) a += g[i] / (z + i + 1);
+      return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(a);
+    }
+    function ibeta(a, b, x) {
+      if (x <= 0) return 0;
+      if (x >= 1) return 1;
+      var bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b)
+                        + a * Math.log(x) + b * Math.log(1 - x));
+      if (x < (a + 1) / (a + b + 2)) return bt * betacf(a, b, x) / a;
+      return 1 - bt * betacf(b, a, 1 - x) / b;
+    }
+    return ibeta(df / 2, 0.5, x);   // this IS the two sided p for a t statistic
+  }
+
+  function winSum(sparse, from, to) {
+    // sum of counts with from <= month index < to, over [i1,v1,i2,v2,...]
+    var s = 0;
+    for (var i = 0; i < sparse.length; i += 2) {
+      var m = sparse[i];
+      if (m >= from && m < to) s += sparse[i + 1];
+    }
+    return s;
+  }
+
+  function estimate(units, out, rule, pre, post, a, b, shift) {
+    var lo = M.month_zero;
+    var recEnd = LAB_REC_END - lo;             // record end as an index
+    var recStart = 0;
+    var deltas = [], censored = 0, noctrl = 0;
+    for (var i = 0; i < units.length; i++) {
+      var u = units[i];
+      var t0 = u.t0 - lo - shift;
+      if (u.t0 - lo < a || u.t0 - lo > b) continue;      // outside install window
+      if (t0 - pre < recStart || t0 + post > recEnd) { censored++; continue; }
+      var d = u.d[out];
+      if (!d) continue;
+      var cg = d[rule];
+      if (!cg || !cg.n) { noctrl++; continue; }
+      var tp = winSum(d.t, t0 - pre, t0), ta = winSum(d.t, t0 + 1, t0 + post + 1);
+      var cp = winSum(cg.s, t0 - pre, t0) / cg.n,
+          ca = winSum(cg.s, t0 + 1, t0 + post + 1) / cg.n;
+      deltas.push(12 * (ta / post - tp / pre) - 12 * (ca / post - cp / pre));
+    }
+    var n = deltas.length;
+    if (n < 3) return { n: n, censored: censored, noctrl: noctrl };
+    var mean = deltas.reduce(function (x, y) { return x + y; }, 0) / n;
+    var sd = Math.sqrt(deltas.reduce(function (x, y) {
+      return x + (y - mean) * (y - mean);
+    }, 0) / (n - 1));
+    var se = sd / Math.sqrt(n);
+    var t = se > 0 ? mean / se : 0;
+    return { n: n, censored: censored, noctrl: noctrl, est: mean, se: se,
+             p: se > 0 ? tcdf(t, n - 1) : 1,
+             lo95: mean - 1.96 * se, hi95: mean + 1.96 * se };
+  }
+
+  function selectedUnits() {
+    // the units belonging to any subset ticked in the left column. Membership
+    // ships in the payload as index lists against subset_order.
+    var names = S.sel;
+    var order = M.subset_order || [];
+    var out = [];
+    M.units.forEach(function (u) {
+      var subs = u.s || [];
+      for (var i = 0; i < subs.length; i++) {
+        if (names.has(order[subs[i]])) { out.push(u); return; }
+      }
+    });
+    return out;
+  }
+
+  function fmt(x, d) { return x == null ? "n.a." : x.toFixed(d == null ? 3 : d); }
+
+  function run() {
+    var body = document.getElementById("lab-body");
+    var out = document.getElementById("lab-out").value;
+    var rule = document.getElementById("lab-rule").value;
+    var pre = +document.getElementById("lab-pre").value;
+    var post = +document.getElementById("lab-post").value;
+    var av = document.getElementById("lab-a").value;
+    var bv = document.getElementById("lab-b").value;
+    if (!av || !bv) { body.innerHTML = "<p class='rule'>choose both months</p>"; return; }
+    var lo = M.month_zero;
+    var a = ymIndex(av) - lo, b = ymIndex(bv) - lo;
+    var units = selectedUnits();
+    var shift = Math.max(pre, post + 1);
+    var main = estimate(units, out, rule, pre, post, a, b, 0);
+    var plac = estimate(units, out, rule, pre, post, a, b, shift);
+    var nm = rule === "c" ? "corridor DiD comparison group"
+                          : "matched comparison group";
+    var h = "";
+    h += "<table><thead><tr><th></th><th>estimate</th><th>95% interval</th>"
+       + "<th>two sided p</th><th>units</th></tr></thead><tbody>";
+    if (main.est == null) {
+      h += "<tr><td>estimate</td><td colspan='4'>" + main.n
+         + " units admitted; too few to estimate. " + main.censored
+         + " set aside because the window does not exist in the record.</td></tr>";
+    } else {
+      h += "<tr><td>estimate</td><td>" + fmt(main.est) + "</td><td>["
+         + fmt(main.lo95) + ", " + fmt(main.hi95) + "]</td><td>" + fmt(main.p, 4)
+         + "</td><td>" + main.n + "</td></tr>";
+      h += "<tr><td>placebo, installation displaced " + shift + " months back"
+         + "</td><td>" + fmt(plac.est) + "</td><td>"
+         + (plac.est == null ? "n.a." : "[" + fmt(plac.lo95) + ", " + fmt(plac.hi95) + "]")
+         + "</td><td>" + (plac.est == null ? "n.a." : fmt(plac.p, 4))
+         + "</td><td>" + plac.n + "</td></tr>";
+    }
+    h += "</tbody></table>";
+    h += "<p class='rule'>Scale: a difference in counts per intersection per year; "
+       + "zero means no effect. Estimator: the unweighted mean over units of the "
+       + "change at the corner minus the mean change at its " + nm
+       + ", tested with a one sample t test on n&minus;1 degrees of freedom. "
+       + main.censored + " units set aside because the chosen window does not "
+       + "exist in their record" + (main.noctrl ? ", " + main.noctrl
+       + " because they carry no comparison location under this rule" : "")
+       + ". Fixed effects Poisson is not recomputed here; the authoritative per "
+       + "subset estimates are in the table above.</p>";
+    if (plac.est != null && plac.p < 0.05) {
+      h += "<p class='rule'><b>The placebo rejects no effect</b> (p "
+         + fmt(plac.p, 4) + "): on months before any installation, the same "
+         + "computation reports a change, so a result on this window describes "
+         + "the comparison group as much as the treatment.</p>";
+    }
+    body.innerHTML = h;
+  }
+
+  function ensureLoaded(cb) {
+    if (M) { cb(); return; }
+    if (loading) return;
+    loading = true;
+    var body = document.getElementById("lab-body");
+    body.innerHTML = "<p class='rule'>loading monthly counts&hellip;</p>";
+    fetch("data/analysis/units_monthly.json").then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(function (j) {
+      M = j; loading = false;
+      var os = document.getElementById("lab-out");
+      os.innerHTML = "";
+      j.outcomes.forEach(function (o) {
+        var e = document.createElement("option");
+        e.value = o; e.textContent = OUTLABELS[o] || o;
+        os.appendChild(e);
+      });
+      cb();
+    }).catch(function (e) {
+      loading = false;
+      body.innerHTML = "<p class='rule'>data/analysis/units_monthly.json could "
+        + "not be read (" + e.message + "). Serve the folder over HTTP, for "
+        + "example: python -m http.server</p>";
+    });
+  }
+
+  document.getElementById("lab-run").addEventListener("click", function () {
+    ensureLoaded(run);
+  });
+})();
+</script>
+</body>
+</html>

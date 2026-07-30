@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daylighting and turn calming: slides</title>
+<style>
+  /* ------------------------------------------------------------------ theme
+     The palette and both theme blocks are the ones defined in explorer.html and
+     analysis.html and are reused verbatim, so the three pages match. Only the
+     type scale is larger, because a slide is read from further away. Four sizes
+     are defined and nothing in the deck uses any other size. */
+  :root {
+    --bg:#fbfbf9; --panel:#fff; --ink:#0b0b0b; --ink2:#52514e; --ink3:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --line:#d8d7cf; --blue:#2a78d6;
+    --orange:#eb6834; --green:#1baf7a;
+    --okink:#0f7d55; --badink:#b4451a;
+    --fam:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --fs-t:12px; --fs-s:14px; --fs-b:17px; --fs-h:31px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14140f; --panel:#1c1c17; --ink:#f4f3ee; --ink2:#b9b7ad;
+            --ink3:#8b8980; --grid:#2e2e26; --axis:#45443a; --line:#2b2b23;
+            --okink:#3fd39c; --badink:#ff8c5c; }
+  }
+  :root[data-theme="light"]{--bg:#fbfbf9;--panel:#fff;--ink:#0b0b0b;--ink2:#52514e;
+    --ink3:#898781;--grid:#e1e0d9;--axis:#c3c2b7;--line:#d8d7cf;
+    --okink:#0f7d55;--badink:#b4451a;}
+  :root[data-theme="dark"]{--bg:#14140f;--panel:#1c1c17;--ink:#f4f3ee;
+    --ink2:#b9b7ad;--ink3:#8b8980;--grid:#2e2e26;--axis:#45443a;--line:#2b2b23;
+    --okink:#3fd39c;--badink:#ff8c5c;}
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:var(--fs-b)/1.6 var(--fam);
+    -webkit-text-size-adjust:100%}
+  a{color:var(--blue)}
+
+  /* ------------------------------------------------------------------ slides */
+  .deck{display:block}
+  section.slide{display:none;flex-direction:column;gap:2px;
+    max-width:1240px;margin:0 auto;padding:30px 40px 96px;
+    min-height:100vh}
+  section.slide.on{display:flex}
+  .kicker{font-size:var(--fs-t);text-transform:uppercase;letter-spacing:.11em;
+    color:var(--ink3);font-weight:650;margin:0 0 5px}
+  h1{font-size:calc(var(--fs-h) * 1.6);line-height:1.1;font-weight:650;
+    letter-spacing:-.02em;margin:6px 0 18px;max-width:26ch}
+  h2{font-size:var(--fs-h);line-height:1.18;font-weight:650;letter-spacing:-.012em;
+    margin:0 0 14px;max-width:40ch}
+  h3{font-size:var(--fs-s);text-transform:uppercase;letter-spacing:.06em;
+    color:var(--ink3);font-weight:650;margin:0 0 5px}
+  p{margin:0 0 9px;max-width:98ch}
+  p.body{color:var(--ink2)}
+  p.note{font-size:var(--fs-s);color:var(--ink3);max-width:110ch}
+  p.lead{font-size:calc(var(--fs-b) * 1.12);color:var(--ink);max-width:80ch;
+    margin-bottom:12px}
+  b.lab{font-weight:650;color:var(--ink)}
+  .num{font-variant-numeric:tabular-nums}
+  .hero{font-size:calc(var(--fs-h) * 1.5);font-weight:650;line-height:1;
+    letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+  ol.steps,ul.plain{margin:2px 0 10px;padding-left:26px;color:var(--ink2);
+    max-width:98ch}
+  ol.steps>li,ul.plain>li{margin:0 0 7px;line-height:1.55}
+  ol.steps>li::marker{color:var(--ink3);font-weight:650}
+  ul.plain{list-style:square}
+  ul.plain>li::marker{color:var(--axis)}
+  ol.refs{margin:2px 0 10px;padding-left:26px;color:var(--ink2);max-width:120ch;
+    font-size:var(--fs-s)}
+  ol.refs>li{margin:0 0 8px;line-height:1.5}
+
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:14px;margin:4px 0 10px;align-items:start}
+  .cols.two{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}
+  .pts{list-style:decimal;margin:6px 0 0;padding-left:26px;
+    display:flex;flex-direction:column;gap:7px}
+  .pts>li{font-size:var(--fs-s);color:var(--ink2);line-height:1.5;
+    max-width:78ch;padding-left:2px}
+  .pts>li::marker{color:var(--ink3);font-variant-numeric:tabular-nums}
+  .pts b.lab{color:var(--ink);font-weight:650}
+  .pts ul.plain{margin:4px 0 0;padding-left:18px}
+  .pts code{font-size:.94em}
+  .refs{list-style:decimal;margin:6px 0 0;padding-left:26px;
+    display:flex;flex-direction:column;gap:6px}
+  .refs>li{font-size:var(--fs-xs);color:var(--ink2);line-height:1.45;
+    max-width:82ch}
+  .refs b.lab{color:var(--ink);font-weight:650}
+  .card{border:1px solid var(--line);border-radius:10px;padding:11px 14px;
+    background:var(--panel)}
+  .card p{font-size:var(--fs-s);color:var(--ink2);margin:0 0 6px;max-width:none}
+  .card p:last-child{margin-bottom:0}
+  .card ul.plain{font-size:var(--fs-s);margin:4px 0 0;padding-left:20px}
+
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:10px;margin:6px 0 12px}
+  .tile{border:1px solid var(--line);border-radius:10px;padding:9px 12px;
+    background:var(--panel)}
+  .tile .v{font-size:calc(var(--fs-h) * .95);font-weight:650;line-height:1.15;
+    font-variant-numeric:tabular-nums;letter-spacing:-.015em}
+  .tile .k{font-size:var(--fs-s);color:var(--ink3);line-height:1.35;margin-top:2px}
+  .tile.bad .v{color:var(--badink)}
+  .tile.ok .v{color:var(--okink)}
+
+  .scroll{overflow-x:auto;max-width:100%;margin:4px 0 10px}
+  table{border-collapse:collapse;font-size:var(--fs-s);min-width:100%}
+  th,td{text-align:left;padding:5px 11px 5px 0;border-bottom:1px solid var(--line);
+    vertical-align:baseline;white-space:nowrap}
+  th{color:var(--ink3);font-weight:650;font-size:var(--fs-t);text-transform:uppercase;
+    letter-spacing:.05em;border-bottom:1px solid var(--axis)}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  td.w{white-space:normal;min-width:22ch}
+  tr.tot td{font-weight:650;color:var(--ink);border-bottom:1px solid var(--axis)}
+  td .sub{color:var(--ink3)}
+
+  .tag{display:inline-block;padding:0 7px;border-radius:20px;font-size:var(--fs-t);
+    border:1px solid var(--axis);color:var(--ink2);white-space:nowrap;line-height:1.7}
+  .tag.bad{border-color:var(--orange);color:var(--badink)}
+  .tag.ok{border-color:var(--green);color:var(--okink)}
+  .warnbox{background:color-mix(in srgb, var(--orange) 12%, transparent);
+    border:1px solid var(--orange);border-radius:9px;padding:9px 12px;
+    font-size:var(--fs-s);color:var(--ink);margin:4px 0 10px;max-width:110ch}
+  .infobox{background:color-mix(in srgb, var(--blue) 9%, transparent);
+    border:1px solid color-mix(in srgb, var(--blue) 45%, var(--line));
+    border-radius:9px;padding:9px 12px;font-size:var(--fs-s);margin:4px 0 10px;
+    max-width:110ch}
+  .warnbox p,.infobox p{margin:0 0 6px;max-width:none}
+  .warnbox p:last-child,.infobox p:last-child{margin-bottom:0}
+
+  .author{font-size:var(--fs-b);color:var(--ink);margin:0 0 3px}
+  .author span{color:var(--ink3)}
+  .navnote{font-size:var(--fs-s);color:var(--ink3);max-width:86ch;
+    border-top:1px solid var(--line);padding-top:11px;margin-top:24px}
+  .navnote a{color:var(--blue)}
+  .spacer{flex:1;min-height:8px}
+
+  /* ---------------------------------------------------------------- controls */
+  .bar{position:fixed;left:0;right:0;bottom:0;z-index:80;
+    display:flex;gap:9px;align-items:center;
+    padding:8px 16px;background:var(--panel);border-top:1px solid var(--line)}
+  .bar .grow{flex:1}
+  button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--axis);
+    border-radius:7px;padding:4px 11px;font-size:var(--fs-s);cursor:pointer;
+    font-family:var(--fam)}
+  button.ghost:hover{color:var(--ink);border-color:var(--ink3)}
+  button.ghost:disabled{opacity:.4;cursor:default}
+  button.ghost:focus-visible,a:focus-visible,summary:focus-visible{
+    outline:2px solid var(--blue);outline-offset:2px}
+  .count{font-size:var(--fs-s);color:var(--ink3);font-variant-numeric:tabular-nums;
+    min-width:8ch;text-align:center}
+  .rail{position:fixed;left:0;right:0;top:0;height:2px;z-index:81;
+    background:transparent;pointer-events:none}
+  .rail>span{display:block;height:2px;background:var(--blue);width:0;
+    transition:width .18s ease}
+
+  /* Fit rhythm, set from a headless measurement at 1366 by 768 where 17 of 30
+     slides overflowed. The control bar is 46px tall, so the foot padding reserves
+     58px rather than 96px. Type sizes are untouched. */
+  section.slide{gap:1px;padding:18px 40px 58px}
+  .kicker{margin:0 0 2px}
+  section.slide h2{margin:0 0 7px}
+  section.slide h3{margin:8px 0 3px}
+  .pts{gap:5px;margin-top:3px}
+  .pts>li{line-height:1.42}
+  p.body,.body{margin:4px 0}
+  .note{margin-top:5px}
+  section.slide table{margin:5px 0}
+  .eqwrap{margin:4px 0 2px}
+  .refs{gap:4px}
+  .refs>li{line-height:1.4}
+
+  section.slide table th,section.slide table td{padding:4px 10px}
+  section.slide table{font-size:var(--fs-s)}
+
+  .steps{gap:5px !important;margin-top:4px}
+  .steps>li{line-height:1.42;font-size:var(--fs-s)}
+
+  /* second rhythm notch, from the pass 3 measurement: ten slides overflow by
+     5 to 58px. Line heights come down one step and the heading size follows the
+     laptop scale; wording is untouched. */
+  section.slide h2{font-size:27px}
+  p.body,.body{line-height:1.45}
+  .pts>li,.steps>li{line-height:1.36}
+  .refs{gap:3px}
+  .refs>li{line-height:1.34}
+  section.slide table th,section.slide table td{padding:3px 9px}
+
+  /* slides measured 3 to 31px over at 1366 by 768; the snug variant closes
+     that from spacing alone */
+  section.slide.snug{padding-top:12px;gap:0}
+  section.slide.snug h2{margin-bottom:4px;font-size:25px}
+  section.slide.snug .pts>li,section.slide.snug .steps>li{line-height:1.3}
+  section.slide.snug p.body,section.slide.snug .body{line-height:1.38;margin:3px 0}
+  section.slide.snug table th,section.slide.snug table td{padding:2px 8px}
+  section.slide.snug .note{margin-top:3px}
+  section.slide.snug .refs>li{line-height:1.3}
+
+  @media (max-width:720px){
+    section.slide{padding:22px 18px 92px}
+    :root{--fs-h:24px;--fs-b:16px}
+    h1{font-size:calc(var(--fs-h) * 1.35)}
+  }
+
+  /* ------------------------------------------------------------------- print
+     One slide per page. The light palette is forced, because a dark page wastes
+     toner and because the printed deck is read on paper. */
+  @media print {
+    :root{--bg:#fff;--panel:#fff;--ink:#000;--ink2:#333;--ink3:#666;
+      --grid:#e4e4de;--axis:#a9a8a0;--line:#cfcec7;--okink:#0f7d55;--badink:#b4451a}
+    @page{size:landscape;margin:12mm}
+    body{background:#fff}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .bar,.rail,#pop,#popscrim{display:none !important}
+    section.slide{display:flex !important;min-height:0;height:auto;
+      padding:0 0 6mm;max-width:none;break-after:page;page-break-after:always}
+    section.slide:last-of-type{break-after:auto;page-break-after:auto}
+    h1{font-size:32pt}
+    h2{font-size:18pt}
+    body{font-size:9.6pt}
+    p.lead{font-size:10.4pt}
+    ol.refs{font-size:8.6pt}
+    .scroll{overflow:visible}
+    .eqwrap,.card,.tile,table,ol.steps>li,ol.refs>li{break-inside:avoid}
+    details.eqsrc{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+<!-- =============================================================== 1. title -->
+<section class="slide">
+  <div class="spacer"></div>
+  <p class="kicker">New York City street safety evaluation</p>
+  <h1>Daylighting and turn calming</h1>
+  <p class="author">Mehmet Kerem Turkcan</p>
+  <p class="author"><span>Columbia University, New York</span></p>
+  <p class="author"><span>mkt2126@columbia.edu</span></p>
+  <div class="spacer"></div>
+  <p class="navnote">Arrow keys, Page Up and Page Down move between slides, and so
+  do the controls at the foot of the page. A circled question mark opens the note
+  behind a term; Escape closes it. Two companion pages carry the same numbers in
+  full: <a href="analysis.html">the statistical companion</a> holds every subset on
+  every outcome, and <a href="explorer.html">the map of the treatments</a> holds the
+  geometry of every record and estimates any selection a reader draws.</p>
+</section>
+
+<!-- ================================================================== 2. law -->
+<section class="slide">
+  <p class="kicker">Statute</p>
+  <h2>What the law requires</h2>
+  <p class="lead"><b class="lab">Definition.</b> Daylighting is the removal of
+  parking beside a crosswalk, so that a driver approaching the corner and a
+  pedestrian stepping into it can see each other.<button class="qhelp"
+  type="button" data-help="statute" aria-expanded="false"
+  aria-label="About: the statutes">?</button></p>
+  <ol class="steps">
+    <li>New York City is exempt from the New York State prohibition on parking
+    within 20 feet of a crosswalk, so daylighting in the city exists only where
+    signage or a physical construction designates it.</li>
+    <li>Local Law 66 of 2023, at Administrative Code section 19-175.8, required
+    the Department of Transportation to do three things: (i) publish a report
+    assessing the feasibility of daylighting, which is the January 2025 report,
+    (ii) daylight at least 100 intersections annually from 1 January 2025, and
+    (iii) publish a progress report each year. Subsection (g) begins location
+    level reporting with calendar 2025.</li>
+    <li>The agency committed to install 1000 daylighting improvements in 2024,
+    above the 100 the law sets as a floor.</li>
+    <li>California AB 413, which the January 2025 report records as passed in
+    2023 and taking effect in 2025, makes a no parking zone of 20 feet standard
+    across that state, reduced to 15 feet where a locality installs curb
+    extensions, and prohibits parking there for motor vehicles rather than for
+    bicycles or scooters.</li>
+    <li>New York State law prohibits parking within 15 feet of a fire hydrant,
+    which is 4.572 m, so a corner carrying a hydrant was already clear before any
+    programme reached it.<button class="qhelp" type="button" data-help="precleared"
+    aria-expanded="false" aria-label="About: curb that was already clear"
+    >?</button></li>
+  </ol>
+  <p class="note">The report also records the geometry the guidance asks for:
+  around 20 to 30 feet of daylighting is often recommended.</p>
+</section>
+
+<!-- ============================================================= 3. evidence -->
+<section class="slide">
+  <p class="kicker">Before this study</p>
+  <h2>The evidence before this study</h2>
+  <p class="lead">The January 2025 report states the position in its own
+  literature review: there is &ldquo;little direct evidence connecting
+  daylighting to safety&rdquo;, and the practice is &ldquo;frequently justified
+  based on past literature and practices rather than empirical
+  research&rdquo;.<button class="qhelp" type="button" data-help="provenance"
+  aria-expanded="false" aria-label="About: provenance of the published analyses"
+  >?</button></p>
+  <div class="cols two">
+    <ol class="pts">
+    <li><b class="lab">The four endorsements.</b> The report's endorsements are guidance documents rather than evaluations: (i) the Manual on Uniform Traffic Control Devices, (ii) the Federal Highway Administration's 2018 guide to uncontrolled crossing locations, (iii) the National Association of City Transportation Officials urban street design guide, and (iv) a National Cooperative Highway Research Program guide. A guidance document recommends a practice; it does not measure one.</li>
+    <li><b class="lab">The four case study cities.</b> Seattle, Hoboken, San Francisco and Portland have each implemented daylighting at scale, and none has published a before and after analysis of its safety effect. San Francisco reported a decrease of 14 per cent in collisions at the 80 intersections daylit in the Tenderloin in 2018, with no data available on injury reductions.</li>
+  </ol>
+  </div>
+  <div class="warnbox">
+    <p>No published analysis of daylighting carries a comparison group, a
+    significance test and published locations at the same time. The January 2025
+    report has a comparison group and a significance test and publishes no
+    locations. The Safety Treatment Evaluation it relies on has neither a
+    comparison group nor a significance test. The case study cities have published
+    nothing.</p>
+  </div>
+  <p class="note">The nearest independent measurement is Kumfer and others 2026,
+  report DDOT-RDT-26-02, on 47 curb extensions in Washington DC. Its outcomes are
+  driver yielding and pedestrian satisfaction, collected by survey and video
+  rather than from crash records, so it measures behaviour at the corner rather
+  than injury counts.</p>
+</section>
+
+<!-- ============================================================ 4. inventory -->
+<section class="slide snug">
+  <p class="kicker">Treatment records</p>
+  <h2>The inventory</h2>
+  <p class="lead">40419 treatment records from 11 published sources, one row per
+  record as its publisher wrote it, never merged across sources.</p>
+  <div class="cols two">
+    <div>
+      <div class="scroll">
+      <table>
+        <thead><tr><th class="w">Source</th><th class="n">Records</th>
+          <th class="w">Family</th></tr></thead>
+        <tbody>
+          <tr><td class="w">Sign work orders naming daylighting</td><td class="n">13223</td><td class="w">daylighting</td></tr>
+          <tr><td class="w">Speed Reducer Tracking System</td><td class="n">9781</td><td class="w">vertical deflection</td></tr>
+          <tr><td class="w">Leading pedestrian interval signals</td><td class="n">6778</td><td class="w">signal</td></tr>
+          <tr><td class="w">Vision Zero View speed humps</td><td class="n">4259</td><td class="w">vertical deflection</td></tr>
+          <tr><td class="w">Bicycle corrals</td><td class="n">2833</td><td class="w">daylighting, hardened</td></tr>
+          <tr><td class="w">Vision Zero View turn calming</td><td class="n">1491</td><td class="w">turn calming</td></tr>
+          <tr><td class="w">Published list, calendar 2025</td><td class="n">728</td><td class="w">daylighting, both arms</td></tr>
+          <tr><td class="w">E scooter corrals</td><td class="n">487</td><td class="w">daylighting, hardened</td></tr>
+          <tr><td class="w">Street improvement projects</td><td class="n">424</td><td class="w">capital project</td></tr>
+          <tr><td class="w">Published list, January to August 2024</td><td class="n">271</td><td class="w">daylighting</td></tr>
+          <tr><td class="w">Raised crosswalks</td><td class="n">144</td><td class="w">vertical deflection</td></tr>
+          <tr class="tot"><td class="w">Every source</td><td class="n">40419</td><td class="w">six families</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    <div>
+      <ol class="pts">
+    <li><b class="lab">The date and its precision.</b> 37315 records carry a day. 2833 carry no published date at all, which is the whole bicycle corral file, so those records cannot enter a before and after design. 271 carry a window rather than a day: every record of the January to August 2024 list is stamped 2024-01, which is the opening bound of the window the source document covers rather than a month in which anything was installed.<button class="qhelp" type="button" data-help="cohorts" aria-expanded="false" aria-label="About: the two published location lists">?</button></li>
+  </ol>
+      <div class="card" style="margin-top:12px">
+        <h3>The position and its provenance</h3>
+        <p>24523 records carry a published point and 4259 a published polyline.
+        7318 positions come from joining a segment identifier to the street
+        centreline, 1148 from a street pair gazetteer, and 271 from a node join.
+        2900 records carry no geometry, and they are recorded as carrying none
+        rather than placed by parsing a location description.</p>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>The corner of the junction</h3>
+        <p>21638 records sit at a named compass corner, 8681 mid block, 6052 at
+        the centre of the junction, and 4048 carry no corner.</p>
+      </div>
+    </div>
+  </div>
+  <p class="note">Roughly 40 per cent of the city's sign orders carry no
+  daylighting annotation, so this inventory is a floor on coverage rather than a
+  census, and physical hardening installed before 2024 appears in no public
+  inventory at all.</p>
+</section>
+
+<!-- ========================================================= 5. one corner -->
+<section class="slide">
+  <p class="kicker">One corner</p>
+  <h2>Broadway and West 45 Street</h2>
+  <p class="lead">A curb regulation sign order recorded as daylighting, installed
+  2019-01 at the south west corner, 10.5 m from the centre of the junction. The
+  outcome is all reported crashes within 30 m. The window is 36 months before
+  installation and 24 months after, with the installation month excluded. The
+  comparison is 3 matched intersections.</p>
+  <ol class="steps">
+    <li><b class="lab">Counts.</b> 111 crashes in the 36 months before, 40 in the
+    24 months after.</li>
+    <li><b class="lab">Annual rates at the corner.</b> 12 &times; 111 / 36 = 37.0
+    crashes per year before, and 12 &times; 40 / 24 = 20.0 after.</li>
+    <li><b class="lab">Change at the corner.</b> 20.0 &minus; 37.0 = &minus;17.0
+    crashes per year.</li>
+    <li><b class="lab">The comparison intersections.</b> The 3 of them average
+    63.0 crashes over the before window and 20.0 over the after window, which is
+    21.0 and 10.0 per year, so their mean change is &minus;11.0 crashes per
+    year.</li>
+    <li><b class="lab">The difference.</b> &minus;17.0 &minus; (&minus;11.0) =
+    <b class="lab">&minus;6.0</b> crashes per year.<button class="qhelp"
+    type="button" data-help="corner" aria-expanded="false"
+    aria-label="About: the arithmetic at one corner">?</button></li>
+  </ol>
+  <div class="infobox">
+    <p>Crashes fell at the treated corner and they also fell at its comparison
+    intersections over the very same calendar months, so the estimate for this
+    corner is the extra fall of 6.0 crashes per year rather than the whole fall of
+    17.0.</p>
+  </div>
+  <p class="note">The same corner against the 4 corridor comparison locations the
+  published rule selects gives 17.5 crashes per year before and 5.625 after, a
+  mean change of &minus;11.875, and a difference of &minus;5.125. Both figures come
+  from the per site sums the companion pages ship, so a reader can recompute
+  either one.<button class="qhelp" type="button" data-help="aggratio"
+  aria-expanded="false" aria-label="About: the live estimate for a selection"
+  >?</button></p>
+</section>
+
+<!-- ========================================================== 6. estimator -->
+<section class="slide">
+  <p class="kicker">The general form</p>
+  <h2>The published estimator</h2>
+  <p class="body">For a site <i>i</i> with installation month <i>t<sub>i</sub></i>,
+  <i>Y<sub>i</sub></i>(<i>a</i>,<i>b</i>) counts the outcome inside 30 m of
+  <i>i</i> over the months from <i>t<sub>i</sub></i> plus <i>a</i> up to
+  <i>t<sub>i</sub></i> plus <i>b</i>, and <i>R<sub>i</sub></i>(<i>a</i>,<i>b</i>)
+  expresses that count as an annual rate.<button class="qhelp" type="button"
+  data-help="arith" aria-expanded="false" aria-label="About: the published estimator"
+  >?</button></p>
+  <div class="cols two">
+    <div>
+      <div class="eqwrap" id="eq-rate"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo><mo>=</mo><mfrac><mrow><mn>12</mn><msub><mi>Y</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo></mrow><mrow><mi>b</mi><mo>&#8722;</mo><mi>a</mi></mrow></mfrac></mrow></math><div class="mathfall">R_i(a,b) \;=\; \frac{12\, Y_i(a,b)}{b-a}</div><div class="eqcap">The outcome at one site, as an annual rate over a window of months.</div><details class="eqsrc"><summary>LaTeX source</summary><code>R_i(a,b) \;=\; \frac{12\, Y_i(a,b)}{b-a}</code></details></div>
+      <div class="eqwrap" id="eq-delta"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>=</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo><mo>&#8722;</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><mn>0</mn></mrow><mo>)</mo></mrow></math><div class="mathfall">\Delta_i \;=\; R_i(1,\;\text{post}+1) \;-\; R_i(-\text{pre},\;0)</div><div class="eqcap">The change at one site, after minus before.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\Delta_i \;=\; R_i(1,\;\text{post}+1) \;-\; R_i(-\text{pre},\;0)</code></details></div>
+    </div>
+    <div>
+      <div class="eqwrap" id="eq-arith"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class="mathfall">\hat\theta \;=\; \frac{1}{n}\sum_{i=1}^{n}\left(\Delta_i \;-\; \frac{1}{|C_i|}\sum_{j\in C_i}\Delta_j\right)</div><div class="eqcap">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\hat\theta \;=\; \frac{1}{n}\sum_{i=1}^{n}\left(\Delta_i \;-\; \frac{1}{|C_i|}\sum_{j\in C_i}\Delta_j\right)</code></details></div>
+      <div class="eqwrap" id="eq-ttest"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>t</mi><mo>=</mo><mfrac><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mrow><msub><mi>s</mi><mi>d</mi></msub><mo>/</mo><msqrt><mi>n</mi></msqrt></mrow></mfrac></mrow></math><div class="mathfall">t \;=\; \frac{\hat\theta}{s_d/\sqrt{n}}</div><div class="eqcap">The test the published estimator uses, a two sided one sample t test on n minus 1 degrees of freedom.</div><details class="eqsrc"><summary>LaTeX source</summary><code>t \;=\; \frac{\hat\theta}{s_d/\sqrt{n}}</code></details></div>
+    </div>
+  </div>
+  <p class="body">The estimate is the unweighted mean over treated sites of the
+  change at the site minus the mean change at that site's own comparison
+  locations, tested against zero by a two sided one sample t test on <i>n</i>
+  minus 1 degrees of freedom. Every treated site enters with weight one over
+  <i>n</i> whatever its crash count, so the quantity estimated is the change at
+  the mean treated corner, in injuries per intersection per year, and zero means
+  no effect.<button class="qhelp" type="button" data-help="scales"
+  aria-expanded="false" aria-label="About: two scales">?</button></p>
+</section>
+
+<!-- ================================================ 7. three specifications -->
+<section class="slide">
+  <p class="kicker">Design</p>
+  <h2>The three specifications</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th class="w">Specification</th><th class="w">Crash record</th>
+      <th class="w">Installations</th><th class="w">Window</th>
+      <th class="w">Comparison locations</th><th class="w">Estimator</th>
+      <th class="w">Scale</th></tr></thead>
+    <tbody>
+      <tr><td class="w"><b class="lab">1. Published specification</b></td>
+        <td class="w">2017-01 to 2023-12</td>
+        <td class="w">2019-01 to 2021-12</td>
+        <td class="w">24 months each side</td>
+        <td class="w">corridor locations on the treated corner's own streets</td>
+        <td class="w">unweighted mean of per unit changes in annual injuries, one sample t test</td>
+        <td class="w">a difference; 0 means no effect</td></tr>
+      <tr><td class="w"><b class="lab">2. Published specification, extended record</b></td>
+        <td class="w">2012-07 to 2026-05</td>
+        <td class="w">eight years, fixed at 2015-07 to 2023-06 on the specification path</td>
+        <td class="w">36 months before, up to 24 after</td>
+        <td class="w">corridor locations, the same rule</td>
+        <td class="w">the same estimator</td>
+        <td class="w">a difference; 0 means no effect</td></tr>
+      <tr><td class="w"><b class="lab">3. Falsification tested specification</b></td>
+        <td class="w">2012-07 to 2026-05</td>
+        <td class="w">the same admissible span, per subset</td>
+        <td class="w">36 months before, up to 24 after</td>
+        <td class="w">three matched comparison intersections per treated unit</td>
+        <td class="w">fixed effects Poisson, unit and calendar month effects, CRV1 clustered on match group</td>
+        <td class="w">a rate ratio; 1 means no effect</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="cols two">
+    
+  </div>
+  <p class="body">Changing one component at a time identifies the component that
+  carries the disagreement. On the city's own cohort of 2019 to 2021, on the same
+  257 turn calming corners, the corridor rule gives &minus;0.2389 (p = 0.003) on
+  pedestrian injuries and the matched rule gives &minus;0.0136 (p = 0.850); under
+  fixed effects Poisson the same pair of comparison rules gives 0.7832
+  (p = 0.0010) and 1.0563 (p = 0.397). Within a column the two estimators agree
+  with each other, and across columns they disagree together, so the comparison
+  group is the responsible component and the estimator does not change the
+  answer.<button class="qhelp" type="button" data-help="scales"
+  aria-expanded="false" aria-label="About: two scales">?</button></p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Design</p>
+  <h2>How the three specifications differ</h2>
+  <ol class="pts">
+    <li><b class="lab">What changes between them.</b> Specification 2 changes three components of specification 1: (i) the crash record, which runs to the full record, (ii) the installation window, which runs to eight years, and (iii) the before period, which is 36 months rather than 24. It then runs over every subset. Specification 3 changes the comparison group and the estimator as well, and it adds a placebo on every cell together with Benjamini and Hochberg adjustment within each outcome.</li>
+    <li><b class="lab">How the comparison intersections are built.</b> A treated unit enters a coarse exact stratum on four keys: borough, approach count clipped to 3 to 6, posted speed bucketed at 25, 30 and above 30, and the major leg flag. The three pool members of that stratum closest to it in Mahalanobis distance become its comparison intersections. The distance uses four numbers per unit, all crashes and pedestrian crashes within 30 m annualised over months &minus;36 to &minus;25 and again over months &minus;24 to &minus;13, so the final twelve months before installation are withheld from the matching. Every pool member carries no treatment within 30 m and sits at least 300 m from every treated unit of the subset.</li>
+  </ol>
+</section>
+
+<!-- ======================================================== 8. reproduction -->
+<section class="slide snug">
+  <p class="kicker">Specification 1</p>
+  <h2>Reproduction of the published specification</h2>
+  <p class="body">Crash record 2017-01 to 2023-12; installations 2019-01 to
+  2021-12; 24 months each side; comparison locations drawn from the treated
+  corner's own streets, up to three per street within one mile; the unweighted
+  mean of per unit changes in an annual injury count; a one sample t test; the outcome counted as injuries to people. The
+  attribution radius of 30 m is this study's convention, because the published
+  specification states none.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th class="w">Arm</th><th class="w">Outcome</th>
+      <th class="w">Published</th><th class="w">Reproduced here</th>
+      <th class="w">Placebo</th></tr></thead>
+    <tbody>
+      <tr><td class="w">Sign only, 567 published locations</td><td class="w">pedestrian injuries</td>
+        <td class="w">0.00, p = 0.96</td>
+        <td class="w">+0.005 [&minus;0.028, +0.038], n = 1261, p = 0.78</td>
+        <td class="w"><span class="tag ok">clear</span></td></tr>
+      <tr><td class="w">Sign only</td><td class="w">total injuries</td>
+        <td class="w">&minus;0.06, p = 0.27</td>
+        <td class="w">&minus;0.084 [&minus;0.171, +0.003], p = 0.058</td>
+        <td class="w"><span class="tag ok">clear</span></td></tr>
+      <tr><td class="w">Hardened, 189</td><td class="w">pedestrian injuries</td>
+        <td class="w">&minus;0.14, p = 0.01</td>
+        <td class="w">&minus;0.221 [&minus;0.424, &minus;0.019], n = 98, p = 0.032</td>
+        <td class="w"><span class="tag ok">clear</span></td></tr>
+      <tr><td class="w">Hardened</td><td class="w">total injuries</td>
+        <td class="w">&minus;0.10, p = 0.42</td>
+        <td class="w">&minus;0.249 [&minus;0.717, +0.219], p = 0.29</td>
+        <td class="w"><span class="tag bad">+0.632, p = 0.008</span></td></tr>
+      <tr><td class="w">Turn calming, 33</td><td class="w">pedestrian injuries</td>
+        <td class="w">&minus;0.12, p = 0.48</td>
+        <td class="w">&minus;0.239 [&minus;0.395, &minus;0.083], n = 251, p = 0.0028</td>
+        <td class="w"><span class="tag ok">clear</span></td></tr>
+      <tr><td class="w">Turn calming</td><td class="w">total injuries</td>
+        <td class="w">&minus;0.30, p = 0.43</td>
+        <td class="w">&minus;0.513 [&minus;0.961, &minus;0.066], p = 0.025</td>
+        <td class="w"><span class="tag bad">+0.472, p = 0.026</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="body">All 6 published estimates fall inside the reproduced confidence
+  interval and all 6 agree in sign. The turn calming row is reconstructed two
+  ways, so 8 comparable rows exist in total and all 8 fall inside the interval;
+  the second reconstruction, 19 hardened corners drawn from the turn calming
+  inventory, gives &minus;0.356 [&minus;0.865, +0.153] on pedestrian
+  injuries.</p>
+  <div class="warnbox">
+    <p>The reproduction establishes that the published values are what the
+    published specification produces on the city's crash record. It does not
+    establish that the published locations were analysed again, because the 756
+    analysed locations are not published: this study rebuilds 98 hardened corners
+    against their 189, and the two arms hold different objects.</p>
+  </div>
+  <p class="note">The city reported two outcomes: pedestrian injuries and total
+  injuries, the latter counting every person hurt including drivers and
+  passengers.<button class="qhelp" type="button" data-help="outcomes"
+  aria-expanded="false" aria-label="About: the two published outcomes"
+  >?</button></p>
+</section>
+
+<!-- ========================================================= 8. composition -->
+<section class="slide">
+  <p class="kicker">Construct validity</p>
+  <h2>The contents of the significant published estimate</h2>
+  <p class="body">The published finding is hardened daylighting at 189 locations,
+  &minus;0.14 pedestrian injuries per intersection per year, p = 0.01. The report
+  also prints the five device rows that make up those 189. They sum exactly to
+  189, and their count weighted mean is &minus;0.1391, which reproduces the
+  published &minus;0.14, so the aggregate is the count weighted average of these
+  five rows and nothing else.<button class="qhelp" type="button"
+  data-help="composition" aria-expanded="false"
+  aria-label="About: the composition of the hardened arm">?</button></p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th class="w">Device row</th><th class="n">n</th>
+      <th class="n">Estimate</th><th class="n">p</th>
+      <th class="n">Share of n</th><th class="n">Share of the estimate</th></tr></thead>
+    <tbody>
+      <tr><td class="w">Citi Bike station</td><td class="n">134</td><td class="n">&minus;0.11</td><td class="n">0.08</td><td class="n">70.9%</td><td class="n">56.1%</td></tr>
+      <tr><td class="w">Bicycle corral</td><td class="n">3</td><td class="n">&minus;0.03</td><td class="n">0.84</td><td class="n">1.6%</td><td class="n">0.3%</td></tr>
+      <tr><td class="w">Turn calming</td><td class="n">33</td><td class="n">&minus;0.12</td><td class="n">0.48</td><td class="n">17.5%</td><td class="n">15.1%</td></tr>
+      <tr><td class="w">Neckdown</td><td class="n">14</td><td class="n">&minus;0.50</td><td class="n">0.02</td><td class="n">7.4%</td><td class="n">26.6%</td></tr>
+      <tr><td class="w">Enhanced crosswalk</td><td class="n">5</td><td class="n">&minus;0.10</td><td class="n">0.57</td><td class="n">2.6%</td><td class="n">1.9%</td></tr>
+      <tr class="tot"><td class="w">Published aggregate</td><td class="n">189</td><td class="n">&minus;0.14</td><td class="n">0.01</td><td class="n">100%</td><td class="n">100%</td></tr>
+    </tbody>
+  </table>
+  </div>
+  
+  <p class="body">Removing the Citi Bike docks and the neckdowns leaves 41
+  locations, of which 33 are turn calming at &minus;0.12 with p = 0.48. The
+  treatment whose effect was estimated and the treatment being scaled by policy
+  are different treatments, and that holds independently of every statistical
+  question about the design.</p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Construct validity</p>
+  <h2>Reading the five device rows</h2>
+  <ol class="steps">
+    <li>The largest row is 134 Citi Bike docks, 70.9 per cent of the locations,
+    and it is not significant on its own at p = 0.08. A dock is sited on
+    ridership demand.</li>
+    <li>The only individually significant row is the 14 neckdowns at p = 0.02. A
+    neckdown is a rebuilt curb line that shortens the crossing, which the
+    report's own footnote states, so it is a capital reconstruction of the corner
+    geometry. Those 14 locations supply 26.6 per cent of the aggregate
+    estimate.</li>
+    <li>No row is a posts or granite blocks row, which is how the report's own
+    summary defines hardened daylighting and which is what the 2024 programme of
+    nearly 300 locations installed. Those 2024 locations fall outside the
+    installation window of 2019 to 2021 the estimate is built from.</li>
+  </ol>
+</section>
+<section class="slide">
+  <p class="kicker">Conclusion, published specification</p>
+  <h2>What the reproduction settles</h2>
+  <ol class="pts">
+    <li><b class="lab">The computation is correct.</b> The published values fall
+    inside our confidence intervals in 6 of 6 comparable estimates and agree in
+    sign in all 6. Nothing in this study contradicts the report's arithmetic.</li>
+    <li><b class="lab">The reported reduction would be found again.</b> Run on the
+    city's crash record with the city's comparison rule, the pedestrian injury
+    estimate for hardened daylighting is a reduction of 0.14 per intersection per
+    year, and it is significant.</li>
+    <li><b class="lab">Three properties of the sample limit what it can mean.</b>
+    70.9 per cent of the significant group is Citi Bike stations, individually not
+    significant; the only individually significant component is 7.4 per cent
+    neckdowns, which are curb reconstructions; and no component is the posts or
+    granite blocks the report defines the treatment as.</li>
+    <li><b class="lab">A reader who stops here should conclude</b> that the city
+    measured a reduction in the group it assembled, and that the group is not the
+    treatment the recommendation is about.</li>
+  </ol>
+  <p class="note">Source: data/results_dot_replicate.json comparison,
+  hardened_composition.dot; paper/tab_reproduction.tex.</p>
+</section>
+
+<!-- ========================================================== 9. provenance -->
+<section class="slide snug">
+  <p class="kicker">Documents</p>
+  <h2>Provenance of the reproduced analysis</h2>
+  <p class="body">Four documents form the chain, of which only the last is
+  independently authored. None of the four is peer reviewed.<button class="qhelp"
+  type="button" data-help="provenance" aria-expanded="false"
+  aria-label="About: provenance of the published analyses">?</button></p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th class="w">Document</th><th class="w">What it is</th>
+      <th class="w">Comparison group</th><th class="w">Significance test</th>
+      <th class="w">Locations</th></tr></thead>
+    <tbody>
+      <tr><td class="w">NYC DOT, Daylighting Report, January 2025</td>
+        <td class="w">the analysis reproduced here, on 756 locations, mandated by Local Law 66 of 2023</td>
+        <td class="w">yes, corridor locations</td><td class="w">yes</td>
+        <td class="w">not published</td></tr>
+      <tr><td class="w">NYC DOT, Daylighting Report on the Record, November 2025</td>
+        <td class="w">restates the same estimates and adds the hydrant zone sample sizes</td>
+        <td class="w">yes, the same</td><td class="w">yes</td>
+        <td class="w">not published</td></tr>
+      <tr><td class="w">NYC DOT, Safety Treatment Evaluation 2005 to 2018, published 2022</td>
+        <td class="w">the source of the treatment effects the January 2025 report leans on, including 266 curb and sidewalk extensions</td>
+        <td class="w">none</td><td class="w">none</td>
+        <td class="w">not published</td></tr>
+      <tr><td class="w">Kumfer and others, DDOT-RDT-26-02, 2026</td>
+        <td class="w">47 curb extensions in Washington DC, with driver yielding and pedestrian satisfaction as outcomes, measured by survey and video</td>
+        <td class="w">not examined</td><td class="w">not examined</td>
+        <td class="w">not examined</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">The Washington DC report is held at ROSA-P record dot/90280,
+  which blocks automated retrieval, so it is cited from its TRID record and its
+  design is described from that record rather than from the full text.</p>
+  <div class="cols two">
+    <ol class="pts">
+    <li><b class="lab">What documentation exists.</b> The reproduced analysis has no journal article and no preprint. Its comparison rule is given in one sentence, and resolving it into something implementable required settling eight separate ambiguities. No attribution radius is stated, no confidence interval accompanies any point estimate, and neither code nor data is released.</li>
+    <li><b class="lab">How the earlier evaluation is quoted.</b> The Safety Treatment Evaluation reports three outcome panels for turn calming. The January 2025 report carries the pedestrian injury change of &minus;17.5 per cent and does not carry the motor vehicle occupant figures from the same table, which are +13.6 per cent for injuries and +50.7 per cent for killed or severely injured. The evaluation's own caution about the last figure is fair, because it rests on an annual average rising from 7.3 to 11.<button class="qhelp" type="button" data-help="ste" aria-expanded="false" aria-label="About: the Safety Treatment Evaluation" >?</button></li>
+  </ol>
+  </div>
+</section>
+
+<!-- ============================================================ 10. placebo -->
+<section class="slide">
+  <p class="kicker">Falsification 1 of 3</p>
+  <h2>The placebo test</h2>
+  <p class="lead">The estimate is recomputed with one change: the installation
+  month of every treated site is moved back in time, far enough that the whole
+  analysis window falls in months before anything was built. The corners, the
+  comparison locations, the estimator and the outcome all stay as they were.
+  Because no treatment exists anywhere in that window, the honest answer is no
+  effect.<button class="qhelp" type="button" data-help="placebo"
+  aria-expanded="false" aria-label="About: the placebo test">?</button></p>
+  <div class="cols two">
+    <div>
+      <div class="eqwrap" id="eq-placebo_shift"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>s</mi><mo>=</mo><mi>max</mi><mo>(</mo><mrow><mi>pre</mi><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo></mrow></math><div class="mathfall">s \;=\; \max\!\left(\text{pre},\; \text{post}+1\right)</div><div class="eqcap">The placebo displacement, chosen so the placebo window ends before installation.</div><details class="eqsrc"><summary>LaTeX source</summary><code>s \;=\; \max\!\left(\text{pre},\; \text{post}+1\right)</code></details></div>
+      <p class="body"><b class="lab">Concrete case.</b> Under a before period of
+      24 months and an after period of 24 months, moving the installation month
+      back by 24 puts the final month of the placebo window on the installation
+      month itself, which is partly treated. Taking the larger of 24 and 25 gives
+      a displacement of 25 months, so the placebo window runs from month
+      &minus;49 to month &minus;1 and every month of it lies strictly before
+      installation.</p>
+    </div>
+    <div>
+      <div class="eqwrap" id="eq-placebo_window"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>[</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>]</mo><mo>&#160;</mo><mo>&#160;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>&#8804;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mn>1</mn></mrow></math><div class="mathfall">\left[\,t_i - s - \text{pre},\;\; t_i - s + \text{post}\,\right], \qquad t_i - s + \text{post} \;\le\; t_i - 1</div><div class="eqcap">The placebo window, every month of it before the installation month.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\left[\,t_i - s - \text{pre},\;\; t_i - s + \text{post}\,\right], \qquad t_i - s + \text{post} \;\le\; t_i - 1</code></details></div>
+      <p class="body">Under the falsification tested specification the before
+      period is 36 months and the after period 24, so the displacement is 36
+      months and the placebo window runs from month &minus;72 to month
+      &minus;12.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== 11. admission -->
+<section class="slide">
+  <p class="kicker">Falsification 2 of 3</p>
+  <h2>The admission condition</h2>
+  <p class="body">A cell is read only when the placebo is consistent with no
+  effect.</p>
+  <div class="eqwrap" id="eq-placebo_test"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mi>plac</mi></msup><mo>=</mo><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>(</mo><mrow><msub><mi>t</mi><mi>i</mi></msub><mo>&#8594;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi></mrow><mo>)</mo><mo>,</mo><mo>&#160;</mo><msup><mi>p</mi><mi>plac</mi></msup><mo>&#8805;</mo><mn>0.05</mn></mrow></math><div class="mathfall">\hat\theta^{\text{plac}} \;=\; \hat\theta\big(t_i \to t_i - s\big), \qquad \text{admit the cell only if } p^{\text{plac}} \ge 0.05</div><div class="eqcap">The placebo estimate and the condition a cell must satisfy to be read.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\hat\theta^{\text{plac}} \;=\; \hat\theta\big(t_i \to t_i - s\big), \qquad \text{admit the cell only if } p^{\text{plac}} \ge 0.05</code></details></div>
+  <p class="body">Three conditions hold together before a cell is read as a
+  finding: (i) the placebo p value is at least 0.05, (ii) the Benjamini and
+  Hochberg adjusted p value falls below 0.05, and (iii) at least 25 treated units
+  contribute. A cell is refused as well when the compounded pre treatment drift
+  accounts for 60 per cent or more of the estimate, and it is marked underpowered
+  when the smallest detectable effect exceeds 25 per cent. A cell that fails any
+  of these is reported with the reason rather than dropped.<button class="qhelp"
+  type="button" data-help="drift" aria-expanded="false"
+  aria-label="About: the pre treatment drift and the admission rule">?</button></p>
+  <div class="warnbox">
+    <p><b class="lab">The published crash record cannot support this test on its
+    own installation window.</b> A placebo with a before period of 24 months
+    needs months 48 to 1 before installation. That record starts 2017-01 and the
+    earliest installations are 2019-01, so across the installation window 79 per
+    cent of the months a placebo requires are present. A month with no crash
+    record contributes zero on the treated side and zero on the comparison side,
+    which pulls the placebo toward zero, and all six affected placebo values were
+    positive, which is the direction that reports no problem.</p>
+  </div>
+  <p class="body">Repairing that crash floor and changing nothing else leaves
+  five of the six published estimates clear of the placebo. The exception is turn
+  calming pedestrian injuries, where the repaired placebo is &minus;0.206
+  (p = 0.022) against an estimate of &minus;0.236, so a specification containing
+  no treatment reproduces 87 per cent of that estimate.</p>
+</section>
+
+<!-- ========================================================= 12. why flagged -->
+<section class="slide">
+  <p class="kicker">Falsification 3 of 3</p>
+  <h2>Why is a decrease at p below 0.01 not evidence about the treatment?</h2>
+  <p class="lead">Suppose a cell returns a decrease at p below 0.01, and the
+  placebo on months containing no treatment returns a decrease of similar size.
+  Both cannot have been caused by the treatment, because in the placebo window
+  there was no treatment, so the specification produces decreases at these
+  corners whether or not anything is installed.<button class="qhelp"
+  type="button" data-help="why_flagged" aria-expanded="false"
+  aria-label="About: why a significant decrease can still be flagged"
+  >?</button></p>
+  <div class="cols two">
+    <ol class="pts">
+    <li><b class="lab">A decrease with a failing placebo.</b> Turn calming pooled, pedestrian injuries, 975 treated units under the published specification on the extended record: <b class="lab">&minus;0.272 per intersection per year at p = 5&times;10<sup>&minus;12</sup></b>, and a placebo of <b class="lab">&minus;0.135 at p = 0.0019</b>. A window containing no treatment reproduces half of the estimate.</li>
+    <li><b class="lab">An increase with a failing placebo.</b> Hardened daylighting at a junction, 143 treated units under the falsification tested specification: a rate ratio of <b class="lab">1.153 [0.954, 1.394]</b> on pedestrian injuries, with a placebo of <b class="lab">0.747 at p = 0.0006</b>. A specification that produces a decrease of 25 per cent from no treatment cannot be trusted to have produced 1.153 from the treatment.</li>
+  </ol>
+  </div>
+  <p class="body">The p value answers whether a result could have arisen by
+  chance. The placebo answers whether the specification produces that result
+  without a treatment, and those are different questions. A refused cell is
+  evidence of no effect and it is evidence of an effect in neither direction; it
+  is a cell in which the design cannot separate the treatment from the reason the
+  site was chosen.</p>
+</section>
+
+<!-- ============================================================= 13. fepois -->
+<section class="slide">
+  <p class="kicker">Specification 3</p>
+  <h2>The falsification tested specification</h2>
+  <p class="body">The panel holds every unit <i>k</i>, treated and comparison
+  together, and every calendar month <i>t</i>, over the crash record 2012-07 to
+  2026-05.<button class="qhelp" type="button" data-help="fepois"
+  aria-expanded="false"
+  aria-label="About: the fixed effects Poisson specification">?</button></p>
+  <div class="cols two">
+    <div>
+      <div class="eqwrap" id="eq-fepois"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant='double-struck'>E</mi><mo>[</mo><msub><mi>Y</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>&#8739;</mo><mi>&#945;</mi><mo>,</mo><mi>&#947;</mi><mo>,</mo><mi>D</mi><mo>]</mo><mo>=</mo><mi>exp</mi><mo>(</mo><mrow><msub><mi>&#945;</mi><mi>k</mi></msub><mo>+</mo><msub><mi>&#947;</mi><mi>t</mi></msub><mo>+</mo><mi>&#946;</mi><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub></mrow><mo>)</mo></mrow></math><div class="mathfall">\mathbb{E}\!\left[Y_{kt} \mid \alpha,\gamma,D\right] \;=\; \exp\!\left(\alpha_k + \gamma_t + \beta\, D_{kt}\right)</div><div class="eqcap">The fixed effects Poisson specification, with a unit effect and a calendar month effect.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\mathbb{E}\!\left[Y_{kt} \mid \alpha,\gamma,D\right] \;=\; \exp\!\left(\alpha_k + \gamma_t + \beta\, D_{kt}\right)</code></details></div>
+      <div class="eqwrap" id="eq-treatind"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>=</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>k</mi><mo>&#160;</mo><mi>treated</mi><mo>}</mo><mo>&#183;</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>t</mi><mo>&gt;</mo><msub><mi>t</mi><mrow><mi>i</mi><mo>(</mo><mi>k</mi><mo>)</mo></mrow></msub><mo>}</mo></mrow></math><div class="mathfall">D_{kt} \;=\; \mathbf{1}\{k \text{ treated}\}\cdot\mathbf{1}\{t &gt; t_{i(k)}\}</div><div class="eqcap">The treatment indicator, one after installation at a treated unit and zero everywhere else.</div><details class="eqsrc"><summary>LaTeX source</summary><code>D_{kt} \;=\; \mathbf{1}\{k \text{ treated}\}\cdot\mathbf{1}\{t &gt; t_{i(k)}\}</code></details></div>
+    </div>
+    <div>
+      <div class="eqwrap" id="eq-irr"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>IRR</mi><mo>=</mo><mi>exp</mi><mo>(</mo><mover><mi>&#946;</mi><mo>&#94;</mo></mover><mo>)</mo></mrow></math><div class="mathfall">\text{IRR} \;=\; \exp(\hat\beta)</div><div class="eqcap">The quantity reported from that specification, a rate ratio in which one means no effect.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\text{IRR} \;=\; \exp(\hat\beta)</code></details></div>
+      <ol class="pts">
+    <li><b class="lab">What each fixed effect absorbs.</b> <b class="lab">The unit effect</b> absorbs everything about a corner that does not change over the record: its traffic volume, its number of approaches, its posted speed, its geometry and its long run crash level. <b class="lab">The calendar month effect</b> absorbs a citywide shock common to that month: weather, a change in police reporting practice, congestion pricing from 2025-01, and the citywide crash trend.</li>
+  </ol>
+    </div>
+  </div>
+  <p class="body">The month at event time zero is excluded, because an
+  installation month is partly treated. Inference uses the CRV1 cluster robust
+  variance estimator with standard errors clustered by match group, in which a
+  match group is a treated unit together with its own three matched comparison
+  intersections. Because the specification weights a unit by its expected count,
+  high exposure corners dominate the estimate and the quantity is the
+  proportional change in the total count, whereas the published estimator gives
+  the change at the mean corner. The two answer different questions and their
+  magnitudes are not comparable: no effect is 1 on the ratio scale and 0 on the
+  difference scale.<button class="qhelp" type="button" data-help="scales"
+  aria-expanded="false" aria-label="About: two scales">?</button></p>
+</section>
+
+<!-- ================================================= 14. multiplicity, power -->
+<section class="slide">
+  <p class="kicker">Inference policy</p>
+  <h2>Multiplicity and power</h2>
+  <div class="cols two">
+    <div>
+      <p class="body">Each outcome is estimated over 40 subsets, so a nominal p
+      value does not control the false positive rate across the family.
+      Benjamini and Hochberg adjustment is applied within each outcome, over the
+      subsets, after sorting the p values in ascending order.<button
+      class="qhelp" type="button" data-help="bh" aria-expanded="false"
+      aria-label="About: adjustment for multiple subsets">?</button></p>
+      <div class="eqwrap" id="eq-bh"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><msup><mi>p</mi><mi>BH</mi></msup><mo>(</mo><mi>k</mi><mo>)</mo></msub><mo>=</mo><munder><mi>min</mi><mrow><mi>j</mi><mo>&#8805;</mo><mi>k</mi></mrow></munder><mi>min</mi><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mfrac><mrow><mi>m</mi><msub><mi>p</mi><mo>(</mo><mi>j</mi><mo>)</mo></msub></mrow><mi>j</mi></mfrac></mrow><mo>)</mo></mrow></math><div class="mathfall">p^{\text{BH}}_{(k)} \;=\; \min_{j \ge k}\; \min\!\left(1,\; \frac{m\, p_{(j)}}{j}\right)</div><div class="eqcap">Benjamini and Hochberg adjustment within one outcome over m subsets.</div><details class="eqsrc"><summary>LaTeX source</summary><code>p^{\text{BH}}_{(k)} \;=\; \min_{j \ge k}\; \min\!\left(1,\; \frac{m\, p_{(j)}}{j}\right)</code></details></div>
+    </div>
+    <div>
+      <p class="body">A null is uninformative without the size of the effect the
+      cell could have found, so every cell reports the minimum detectable effect
+      at 80 per cent power, which follows from the standard error of the log rate
+      ratio.<button class="qhelp" type="button" data-help="mde"
+      aria-expanded="false" aria-label="About: the smallest detectable effect"
+      >?</button></p>
+      <div class="eqwrap" id="eq-mde"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>MDE</mi><mo>=</mo><mn>100</mn><mo>(</mo><mrow><mn>1</mn><mo>&#8722;</mo><msup><mi>e</mi><mrow><mo>&#8722;</mo><mn>2.802</mn><mover><mi>se</mi><mo>&#94;</mo></mover></mrow></msup></mrow><mo>)</mo></mrow></math><div class="mathfall">\text{MDE} \;=\; 100\left(1 - e^{-2.802\,\widehat{\text{se}}}\right)</div><div class="eqcap">The smallest effect the cell could detect at 80 per cent power, as a percentage.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\text{MDE} \;=\; 100\left(1 - e^{-2.802\,\widehat{\text{se}}}\right)</code></details></div>
+    </div>
+  </div>
+  <div class="tiles">
+    <div class="tile"><div class="v">6.2%</div><div class="k">smallest detectable
+      reduction in all crashes, signage only at a junction, 2026 treated
+      units</div></div>
+    <div class="tile"><div class="v">11.6%</div><div class="k">the same cell on
+      pedestrian injuries</div></div>
+    <div class="tile"><div class="v">23.8%</div><div class="k">pedestrian
+      injuries, hardened at a junction, 143 treated units</div></div>
+    <div class="tile bad"><div class="v">36</div><div class="k">cells of 258
+      carrying fewer than the minimum of 25 treated units, so they are not
+      read</div></div>
+  </div>
+  <p class="note">A null with a bound of 6 per cent excludes a moderate benefit.
+  A null with a bound of 60 per cent excludes almost nothing. The bounds reported
+  across the 240 cells run from 6 per cent to 96 per cent, which is why the bound
+  is printed beside every null rather than left for a reader to guess.</p>
+</section>
+
+<!-- ============================================================= 15. results -->
+<section class="slide">
+  <p class="kicker">Falsification tested specification</p>
+  <h2>Results over 240 cells</h2>
+  <ol class="pts">
+    <li><b class="lab">240 cells, being 40 estimable subsets on 6 outcomes.</b>
+    The admission rule is applied to every one: at least 25 treated units,
+    significance after Benjamini and Hochberg within the outcome, and a placebo
+    consistent with no effect.</li>
+    <li><b class="lab">117 of the 235 cells carrying a placebo fail it.</b> The
+    failing placebos are one sided, toward fewer crashes before installation,
+    which is the signature of comparison groups that regress to the mean.</li>
+    <li><b class="lab">39 cells are significant before adjustment and 14
+    after.</b> 13 of those 14 carry a placebo that rejects no effect.</li>
+    <li><b class="lab">The single cell that survives everything is an
+    increase.</b> Pedestrian injuries in the 2025 sign only cohort, 2.409 with
+    interval 1.263 to 4.595 on 107 units, over 12 months of follow up and with a
+    smallest detectable effect of 60 per cent; the same design produces false
+    increases on 78 per cent of null draws under selection on a persistent
+    level, so this is reported as a property of the design rather than as
+    harm.</li>
+    <li><b class="lab">No reduction survives.</b> 7 cells do not identify and 18
+    hold fewer than 25 units. The hardened daylighting cells fail the placebo
+    test and are reported for completeness rather than as findings.</li>
+  </ol>
+  <p class="note">Source: data/subset_estimates.csv; logs/stats_subsets.md final
+  line; data/results_design_compare.json ours.exp3null.</p>
+</section>
+
+<!-- =========================================================== 16. agreement -->
+<section class="slide">
+  <p class="kicker">Two designs</p>
+  <h2>Agreement between the two designs</h2>
+  <p class="lead">Across 40 subsets and 6 outcomes the two designs agree on the
+  direction of the estimate in <b class="lab">125 of 241</b> comparable cells,
+  which is the rate independent signs would produce.<button class="qhelp"
+  type="button" data-help="designs" aria-expanded="false"
+  aria-label="About: neither design is better in general">?</button></p>
+  <div class="tiles">
+    <div class="tile"><div class="v">75</div><div class="k">significant
+      reductions under the published specification on the extended record</div></div>
+    <div class="tile"><div class="v">1</div><div class="k">significant reduction
+      under the falsification tested specification</div></div>
+    <div class="tile bad"><div class="v">0</div><div class="k">cells both designs
+      call a significant reduction</div></div>
+    <div class="tile bad"><div class="v">65</div><div class="k">of the extended
+      record cells whose own placebo rejects no effect</div></div>
+  </div>
+  <p class="body">A cell counts as a significant reduction when its estimate lies
+  below no effect at p under 0.05 without adjustment. The single reduction under
+  the falsification tested specification is the sign only arm of the January to
+  August 2024 list on vehicle to vehicle injury crashes, 0.634 [0.430, 0.935] at
+  p = 0.021, and its Benjamini and Hochberg adjusted p value is 0.609, so it does
+  not survive the adjustment either.</p>
+  <div class="warnbox">
+    <p>A rate ratio and a difference in counts per intersection per year are never
+    comparable in magnitude, because no effect is 1 on one scale and 0 on the
+    other. The two columns can be compared on direction and on significance, and
+    they cannot be ordered or averaged together.<button class="qhelp"
+    type="button" data-help="scales" aria-expanded="false"
+    aria-label="About: two scales">?</button></p>
+  </div>
+</section>
+<section class="slide">
+  <p class="kicker">Conclusion, extended record</p>
+  <h2>What the extended record settles</h2>
+  <ol class="pts">
+    <li><b class="lab">The published design finds reductions almost everywhere it
+    looks.</b> Held fixed and applied to 40 subsets on 6 outcomes, it returns 76
+    significant reductions out of 233 estimable cells.</li>
+    <li><b class="lab">It finds them in places no mechanism connects.</b> The same
+    design returns a significant reduction for paint only turn calming and for
+    cohorts that are lists of locations rather than treatments, at similar
+    magnitudes to the hardened estimate.</li>
+    <li><b class="lab">Its own placebo rejects.</b> Displace every installation
+    date into pre treatment months and re estimate: the design still reports a
+    significant reduction, on months when no work had been done. That is a
+    property of the design rather than of any treatment.</li>
+    <li><b class="lab">A reader who stops here should conclude</b> that a
+    reduction from this design is not evidence about a treatment, because the
+    design produces one when the treatment is absent.</li>
+  </ol>
+  <p class="note">Source: data/subset_estimates.csv dot_diff, dot_p,
+  dot_placebo_p; logs/stats_subsets.md agreement block.</p>
+</section>
+
+<!-- ========================================================= 17. calibration -->
+<section class="slide">
+  <p class="kicker">Instrument test</p>
+  <h2>Calibration against a known answer</h2>
+  <p class="body">Data in which the true effect is known is supplied to each
+  design, and what the design reports is scored. The comparison group and the
+  estimator are crossed, so each one's contribution is separated. Correct size is
+  5 per cent in the six rejection columns; the power column reports how often a
+  design finds a true reduction of 20 per cent. 200 draws for the random date
+  experiment, and 100 draws per window for the spike experiment with 143 fake
+  sites per draw.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th class="w">Comparison group and estimator</th>
+      <th class="n">Random dates</th>
+      <th class="n">Spike, &minus;12 to 0</th><th class="n">Spike, &minus;24 to &minus;12</th>
+      <th class="n">Spike, &minus;36 to &minus;12</th><th class="n">Spike, &minus;36 to 0</th>
+      <th class="n">Persistent level</th><th class="n">Power</th>
+      <th class="n">Mean estimate</th></tr></thead>
+    <tbody>
+      <tr><td class="w">Corridor, arithmetic mean and t test</td>
+        <td class="n">27.0%</td><td class="n">35.0%</td><td class="n">36.0%</td>
+        <td class="n">79.0%</td><td class="n">88.0%</td>
+        <td class="n">5.0%</td><td class="n">62.0%</td>
+        <td class="n">&minus;0.1753</td></tr>
+      <tr><td class="w">Corridor, fixed effects Poisson</td>
+        <td class="n">2.0%</td><td class="n">42.4%</td><td class="n">34.3%</td>
+        <td class="n">53.0%</td><td class="n">83.0%</td>
+        <td class="n">5.0%</td><td class="n">42.0%</td>
+        <td class="n">0.8005</td></tr>
+      <tr><td class="w">Matched, arithmetic mean and t test</td>
+        <td class="n">27.0%</td><td class="n">39.0%</td><td class="n">6.0%</td>
+        <td class="n">5.0%</td><td class="n">32.0%</td>
+        <td class="n">57.0%</td><td class="n">5.0%</td>
+        <td class="n">+0.0041</td></tr>
+      <tr><td class="w">Matched, fixed effects Poisson</td>
+        <td class="n">31.0%</td><td class="n">46.9%</td><td class="n">11.2%</td>
+        <td class="n">4.0%</td><td class="n">18.0%</td>
+        <td class="n">78.0%</td><td class="n">12.0%</td>
+        <td class="n">1.0745</td></tr>
+    </tbody>
+  </table>
+  </div>
+  
+  <div class="warnbox">
+    <p>Neither design is better in general. Each attains approximately the
+    nominal rejection rate in one regime of site selection and rejects far too
+    often in the other, and each design's bias runs in the direction of the
+    estimate that design reports. The city's design, on corridor comparisons,
+    reports a benefit, and a corridor rule produces false benefits under spike
+    selection. This study's design, on matched comparisons, reports harm at the
+    hardened corners, and matching produces false harm under level selection.
+    Neither result is evidence about daylighting until the mixture of transient
+    and persistent in the city's selection is known, and that mixture cannot be
+    established from the published record, because the city has published neither
+    the list it selected from nor the vintage of the crash data it selected
+    on.<button class="qhelp" type="button" data-help="designs"
+    aria-expanded="false" aria-label="About: neither design is better in general"
+    >?</button></p>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="kicker">Instrument test</p>
+  <h2>What the calibration establishes</h2>
+  <ol class="steps">
+    <li><b class="lab">Selection on a transient spike.</b> A corridor comparison
+    produces a false benefit on 34 to 88 per cent of draws in every window,
+    because it balances location and nothing else, so it cannot absorb a spike at
+    the treated corner however that spike is timed. A matched comparison gives
+    4.0 per cent in the window the matcher balances, months &minus;36 to
+    &minus;12, and 46.9 per cent in the final year the matcher deliberately
+    withholds.</li>
+    <li><b class="lab">Selection on a persistent level.</b> The corridor cells
+    are exactly sized at 5.0 per cent and recover the truth, 0.8005 against a
+    true 0.80. The matched cells reject on 57 and 78 per cent of null draws, and
+    the matched Poisson pair returns 1.0745 when the truth is 0.80, so it reports
+    an increase where the truth is a reduction of a fifth.</li>
+  </ol>
+</section>
+
+<!-- ========================================================== 18. selection -->
+<section class="slide">
+  <p class="kicker">Site selection</p>
+  <h2>How sites are chosen</h2>
+  <p class="body">The city designates 304 Vision Zero priority intersections,
+  being the intersections that cumulatively account for 15 per cent of a
+  borough's pedestrian killed or seriously injured total. Treated corners are far
+  more likely to be one than an intersection carrying no device.<button
+  class="qhelp" type="button" data-help="selection" aria-expanded="false"
+  aria-label="About: how sites are chosen">?</button></p>
+  <div class="cols two">
+    <div class="scroll">
+    <table>
+      <thead><tr><th class="w">Group</th><th class="n">Units</th>
+        <th class="n">At a priority intersection</th>
+        <th class="n">Ratio to the comparison pool</th></tr></thead>
+      <tbody>
+        <tr><td class="w">Intersections with no device</td><td class="n">22066</td><td class="n">0.5%</td><td class="n">1.0</td></tr>
+        <tr><td class="w">Signage only at a junction</td><td class="n">5149</td><td class="n">1.7%</td><td class="n">3.6</td></tr>
+        <tr><td class="w">Hardened at a junction</td><td class="n">1438</td><td class="n">2.8%</td><td class="n">5.8</td></tr>
+        <tr><td class="w">Turn calming</td><td class="n">1484</td><td class="n">9.7%</td><td class="n">20.2</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Co treatment is larger still. 65.5 per cent of hardened
+    daylighting corners lie within 40 m of a street improvement project corridor,
+    against 20.7 per cent of the comparison pool, and 76.8 per cent of turn
+    calming corners lie on a retimed corridor against 19.7 per cent. A comparison
+    group balanced on crash history and geometry is unbalanced on both of
+    these.</p>
+    </div>
+    <div>
+      <p class="body">A corner chosen because its count is high tends to fall
+      afterwards whether or not it is treated, which is regression to the mean,
+      and a before and after comparison attributes that fall to whatever was
+      installed. The drift is measured directly: pedestrian crashes at physically
+      treated sites were already falling 0.464 per cent per month relative to
+      their matched comparison intersections before anything was installed, at
+      p below 0.001, while non pedestrian crashes at the same sites were
+      flat.<button class="qhelp" type="button" data-help="drift"
+      aria-expanded="false"
+      aria-label="About: the pre treatment drift and the admission rule">?</button></p>
+      <div class="eqwrap" id="eq-drift"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>trend</mi><mn>24</mn></msub><mo>=</mo><msup><mo>(</mo><mrow><mn>1</mn><mo>+</mo><mi>&#948;</mi></mrow><mo>)</mo><mn>24</mn></msup><mo>,</mo><mo>&#160;</mo><mi>share</mi><mo>=</mo><mfrac><mrow><mi>log</mi><msub><mi>trend</mi><mn>24</mn></msub></mrow><mrow><mi>log</mi><mover><mi>&#952;</mi><mo>&#94;</mo></mover></mrow></mfrac></mrow></math><div class="mathfall">\text{trend}_{24} = (1+\delta)^{24}, \qquad \text{share} = \frac{\log \text{trend}_{24}}{\log \hat\theta}</div><div class="eqcap">The compounded pre treatment drift, and the share of an estimate it accounts for.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\text{trend}_{24} = (1+\delta)^{24}, \qquad \text{share} = \frac{\log \text{trend}_{24}}{\log \hat\theta}</code></details></div>
+      <p class="body">Compounded over the 24 months of an after period that drift
+      alone predicts a factor of 0.894, which is the magnitude of the benefit the
+      published design reports. A before period of 24 months with no placebo
+      cannot distinguish the two.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= 19. turn calming -->
+<section class="slide snug">
+  <p class="kicker">What the treatment variable contains</p>
+  <h2>Eleven treatments under one name</h2>
+  <p class="lead">The inventory publishes eleven classes of turn calming, and they
+  differ in mechanism, so an estimate for turn calming pooled is an estimate for
+  whatever mixture the inventory happens to hold.<button class="qhelp"
+  type="button" data-help="turncalming" aria-expanded="false"
+  aria-label="About: turn calming is eleven treatments">?</button></p>
+  <div class="cols two">
+    <div class="scroll">
+    <table>
+      <thead><tr><th class="w">Class</th><th class="n">Records</th>
+        <th class="w">Mechanism</th></tr></thead>
+      <tbody>
+        <tr><td class="w">Left turn treatment</td><td class="n">809</td><td class="w">not published</td></tr>
+        <tr><td class="w">Quick kurb</td><td class="n">222</td><td class="w">narrowing, a plastic curb line</td></tr>
+        <tr><td class="w">Rubber speed bump</td><td class="n">121</td><td class="w">vertical deflection</td></tr>
+        <tr><td class="w">Hardened centreline</td><td class="n">119</td><td class="w">narrowing, a raised centre line</td></tr>
+        <tr><td class="w">Right turn treatment</td><td class="n">98</td><td class="w">not published</td></tr>
+        <tr><td class="w">Markings only</td><td class="n">28</td><td class="w">paint alone</td></tr>
+        <tr><td class="w">Bicycle island</td><td class="n">27</td><td class="w">narrowing, a channelising island</td></tr>
+        <tr><td class="w">Delineators</td><td class="n">25</td><td class="w">vertical posts</td></tr>
+        <tr><td class="w">Davidsons</td><td class="n">19</td><td class="w">vertical posts</td></tr>
+        <tr><td class="w">Median extension</td><td class="n">17</td><td class="w">narrowing, a lengthened median</td></tr>
+        <tr><td class="w">Pegatracks</td><td class="n">2</td><td class="w">a surface treatment</td></tr>
+        <tr><td class="w">No class recorded</td><td class="n">4</td><td class="w">not published</td></tr>
+        <tr class="tot"><td class="w">Every record</td><td class="n">1491</td><td class="w">eleven published classes</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div>
+      <div class="tiles" style="grid-template-columns:1fr">
+        <div class="tile bad"><div class="v">907 of 1491</div><div class="k">
+          records stating that a turn was treated without stating what was
+          installed, which is 61 per cent</div></div>
+      </div>
+      <ol class="pts">
+    <li>The two classes carrying the material string generic turn treatment, being left turn treatment and right turn treatment, account for those 907 records. For most of the programme the city records that a turn was treated and does not record what was installed, and the Vision Zero View turn calming layer carries exactly the four fields already held, so those records cannot be resolved from it. Obtaining them requires a records request.</li>
+    <li>Paint alone and a rebuilt median act on a turning driver through different mechanisms, so pooling them estimates the average of a mixture whose composition is set by what the publisher chose to describe.</li>
+  </ol>
+  </div>
+  </div>
+</section>
+
+<!-- =============================================================== 20. curb -->
+<section class="slide">
+  <p class="kicker">Confounding at the corner</p>
+  <h2>Curb already cleared by a hydrant or a bus stop</h2>
+  <p class="lead">The observation belongs to the agency. Its January 2025 report
+  contains a hydrant zone analysis, defines a hydrant zone as hydrants and bus
+  stops, and reports a normalised injury rate 30 per cent higher at 7558 such
+  intersections out of 20543 eligible, of which 90 per cent are fire hydrants and
+  10 per cent bus stops.<button class="qhelp" type="button" data-help="precleared"
+  aria-expanded="false" aria-label="About: curb that was already clear"
+  >?</button></p>
+  <p class="body">That analysis is cross sectional. It compares intersections
+  that have a hydrant zone against those that do not, so it cannot separate the
+  effect of the cleared curb from whatever caused a hydrant to be sited there,
+  and the report's own footnote records that hydrant zone locations average 0.82
+  injuries per intersection per year, which is low.</p>
+  <div class="cols two">
+    <ol class="pts">
+    <li><b class="lab">A test inside the treated arm.</b> 109725 hydrants and 13618 distinct bus stops are held with their positions. At the working radius of 12 m, 20.5 per cent of daylighted corners at a junction were already clear, against 16.6 per cent of intersections carrying no device. The test here splits the treated arm by whether the corner was already clear and compares treated corners against other treated corners, so it does not rest on a treated against untreated comparison at all.</li>
+    <li><b class="lab">The registered prediction.</b> Less changed at a corner that was already clear, so that arm should move less. All seven contrasts run in the predicted direction. Daylighting at a junction: 1.099 where the corner was already clear against 0.920 where it was newly cleared, on 426 and 1584 units, z = 1.80, p = 0.071. Turn calming: 1.191 against 0.884, on 90 and 773 units, z = 2.65, p = 0.008.</li>
+  </ol>
+  </div>
+</section>
+
+<!-- ============================================================= 21. status -->
+<section class="slide snug">
+  <p class="kicker">What the record supports</p>
+  <h2>Status by treatment class</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th class="w">Class</th><th class="w">Status</th>
+      <th class="w">What can be said</th></tr></thead>
+    <tbody>
+      <tr><td class="w">Daylighting by signs and markings</td>
+        <td class="w"><span class="tag ok">settled</span></td>
+        <td class="w">Both comparison rules and both estimators give the same
+        answer, so no contested design choice affects the conclusion, and on the
+        city's own cohort of 2019 to 2021 both placebos are clear. There is no
+        detectable effect on crash frequency, bounded at 6.2 per cent on all
+        crashes and 11.6 per cent on pedestrian injuries. The pooled cells on the
+        extended grid are refused by their own placebo, so the bound rather than
+        the point estimate is the finding. Compliance is a plausible mechanism:
+        complaints about cars parked against the new signs double relative to
+        matched comparison intersections, at a rate ratio of 2.00 [1.05, 3.83],
+        p = 0.036.</td></tr>
+      <tr><td class="w">Hardened daylighting</td>
+        <td class="w"><span class="tag bad">not settled by either design</span></td>
+        <td class="w">The published benefit and this study's harm are each that
+        design's characteristic bias under the regime of selection the hardened
+        corners occupy. This study's own gate refuses these cells, because their
+        placebo rejects no effect. No number should be quoted in either
+        direction.</td></tr>
+      <tr><td class="w">Turn calming</td>
+        <td class="w"><span class="tag bad">disqualified on the published estimate</span></td>
+        <td class="w">The published estimate's repaired placebo reproduces 87 per
+        cent of its estimate. Under the falsification tested specification the
+        pooled class is refused by its placebo, and the class is eleven
+        treatments of which 907 of 1491 records do not state what was
+        installed.</td></tr>
+      <tr><td class="w">Individual hardening materials</td>
+        <td class="w"><span class="tag bad">unanswerable</span></td>
+        <td class="w">The largest single material class in the published record
+        holds 49 corners, at which size the comparison could only detect a change
+        of 25 per cent or more. Physical hardening installed before 2024 appears
+        in no public inventory, so granite blocks and planters are largely
+        invisible.</td></tr>
+      <tr><td class="w">Leading pedestrian intervals</td>
+        <td class="w"><span class="tag ok">a detected effect</span></td>
+        <td class="w">A different treatment, estimated by the same design on the
+        same crash table with the same comparison rule: pedestrian crashes 0.886
+        [0.855, 0.919] and all crashes 0.923 [0.908, 0.937] on 6085 units, with a
+        placebo of 1.009 at p = 0.71.<button class="qhelp" type="button"
+        data-help="poscontrol" aria-expanded="false"
+        aria-label="About: the positive control">?</button></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="body">The positive control carries more weight than any individual
+  null, because it shows that this design detects an effect of the size the
+  daylighting literature claims. The daylighting nulls are therefore statements
+  about daylighting rather than about a design too blunt to see anything.</p>
+</section>
+
+<!-- ============================================================= 22. settle -->
+<section class="slide">
+  <p class="kicker">Study design</p>
+  <h2>What would settle the question</h2>
+  <ol class="steps">
+    <li><b class="lab">The published location list.</b> The 756 locations behind
+    the January 2025 report are not published, so a reproduction of that
+    specification is a reproduction of a method rather than of a sample. The
+    hardened arm rebuilt here holds 84 e scooter corrals, 15 rubber speed bumps
+    and 4 bicycle islands against their 134 Citi Bike stations, 3 bicycle
+    corrals, 33 turn calming projects, 14 neckdowns and 5 enhanced crossings.
+    Publishing the list closes that gap at no cost.<button class="qhelp"
+    type="button" data-help="settle" aria-expanded="false"
+    aria-label="About: what would settle the question">?</button></li>
+    <li><b class="lab">A comparison group not selected on lagged outcomes.</b>
+    Matching on lagged crash counts is protective when selection acts on a
+    transient component and harmful when it acts on a persistent one, and a
+    corridor rule behaves in the opposite way for the same reason. Both biases
+    are properties of choosing comparisons from the outcome history. A design
+    that selects its comparison group on crash history should at minimum report
+    the achieved exposure of that group beside its estimate; neither design here
+    did.</li>
+    <li><b class="lab">A staggered rollout with a published eligibility list.</b>
+    Local Law 66 obliges at least 100 intersections a year, so the eligible set
+    is larger than the set treated in any one year. Publishing the eligibility
+    list and the order of treatment lets the comparison group be defined
+    before the outcome is observed rather than matched to it afterwards.</li>
+  </ol>
+  <div class="infobox">
+    <p>Two repairs cost nothing and are worth stating separately. A crash window
+    should extend at least one before period earlier than the earliest
+    installation analysed, so that a placebo is computable at all. And the eleven
+    turn calming classes, together with what was installed at the 907 records
+    that do not say, are already recorded inside the agency; releasing that field
+    makes the class testable.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 23. sources -->
+<section class="slide">
+  <p class="kicker">The obvious objection</p>
+  <h2>Is the placebo excluding everything because it is broken?</h2>
+  <ol class="pts">
+    <li><b class="lab">The pattern demands the question.</b> 117 of 235 cells with
+    a placebo fail it, and every reduction that clears multiplicity control fails
+    it. A test that excludes almost everything is either detecting a real problem
+    or malfunctioning.</li>
+    <li><b class="lab">Evidence that it detects a real problem.</b> The placebo
+    estimates are large and one sided: 0.554 for the posts and blocks programme,
+    0.672 for pooled hardened daylighting, 0.770 for turn calming. A malfunction
+    would scatter around 1. A pre treatment trend toward fewer crashes at treated
+    corners produces exactly this.</li>
+    <li><b class="lab">Evidence that the test is too strict.</b> It is a
+    significance test, so on 235 cells with samples in the thousands it rejects on
+    trends too small to matter. A placebo of 0.97 that is significant excludes a
+    cell over a 3 per cent pre trend.</li>
+    <li><b class="lab">Both are true, and they are separable.</b> The size of the
+    placebo departure distinguishes them, and no current output reports the
+    exclusions ranked by that size.</li>
+  </ol>
+  <p class="note">Source: data/subset_estimates.csv placebo_irr, placebo_p over
+  235 cells with a placebo.</p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Further analysis</p>
+  <h2>Six analyses that would separate the two readings</h2>
+  <ol class="pts">
+    <li><b class="lab">Report the placebo as a magnitude rather than a verdict.</b>
+    Rank every excluded cell by how far its placebo sits from 1, and read the
+    cells whose placebo is within a stated tolerance. A cell with a placebo of
+    0.98 and a cell with a placebo of 0.55 are not the same evidence.</li>
+    <li><b class="lab">Estimate the pre treatment trend directly.</b> Fit event
+    time coefficients over months minus 36 to minus 1 and test their slope. A flat
+    pre trend with a significant placebo indicts the placebo; a sloped one indicts
+    the comparison group.</li>
+    <li><b class="lab">Match without using lagged outcomes.</b> Match on borough,
+    geometry, and traffic volume alone. Matching on crash history is what induces
+    regression to the mean, so a design that avoids it has a placebo with no
+    mechanical reason to reject.</li>
+    <li><b class="lab">Use the never treated as the comparison group.</b> Compare
+    treated corners against corners that were never treated in any year rather
+    than against corners matched to them, and absorb selection with borough by
+    month effects.</li>
+    <li><b class="lab">Exploit the eligibility list.</b> Local Law 66 requires at
+    least 100 intersections a year, chosen from a stated priority set. Corners on
+    the priority set that were not yet reached are the natural comparison group,
+    and they are selected the same way the treated corners were.</li>
+    <li><b class="lab">Calibrate the placebo itself.</b> Simulate under a known
+    null with a known pre trend and record how often the placebo rejects. That
+    gives the placebo a false positive rate, which is the number needed to decide
+    whether 117 of 235 is too many.</li>
+  </ol>
+  <p class="note">Each is a change to src/stats_subsets.py or src/matching.py; none
+  requires data the project does not hold.</p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Further analysis</p>
+  <h2>What the results look like with the placebo test switched off</h2>
+  <ol class="pts">
+    <li><b class="lab">The statistical companion carries the switch.</b> Turning
+    the placebo requirement off in analysis.html leaves multiplicity control and
+    the unit floor in place, and shows what the study would report under the
+    admission rule the published analysis used, which contains no placebo.</li>
+    <li><b class="lab">Off, the matched Poisson design reports 14 significant
+    cells.</b> Of those, 13 have a placebo that rejects no effect, and 1 does
+    not.</li>
+    <li><b class="lab">Off, the reported directions reverse the published
+    story.</b> The significant cells under this design are increases rather than
+    reductions, including 1.439 for the posts and blocks programme on pedestrian
+    crashes.</li>
+    <li><b class="lab">That is why the switch is a diagnostic rather than a
+    setting.</b> Neither position gives a defensible estimate: on, nothing
+    survives; off, what survives is an increase from a design that produces false
+    increases at 78 per cent of null draws under the selection these corners
+    display.</li>
+  </ol>
+  <p class="note">Source: data/subset_estimates.csv p_bh, placebo_p;
+  data/results_design_compare.json ours.exp3null.</p>
+</section>
+
+<section class="slide snug">
+  <p class="kicker">Provenance</p>
+  <h2>Sources: the agency documents</h2>
+  <ol class="refs">
+<li><b class="lab">NYC DOT, Daylighting and Street Safety: An Analysis,
+    January 2025.</b> The analysis reproduced here, mandated by Local Law 66 of
+    2023, a before and after difference in differences on 756 locations against
+    corridor comparison locations. Source of the five device rows of the hardened
+    arm, the hydrant zone analysis, the four case study cities, the four
+    endorsements, the summary of California AB 413 and the statement that there
+    is little direct evidence connecting daylighting to safety. Local copy
+    <code>data/raw/nycdot_daylighting_jan2025.txt</code>.</li>
+<li><b class="lab">NYC DOT, Daylighting Report on the Record, November
+    2025.</b> Restates the same estimates and gives the hydrant zone sample:
+    7558 intersections with hydrant zones, 90 per cent fire hydrants and 10 per
+    cent bus stops, out of 20543 eligible. Local copy
+    <code>data/raw/dot_daylighting_rotr_nov2025.txt</code>.</li>
+<li><b class="lab">NYC DOT, Safety Treatment Evaluation 2005 to 2018,
+    published 2022.</b> A three page report whose sample size table is the source
+    of the <b class="lab">266 curb and sidewalk extensions</b> over 9.5
+    centreline miles, a category its own text states includes neckdowns. It
+    publishes no locations for them, and no location list for them is published
+    anywhere: NYC Open Data holds no matching dataset, Vision Zero View has no
+    curb extension family among its 260 layers, and of 996 street improvement
+    project corridors and 424 intersections exactly four name a curb extension.
+    The report has no comparison group and no significance test. Source of the
+    three turn calming outcome panels, being all road users, pedestrians and
+    motor vehicle occupants. Local copy
+    <code>data/raw/nycdot_safety_treatment_eval_2005_2018.txt</code>.</li>
+<li><b class="lab">Local Law 66 of 2023, City of New York</b>,
+    Administrative Code section 19-175.8. Study due 1 May 2024; at least 100
+    intersections daylighted annually from 1 January 2025; location level
+    reporting beginning with calendar 2025 under subsection (g), due 1 February
+    2026. Local copy <code>data/raw/local_law_66_2023.pdf</code>.</li>
+
+  </ol>
+</section>
+
+<section class="slide">
+  <p class="kicker">Provenance</p>
+  <h2>Sources: guidance, map services and data</h2>
+  <ol class="refs" start="5">
+<li><b class="lab">Kumfer and others, DDOT-RDT-26-02, 2026.</b> A Washington
+    DC study of 47 curb extensions, federally sponsored and academically
+    authored, with driver yielding and pedestrian satisfaction as its outcomes,
+    collected by survey and video. It is not a journal article. Held at ROSA-P
+    record <code>dot/90280</code>, which blocks automated retrieval, so it is
+    cited from its TRID record.</li>
+<li><b class="lab">Four guidance documents, the endorsements the January 2025
+    report cites.</b> The Manual on Uniform Traffic Control Devices; the Federal
+    Highway Administration's 2018 guide to uncontrolled crossing locations; the
+    National Association of City Transportation Officials urban street design
+    guide; and a National Cooperative Highway Research Program guide. Each
+    recommends the practice and none evaluates it.</li>
+<li><b class="lab">Vision Zero View, retrieved 2026-07-29.</b> 260 map
+    service layers over 14 treatment families and 45 catalogue assets, holding no
+    daylighting layer at all. Source of the 304 Vision Zero priority
+    intersections, the 996 street improvement project corridors, the 444 signal
+    retiming corridors, the 197 enhanced crossings, the 1491 turn calming records
+    and the 4259 speed hump records. Its turn calming layer carries exactly the
+    four fields already held.</li>
+<li><b class="lab">NYC Open Data, Motor Vehicle Collisions, dataset
+    h9gi-nx95.</b> The outcome for every design, reduced to
+    <code>data/crash_index.csv.gz</code> over 2012-07 to 2026-06. The other
+    inventory sources are the sign work orders <code>qt6m-xctn</code> and
+    <code>nfid-uabd</code>, the Speed Reducer Tracking System
+    <code>9n6h-pt9g</code>, Vision Zero View speed humps
+    <code>jknp-skuy</code>, raised crosswalks <code>uh2s-ftgh</code>, turn
+    calming <code>sm2x-35i7</code>, and the published daylighting list for
+    calendar 2025.</li>
+
+  </ol>
+  <p class="note">Retrieval date for every online source is 2026-07-29.</p>
+</section>
+
+<section class="slide">
+  <p class="kicker">About</p>
+  <h2>Author, programme and companion pages</h2>
+  <ol class="pts">
+    <li><b class="lab">Author.</b> Mehmet Kerem Turkcan, Associate Research
+    Scientist, Columbia University.
+    <a href="https://keremturkcan.com" target="_blank" rel="noopener">keremturkcan.com</a>,
+    <a href="mailto:mkt2126@columbia.edu">mkt2126@columbia.edu</a>.</li>
+    <li><b class="lab">Programme.</b> Created for the Research Experience for
+    Teachers programme of the Center for Smart Streetscapes, a National Science
+    Foundation Engineering Research Center.
+    <a href="https://center-for-smart-streetscapes-cs3.github.io/ret2026/"
+    target="_blank" rel="noopener">center-for-smart-streetscapes-cs3.github.io/ret2026</a>.</li>
+    <li><b class="lab">Companion pages.</b> Three pages share one set of
+    estimates: the map of the treatments
+    (<a href="explorer.html">explorer.html</a>), the statistical companion
+    (<a href="analysis.html">analysis.html</a>), and this deck.</li>
+    <li><b class="lab">Reproducibility.</b> Every number in this deck names the
+    file it was read from. The pipeline runs from
+    <code>python src/rebuild_all.py</code> through
+    <code>python src/stats_subsets.py</code>.</li>
+  <li><b class="lab">Repository documents.</b>
+    <code>EVIDENCE_PROVENANCE.md</code> for the document chain and the 266;
+    <code>DESIGN_COMPARISON.md</code> for the specification path and the three
+    calibration experiments; <code>FINDINGS.md</code> and <code>README.md</code>
+    for the results in prose; <code>data/analysis/*.json</code> for the cells, the
+    agreement counts, the calibration and the limitations, written by
+    <code>src/make_analysis_data.py</code>.</li>
+  </ol>
+</section>
+
+</div><!-- /deck -->
+
+<div class="rail" aria-hidden="true"><span id="rail"></span></div>
+<nav class="bar" aria-label="Slide controls">
+  <button class="ghost" id="prev" type="button">Previous</button>
+  <button class="ghost" id="next" type="button">Next</button>
+  <span class="count" id="count" role="status" aria-live="polite">1 / 1</span>
+  <span class="grow"></span>
+  <button class="ghost" id="themebtn" type="button">Dark</button>
+</nav>
+
+<script>
+  // Authorship and programme credit. Every page carries the same block, generated
+  // from one string so the three cannot disagree.
+  const CREDIT = '<h3>Author</h3>'
+    + '<p>Mehmet Kerem Turkcan, Associate Research Scientist, Columbia University. '
+    + '<a href="https://keremturkcan.com" target="_blank" rel="noopener">'
+    + 'keremturkcan.com</a>, '
+    + '<a href="mailto:mkt2126@columbia.edu">mkt2126@columbia.edu</a>.</p>'
+    + '<h3>Programme</h3>'
+    + '<p>This project was created for the Research Experience for Teachers '
+    + 'programme of the Center for Smart Streetscapes, a National Science '
+    + 'Foundation Engineering Research Center. '
+    + '<a href="https://center-for-smart-streetscapes-cs3.github.io/ret2026/" '
+    + 'target="_blank" rel="noopener">'
+    + 'center-for-smart-streetscapes-cs3.github.io/ret2026</a>.</p>'
+    + '<h3>Companion pages</h3>'
+    + '<p>Three pages share one set of estimates: the map of the treatments '
+    + '(<a href="explorer.html">explorer.html</a>), the statistical companion '
+    + '(<a href="analysis.html">analysis.html</a>) and the slide deck '
+    + '(<a href="slides.html">slides.html</a>).</p>';
+/* ------------------------------------------------------------------ the deck
+   One section per slide. Only the current slide is displayed on screen, and the
+   print stylesheet displays them all so that each one takes its own page. The
+   keyboard, the two buttons and the location hash all move the same index. */
+(function () {
+  "use strict";
+  var slides = [].slice.call(document.querySelectorAll("section.slide"));
+  var N = slides.length;
+  var cur = -1;
+  var count = document.getElementById("count");
+  var rail = document.getElementById("rail");
+  var prev = document.getElementById("prev");
+  var next = document.getElementById("next");
+
+  function closePopover() {
+    /* The shared bundle closes its popover on Escape, so a slide change asks it
+       to do exactly that rather than reaching into its private state. */
+    try {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    } catch (e) { /* a browser without the KeyboardEvent constructor */ }
+  }
+
+  function show(i, push) {
+    i = Math.max(0, Math.min(N - 1, i));
+    if (i === cur) return;
+    if (cur >= 0) closePopover();
+    slides.forEach(function (s, k) { s.classList.toggle("on", k === i); });
+    cur = i;
+    count.textContent = (i + 1) + " / " + N;
+    rail.style.width = (100 * (i + 1) / N) + "%";
+    prev.disabled = i === 0;
+    next.disabled = i === N - 1;
+    if (push !== false) {
+      try { history.replaceState(null, "", "#" + (i + 1)); }
+      catch (e) { location.hash = "#" + (i + 1); }
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function go(d) { show(cur + d); }
+
+  function fromHash() {
+    var n = parseInt(String(location.hash || "").replace(/[^0-9]/g, ""), 10);
+    return (n >= 1 && n <= N) ? n - 1 : 0;
+  }
+
+  prev.addEventListener("click", function () { go(-1); });
+  next.addEventListener("click", function () { go(1); });
+  addEventListener("hashchange", function () { show(fromHash(), false); });
+
+  document.addEventListener("keydown", function (ev) {
+    if (ev.metaKey || ev.ctrlKey || ev.altKey || ev.shiftKey) return;
+    var t = ev.target;
+    var tag = (t && t.tagName) ? t.tagName.toLowerCase() : "";
+    if (tag === "input" || tag === "textarea" || tag === "select"
+        || (t && t.isContentEditable)) return;
+    var onControl = tag === "button" || tag === "a" || tag === "summary";
+    var k = ev.key;
+    if (k === "ArrowRight" || k === "ArrowDown" || k === "PageDown") {
+      go(1); ev.preventDefault();
+    } else if (k === "ArrowLeft" || k === "ArrowUp" || k === "PageUp") {
+      go(-1); ev.preventDefault();
+    } else if (k === " " && !onControl) {
+      go(1); ev.preventDefault();
+    } else if (k === "Home") {
+      show(0); ev.preventDefault();
+    } else if (k === "End") {
+      show(N - 1); ev.preventDefault();
+    }
+  });
+
+  var themebtn = document.getElementById("themebtn");
+  function darkNow() {
+    var set = document.documentElement.getAttribute("data-theme");
+    return set ? set === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  themebtn.textContent = darkNow() ? "Light" : "Dark";
+  themebtn.addEventListener("click", function () {
+    var dark = darkNow();
+    document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+    themebtn.textContent = dark ? "Dark" : "Light";
+  });
+
+  show(fromHash(), false);
+  if (!location.hash) { try { history.replaceState(null, "", "#1"); } catch (e) {} }
+})();
+</script>
+
+<!-- generated by src/make_web_assets.py: do not edit -->
+<style>/* ---------------------------------------------------------------- equations */
+.eqwrap{margin:10px 0;padding:8px 10px;border:1px solid var(--line);
+  border-radius:8px;background:color-mix(in srgb, var(--ink) 3%, transparent)}
+.eqwrap math{font-size:1.12em;display:block;width:max-content;max-width:100%;
+  margin:2px auto 4px;overflow-x:auto;overflow-y:hidden;padding-bottom:2px;
+  scrollbar-width:thin}
+.eqcap{font-size:var(--fs-s);color:var(--ink2);line-height:1.4}
+.eqsrc{margin-top:4px}
+.eqsrc summary{font-size:var(--fs-s);color:var(--ink3);cursor:pointer}
+.eqsrc code{display:block;margin-top:4px;padding:6px 8px;background:var(--grid);
+  border-radius:6px;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12px;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+.mathfall{display:none;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12.5px;color:var(--ink);white-space:pre-wrap}
+.nomathml .eqwrap math{display:none}
+.nomathml .mathfall{display:block}
+
+/* ------------------------------------------------------------------ popover */
+.qhelp{display:inline-flex;align-items:center;justify-content:center;
+  width:15px;height:15px;margin-left:5px;border-radius:50%;
+  border:1px solid var(--axis);background:transparent;color:var(--ink3);
+  font-size:10.5px;line-height:1;font-weight:700;cursor:help;padding:0;
+  vertical-align:middle;flex:none}
+.qhelp:hover,.qhelp:focus-visible{color:var(--ink);border-color:var(--ink3);
+  background:color-mix(in srgb, var(--ink) 8%, transparent);outline:none}
+.qhelp[aria-expanded="true"]{background:var(--blue);border-color:var(--blue);
+  color:#fff}
+#pop{position:fixed;z-index:120;max-width:min(560px, 92vw);display:none;
+  background:var(--panel);color:var(--ink);border:1px solid var(--axis);
+  border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.26);
+  padding:12px 14px;font-size:var(--fs-s);line-height:1.5}
+#pop h4{margin:0 0 6px;font-size:var(--fs-b);font-weight:650}
+#pop p{margin:0 0 7px}
+#pop p:last-child{margin-bottom:0}
+#pop .pin{position:absolute;top:7px;right:9px;font-size:11px;color:var(--ink3)}
+#pop.pinned{border-color:var(--blue)}
+#popscrim{position:fixed;inset:0;z-index:119;display:none;background:transparent}</style>
+<div id="popscrim"></div>
+<div id="pop" role="dialog" aria-live="polite"></div>
+<script>window.HELPTEXT = {"placebo":{"title":"The placebo test","body":"<p>The estimate is recomputed with one change: the installation date of every treated\nsite is moved back in time, far enough that the whole analysis window falls in months\nbefore anything was built. The corners, the comparison locations, the estimator and the\noutcome all stay as they were. Because no treatment exists anywhere in that window, the\nhonest answer is no effect.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_shift\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>s</mi><mo>=</mo><mi>max</mi><mo>(</mo><mrow><mi>pre</mi><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">s \\;=\\; \\max\\!\\left(\\text{pre},\\; \\text{post}+1\\right)</div><div class=\"eqcap\">The placebo displacement, chosen so the placebo window ends before installation.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>s \\;=\\; \\max\\!\\left(\\text{pre},\\; \\text{post}+1\\right)</code></details></div>\n<p>Moving the date back only by the length of the before period is not sufficient. Under\na before period of 24 months and an after period of 24 months, that displacement puts\nthe final month of the placebo window on the installation month itself, which is partly\ntreated. Taking the larger of the before period and one month more than the after period\nends the placebo window at month minus one, so every month of it lies strictly before\ninstallation.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_window\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mo>[</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>]</mo><mo>&#160;</mo><mo>&#160;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>&#8804;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mn>1</mn></mrow></math><div class=\"mathfall\">\\left[\\,t_i - s - \\text{pre},\\;\\; t_i - s + \\text{post}\\,\\right], \\qquad t_i - s + \\text{post} \\;\\le\\; t_i - 1</div><div class=\"eqcap\">The placebo window, every month of it before the installation month.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\left[\\,t_i - s - \\text{pre},\\;\\; t_i - s + \\text{post}\\,\\right], \\qquad t_i - s + \\text{post} \\;\\le\\; t_i - 1</code></details></div>\n<p>A cell is read only when the placebo is consistent with no effect.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_test\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msup><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mi>plac</mi></msup><mo>=</mo><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>(</mo><mrow><msub><mi>t</mi><mi>i</mi></msub><mo>&#8594;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi></mrow><mo>)</mo><mo>,</mo><mo>&#160;</mo><msup><mi>p</mi><mi>plac</mi></msup><mo>&#8805;</mo><mn>0.05</mn></mrow></math><div class=\"mathfall\">\\hat\\theta^{\\text{plac}} \\;=\\; \\hat\\theta\\big(t_i \\to t_i - s\\big), \\qquad \\text{admit the cell only if } p^{\\text{plac}} \\ge 0.05</div><div class=\"eqcap\">The placebo estimate and the condition a cell must satisfy to be read.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta^{\\text{plac}} \\;=\\; \\hat\\theta\\big(t_i \\to t_i - s\\big), \\qquad \\text{admit the cell only if } p^{\\text{plac}} \\ge 0.05</code></details></div>\n<p>Because a decrease can appear in a window that contains no treatment, a decrease in\nthe real window with a failing placebo is reliably present and reliably not caused by the\ninstallation. The p value answers whether a result could have arisen by chance. The\nplacebo answers whether the specification produces that result without a treatment, and\nthose are different questions.</p>"},"why_flagged":{"title":"Why a significant decrease can still be flagged","body":"<p>Suppose a cell returns a decrease at p below 0.01, and the placebo on months\ncontaining no treatment also returns a decrease of similar size. Both cannot be caused by\nthe treatment, because in the placebo window there was no treatment. So the\nspecification produces decreases at these corners whether or not anything is installed,\nand the decrease in the real window cannot be attributed to the installation.</p>\n<p>The city selects sites on a deteriorating crash record, and it selects them on its own\npublished risk criterion: treated corners are 3.6 to 20.2 times more likely to be a\ndesignated Vision Zero priority intersection than an intersection carrying no device. A\ncorner chosen because its count is high tends to fall afterwards whether or not it is\ntreated, which is regression to the mean, and a before and after comparison attributes\nthat fall to whatever was installed.</p>\n<p>A flagged cell is evidence of no effect and it is evidence of an effect in neither\ndirection. It is a cell in which the design cannot separate the treatment from the reason\nthe site was chosen.</p>"},"arith":{"title":"The published estimator","body":"<p>For a site i with installation month t_i, Y_i(a,b) counts the outcome inside 30 m of\ni over the months from t_i plus a up to t_i plus b, and R_i(a,b) expresses that count as\nan annual rate.</p>\n<div class=\"eqwrap\" id=\"eq-rate\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo><mo>=</mo><mfrac><mrow><mn>12</mn><msub><mi>Y</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo></mrow><mrow><mi>b</mi><mo>&#8722;</mo><mi>a</mi></mrow></mfrac></mrow></math><div class=\"mathfall\">R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</div><div class=\"eqcap\">The outcome at one site, as an annual rate over a window of months.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</code></details></div>\n<div class=\"eqwrap\" id=\"eq-delta\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>=</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo><mo>&#8722;</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><mn>0</mn></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</div><div class=\"eqcap\">The change at one site, after minus before.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</code></details></div>\n<p>The estimate is the unweighted mean over treated sites of the change at the site minus\nthe mean change at that site's own comparison locations, tested against zero.</p>\n<div class=\"eqwrap\" id=\"eq-arith\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</div><div class=\"eqcap\">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</code></details></div>\n<div class=\"eqwrap\" id=\"eq-ttest\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>t</mi><mo>=</mo><mfrac><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mrow><msub><mi>s</mi><mi>d</mi></msub><mo>/</mo><msqrt><mi>n</mi></msqrt></mrow></mfrac></mrow></math><div class=\"mathfall\">t \\;=\\; \\frac{\\hat\\theta}{s_d/\\sqrt{n}}</div><div class=\"eqcap\">The test the published estimator uses, a two sided one sample t test on n minus 1 degrees of freedom.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>t \\;=\\; \\frac{\\hat\\theta}{s_d/\\sqrt{n}}</code></details></div>\n<p>Every treated site enters with weight one over n whatever its crash count, so the\nquantity estimated is the change at the mean treated corner. The scale is a difference in\ncounts per intersection per year, in which zero means no effect.</p>"},"fepois":{"title":"The fixed effects Poisson specification","body":"<p>The panel holds every unit k, treated and comparison together, and every calendar\nmonth t. A unit effect absorbs the level at a corner and a calendar month effect absorbs\na citywide shock common to that month.</p>\n<div class=\"eqwrap\" id=\"eq-fepois\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi mathvariant='double-struck'>E</mi><mo>[</mo><msub><mi>Y</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>&#8739;</mo><mi>&#945;</mi><mo>,</mo><mi>&#947;</mi><mo>,</mo><mi>D</mi><mo>]</mo><mo>=</mo><mi>exp</mi><mo>(</mo><mrow><msub><mi>&#945;</mi><mi>k</mi></msub><mo>+</mo><msub><mi>&#947;</mi><mi>t</mi></msub><mo>+</mo><mi>&#946;</mi><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\mathbb{E}\\!\\left[Y_{kt} \\mid \\alpha,\\gamma,D\\right] \\;=\\; \\exp\\!\\left(\\alpha_k + \\gamma_t + \\beta\\, D_{kt}\\right)</div><div class=\"eqcap\">The fixed effects Poisson specification, with a unit effect and a calendar month effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\mathbb{E}\\!\\left[Y_{kt} \\mid \\alpha,\\gamma,D\\right] \\;=\\; \\exp\\!\\left(\\alpha_k + \\gamma_t + \\beta\\, D_{kt}\\right)</code></details></div>\n<div class=\"eqwrap\" id=\"eq-treatind\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>=</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>k</mi><mo>&#160;</mo><mi>treated</mi><mo>}</mo><mo>&#183;</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>t</mi><mo>&gt;</mo><msub><mi>t</mi><mrow><mi>i</mi><mo>(</mo><mi>k</mi><mo>)</mo></mrow></msub><mo>}</mo></mrow></math><div class=\"mathfall\">D_{kt} \\;=\\; \\mathbf{1}\\{k \\text{ treated}\\}\\cdot\\mathbf{1}\\{t &gt; t_{i(k)}\\}</div><div class=\"eqcap\">The treatment indicator, one after installation at a treated unit and zero everywhere else.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>D_{kt} \\;=\\; \\mathbf{1}\\{k \\text{ treated}\\}\\cdot\\mathbf{1}\\{t &gt; t_{i(k)}\\}</code></details></div>\n<p>The month at event time zero is excluded, because an installation month is partly\ntreated. Inference uses the CRV1 cluster robust variance estimator with standard errors\nclustered by match group, in which a match group is a treated unit together with its own\ncomparison locations. The reported quantity is a rate ratio.</p>\n<div class=\"eqwrap\" id=\"eq-irr\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>IRR</mi><mo>=</mo><mi>exp</mi><mo>(</mo><mover><mi>&#946;</mi><mo>&#94;</mo></mover><mo>)</mo></mrow></math><div class=\"mathfall\">\\text{IRR} \\;=\\; \\exp(\\hat\\beta)</div><div class=\"eqcap\">The quantity reported from that specification, a rate ratio in which one means no effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{IRR} \\;=\\; \\exp(\\hat\\beta)</code></details></div>\n<p>Because the specification weights a unit by its expected count, high exposure corners\ndominate the estimate, and the quantity is the proportional change in the total count.\nThe published estimator gives the change at the mean corner instead, so the two answer\ndifferent questions and their magnitudes are not comparable.</p>"},"bh":{"title":"Adjustment for multiple subsets","body":"<p>Each outcome is estimated over m subsets, so a nominal p value does not control the\nfalse positive rate across the family. Benjamini and Hochberg adjustment is applied\nwithin each outcome, over the subsets, after sorting the p values in ascending order.</p>\n<div class=\"eqwrap\" id=\"eq-bh\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><msup><mi>p</mi><mi>BH</mi></msup><mo>(</mo><mi>k</mi><mo>)</mo></msub><mo>=</mo><munder><mi>min</mi><mrow><mi>j</mi><mo>&#8805;</mo><mi>k</mi></mrow></munder><mi>min</mi><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mfrac><mrow><mi>m</mi><msub><mi>p</mi><mo>(</mo><mi>j</mi><mo>)</mo></msub></mrow><mi>j</mi></mfrac></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">p^{\\text{BH}}_{(k)} \\;=\\; \\min_{j \\ge k}\\; \\min\\!\\left(1,\\; \\frac{m\\, p_{(j)}}{j}\\right)</div><div class=\"eqcap\">Benjamini and Hochberg adjustment within one outcome over m subsets.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>p^{\\text{BH}}_{(k)} \\;=\\; \\min_{j \\ge k}\\; \\min\\!\\left(1,\\; \\frac{m\\, p_{(j)}}{j}\\right)</code></details></div>\n<p>A cell is read only when the adjusted p value falls below 0.05, when the placebo is\nconsistent with no effect, and when at least 25 treated units contribute.</p>"},"mde":{"title":"The smallest detectable effect","body":"<p>A null is uninformative without the size of the effect the cell could have found. The\nminimum detectable effect at 80 per cent power follows from the standard error of the log\nrate ratio.</p>\n<div class=\"eqwrap\" id=\"eq-mde\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>MDE</mi><mo>=</mo><mn>100</mn><mo>(</mo><mrow><mn>1</mn><mo>&#8722;</mo><msup><mi>e</mi><mrow><mo>&#8722;</mo><mn>2.802</mn><mover><mi>se</mi><mo>&#94;</mo></mover></mrow></msup></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\text{MDE} \\;=\\; 100\\left(1 - e^{-2.802\\,\\widehat{\\text{se}}}\\right)</div><div class=\"eqcap\">The smallest effect the cell could detect at 80 per cent power, as a percentage.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{MDE} \\;=\\; 100\\left(1 - e^{-2.802\\,\\widehat{\\text{se}}}\\right)</code></details></div>\n<p>A null with a bound of 6 per cent excludes a moderate benefit. A null with a bound of\n60 per cent excludes almost nothing.</p>"},"aggratio":{"title":"The live estimate for a selection","body":"<p>A browser cannot fit a fixed effects Poisson specification, so a selection is\nestimated by the published arithmetic estimator, which is an exact computation from the per site\nsums the page carries.</p>\n<div class=\"eqwrap\" id=\"eq-arith\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</div><div class=\"eqcap\">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</code></details></div>\n<p>A descriptive aggregate rate ratio is shown beside it.</p>\n<div class=\"eqwrap\" id=\"eq-aggratio\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>RR</mi><mi>agg</mi></msub><mo>=</mo><mfrac><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>before</mi></msup><mi>i</mi></msub></mrow><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>before</mi></msup><mi>i</mi></msub></mrow></mfrac></mrow></math><div class=\"mathfall\">\\text{RR}_{\\text{agg}} \\;=\\; \\frac{\\sum_i T^{\\text{after}}_i \\big/ \\sum_i T^{\\text{before}}_i}{\\sum_i C^{\\text{after}}_i \\big/ \\sum_i C^{\\text{before}}_i}</div><div class=\"eqcap\">The descriptive aggregate rate ratio a browser can compute for any selection, carrying no unit effect and no calendar month effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{RR}_{\\text{agg}} \\;=\\; \\frac{\\sum_i T^{\\text{after}}_i \\big/ \\sum_i T^{\\text{before}}_i}{\\sum_i C^{\\text{after}}_i \\big/ \\sum_i C^{\\text{before}}_i}</code></details></div>\n<p>That ratio carries no unit effect, no calendar month effect and no cluster robust\nvariance, so it is not the modelled quantity the manuscript reports and it can disagree\nin sign with it. For hardened daylighting at a junction the aggregate ratio is about 0.72\nand the modelled estimate is about 1.15.</p>\n<p>Comparison intersections were matched once over the union of treated units, because a\nbrowser cannot rematch for an arbitrary selection, so a selection that coincides with a\npublished subset differs slightly from the published estimate for it.</p>"},"drift":{"title":"The pre treatment drift and the admission rule","body":"<p>The crash record at treated sites falls before installation, at 0.464 per cent per\nmonth at physical sites. Compounded over the 24 months of an after period, that drift\nalone produces a factor.</p>\n<div class=\"eqwrap\" id=\"eq-drift\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>trend</mi><mn>24</mn></msub><mo>=</mo><msup><mo>(</mo><mrow><mn>1</mn><mo>+</mo><mi>&#948;</mi></mrow><mo>)</mo><mn>24</mn></msup><mo>,</mo><mo>&#160;</mo><mi>share</mi><mo>=</mo><mfrac><mrow><mi>log</mi><msub><mi>trend</mi><mn>24</mn></msub></mrow><mrow><mi>log</mi><mover><mi>&#952;</mi><mo>&#94;</mo></mover></mrow></mfrac></mrow></math><div class=\"mathfall\">\\text{trend}_{24} = (1+\\delta)^{24}, \\qquad \\text{share} = \\frac{\\log \\text{trend}_{24}}{\\log \\hat\\theta}</div><div class=\"eqcap\">The compounded pre treatment drift, and the share of an estimate it accounts for.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{trend}_{24} = (1+\\delta)^{24}, \\qquad \\text{share} = \\frac{\\log \\text{trend}_{24}}{\\log \\hat\\theta}</code></details></div>\n<p>A cell is refused when the drift accounts for 60 per cent or more of the estimate, and\nwhen the placebo rejects no effect, and it is marked underpowered when the smallest\ndetectable effect exceeds 25 per cent.</p>"},"scales":{"title":"Two scales, never comparable in magnitude","body":"<p>The published specification and its extension to the full record report a difference in\ncounts per intersection per year, in which zero means no effect and a negative value\nmeans fewer crashes. The falsification tested specification reports a rate ratio, in\nwhich one means no effect and a value below one means fewer crashes.</p>\n<p>A value of 0.9 on the ratio scale and a value of minus 0.14 on the difference scale\ncannot be compared, ordered or averaged together. Each column group on this page carries\nits own scale in its header for that reason.</p>"},"cohorts":{"title":"The two published location lists","body":"<p>The city has published two location lists, a document covering January to August 2024\nand a spreadsheet covering 2025. Each is a cohort of locations rather than a treatment\ntype. The 2025 list holds sign only daylighting at 278 locations, e scooter corrals at\n190, street improvement projects at 141, turn calming outside a street improvement project\nat 88, bicycle corrals at 25, bikeshare at 5 and a direction change at 1.</p>\n<p>The 2024 list publishes no treatment type for any of its 271 records, so the class\nshown for a 2024 record is recovered from the inventory at the same corner. Tested against\nthe 2025 list, where the type is published, that recovery reproduces turn calming exactly\nand sign only daylighting on 80.6 per cent of records, and it fails on street improvement\nprojects at 7.1 per cent.</p>\n<p>The two lists are almost disjoint: 13 of the 271 records of the 2024 list lie within 50\nm of a 2025 record.</p>"},"turncalming":{"title":"Turn calming is eleven treatments","body":"<p>The inventory publishes eleven classes of turn calming, which differ in mechanism: a\nplastic curb line, a raised centre line, a lengthened median, a channelising island, a\nrubber bump, vertical posts of two kinds, a surface treatment, paint alone, and two\nclasses that record only the direction of the turn.</p>\n<p>Those last two classes carry the material string generic turn treatment and account for\n907 of 1491 records, which is 61 per cent. For most of the programme the city records that\na turn was treated and does not record what was installed. Any turn calming result is an\nestimate for that mixture.</p>"},"censoring":{"title":"Right censoring of recent work","body":"<p>An after period of a stated length can only be filled where that many months of crash\nrecord exist after an installation. The crash record ends 2026-05, so an installation in\n2025 cannot support 24 months of follow up.</p>\n<p>Each subset therefore receives the longest after period its own records can fill, and\nthat value is reported in every row. The 2025 published list supports 12 months and\nretains 173 of its 728 records. The 2024 list supports 24 months and retains all 271,\nwhile carrying a single imputed installation month for every one of them, so that design\ncannot separate the treatment from a citywide shock in that month except through the\ncomparison group.</p>"},"precleared":{"title":"Curb that was already clear","body":"<p>New York State law prohibits parking within 15 feet of a fire hydrant, and a bus stop\nis a no standing zone as long as a bus, so a corner carrying either was already daylighted\nin part before the programme reached it. At the working radius of 12 m, 20.5 per cent of\ndaylighted corners at a junction were already clear, against 16.6 per cent of\nintersections carrying no device.</p>\n<p>The observation belongs to the agency rather than to this study. Its January 2025 report\ncontains a hydrant zone analysis, defines a hydrant zone as hydrants and bus stops, and\nreports a 30 per cent higher normalised injury rate at 7558 such intersections. That\nanalysis compares intersections that have a hydrant zone against those that do not, so it\ncannot separate cleared curb from whatever caused a hydrant to be sited there. The test in\nthis study compares treated corners against other treated corners.</p>"},"provenance":{"title":"Provenance of the published analyses","body":"<p>No published analysis of daylighting carries a comparison group, a significance test\nand published locations at the same time. The January 2025 report has a comparison group\nand a significance test and publishes no locations. The Safety Treatment Evaluation it\nrelies on has neither a comparison group nor a significance test. The four case study\ncities in the report have published nothing.</p>\n<p>The analysis reproduced here is an agency report with no journal article and no\npreprint. Its comparison rule is given in one sentence, and resolving it into something\nimplementable required settling eight separate ambiguities. No attribution radius is\nstated, no confidence interval accompanies any estimate, and neither code nor data is\nreleased.</p>\n<p>The 756 analysed locations are not published, so the cohort reproduced here is rebuilt\nfrom other inventories: 98 hardened units against their 189, holding different objects.\nTheirs is 134 Citi Bike stations, 3 bicycle corrals, 33 turn calming projects, 14\nneckdowns and 5 enhanced crossings. Ours is 84 e scooter corrals, 15 rubber speed bumps\nand 4 bicycle islands. The reproduction shows that the published values are what the\npublished specification produces, and it does not show that the published locations were\nanalysed again.</p>"},"selection":{"title":"How sites are chosen","body":"<p>The city designates 304 Vision Zero priority intersections, being the intersections\nthat cumulatively account for 15 per cent of a borough's pedestrian killed or seriously\ninjured total. Treated corners are far more likely to be one than an intersection carrying\nno device: signage only at 3.6 times the rate of the comparison pool, hardened at 5.8\ntimes, and turn calming at 20.2 times.</p>\n<p>Co treatment is larger still. 65.5 per cent of hardened daylighting corners lie within\n40 m of a street improvement project corridor, against 20.7 per cent of the comparison\npool, and 76.8 per cent of turn calming corners lie on a retimed corridor against 19.7 per\ncent.</p>\n<p>A comparison group balanced on crash history and geometry is unbalanced on both of\nthese.</p>"},"designs":{"title":"The two designs, and which analysis uses which","body":"<p>Two designs appear throughout these pages, and each one is a pair of a comparison\ngroup and an estimator.</p>\n<p><b>The corridor DiD design</b> is the city's: the comparison group is up to three\nintersections carrying no daylighting along each street of the treated intersection\nwithin one mile, and the estimator is the unweighted mean of per unit changes in an\nannual rate, tested with a one sample t test. Specification 1, the published analysis,\nand specification 2, the same analysis on the extended record, both use it. Its\nestimate is a difference, so zero means no effect.</p>\n<p><b>The matched Poisson design</b> is this study's: the comparison group is three\nintersections per treated unit chosen by Mahalanobis matching on borough, geometry and\ntwo blocks of pre treatment crash history with the final pre year withheld, and the\nestimator is fixed effects Poisson with unit and calendar month effects, clustered on\nthe match group. Specification 3 uses it. Its estimate is a rate ratio, so one means no\neffect.</p>\n<p>Neither is the better instrument in general. Calibration on this crash record shows\neach attains roughly the nominal false positive rate in one regime of site selection\nand rejects far too often in the other, and each design's bias runs in the direction of\nthe estimate it reports: the corridor group produces false reductions on 34 to 88 per\ncent of null draws under selection on a transient increase, and the matched group\nproduces false increases on 78 per cent of null draws under selection on a persistent\nlevel. Across 40 subsets and 6 outcomes the two agree on direction in 118 of 233\nestimable cells, which is chance; the corridor DiD design returns 76 significant\nreductions, the matched Poisson design returns 0 significant reductions, and no cell is\ncalled a significant reduction by both.</p>"}};</script>
+<script>/* ---------------------------------------------------- help popovers and math
+   One popover element is reused by every control. Hovering opens it, clicking pins
+   it so a reader can select the text inside, Escape and a click outside close it.
+   The content comes from HELPTEXT, which is inlined above, so the page needs no
+   network to explain itself. */
+(function () {
+  "use strict";
+  var pop = document.getElementById("pop");
+  var scrim = document.getElementById("popscrim");
+  if (!pop) return;
+  var pinned = false, current = null, hideTimer = null;
+
+  function place(anchor) {
+    var r = anchor.getBoundingClientRect();
+    pop.style.display = "block";
+    pop.style.visibility = "hidden";
+    var w = pop.offsetWidth, h = pop.offsetHeight;
+    var left = Math.min(Math.max(8, r.left - 8), innerWidth - w - 8);
+    var top = r.bottom + 8;
+    if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 8);
+    pop.style.left = left + "px";
+    pop.style.top = top + "px";
+    pop.style.visibility = "visible";
+  }
+
+  function open(anchor, pin) {
+    var key = anchor.getAttribute("data-help");
+    var t = (window.HELPTEXT || {})[key];
+    if (!t) {
+      pop.innerHTML = "<h4>No description available</h4><p>This control names "
+        + "the topic " + key + ", for which no text has been written.</p>";
+    } else {
+      pop.innerHTML = "<h4>" + t.title + "</h4>" + t.body
+        + (pin ? "<span class='pin'>click away or press Escape to close</span>" : "");
+    }
+    if (current && current !== anchor) current.setAttribute("aria-expanded", "false");
+    current = anchor;
+    anchor.setAttribute("aria-expanded", "true");
+    pinned = !!pin;
+    pop.classList.toggle("pinned", pinned);
+    scrim.style.display = pinned ? "block" : "none";
+    place(anchor);
+  }
+
+  function close() {
+    if (current) current.setAttribute("aria-expanded", "false");
+    pop.style.display = "none";
+    scrim.style.display = "none";
+    pinned = false; current = null;
+  }
+
+  document.addEventListener("pointerover", function (ev) {
+    var a = ev.target.closest ? ev.target.closest(".qhelp") : null;
+    if (!a || pinned) return;
+    clearTimeout(hideTimer);
+    open(a, false);
+  });
+  document.addEventListener("pointerout", function (ev) {
+    var a = ev.target.closest ? ev.target.closest(".qhelp") : null;
+    if (!a || pinned) return;
+    hideTimer = setTimeout(function () { if (!pinned) close(); }, 220);
+  });
+  pop.addEventListener("pointerenter", function () { clearTimeout(hideTimer); });
+  pop.addEventListener("pointerleave", function () {
+    if (!pinned) hideTimer = setTimeout(close, 160);
+  });
+  document.addEventListener("click", function (ev) {
+    var a = ev.target.closest ? ev.target.closest(".qhelp") : null;
+    if (a) { ev.preventDefault(); open(a, true); return; }
+    if (pinned && !pop.contains(ev.target)) close();
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") close();
+    if ((ev.key === "Enter" || ev.key === " ")
+        && document.activeElement
+        && document.activeElement.classList
+        && document.activeElement.classList.contains("qhelp")) {
+      ev.preventDefault();
+      open(document.activeElement, true);
+    }
+  });
+
+  /* A browser without MathML shows the LaTeX source instead of empty space. */
+  try {
+    var probe = document.createElement("div");
+    probe.innerHTML = "<math><mfrac><mn>1</mn><mn>2</mn></mfrac></math>";
+    document.body.appendChild(probe);
+    var ok = probe.firstChild && probe.firstChild.getBoundingClientRect().height > 12;
+    document.body.removeChild(probe);
+    if (!ok) document.documentElement.classList.add("nomathml");
+  } catch (e) { document.documentElement.classList.add("nomathml"); }
+})();</script>
+
+<script>
+/* Topics this deck needs that the shared bundle does not carry. Merged after the
+   bundle, so the generated 16 stay exactly as generated. */
+Object.assign(window.HELPTEXT, {
+  statute: {
+    title: "The statutes",
+    body: "<p>Local Law 66 of 2023 adds section 19-175.8 to the New York City"
+      + " Administrative Code. It defines daylighting, requires a feasibility"
+      + " report, which became the January 2025 report, requires at least 100"
+      + " intersections to be daylighted each year from 1 January 2025, and in"
+      + " subsection (g) begins location level reporting with calendar 2025, due"
+      + " 1 February 2026. That reporting duty is why a published location list"
+      + " exists for 2025 and why no 2024 list was ever obliged to exist.</p>"
+      + "<p>New York City is exempt from the statewide prohibition on parking"
+      + " within 20 feet of a crosswalk, so in the city the prohibition exists"
+      + " only where signage or a physical construction designates it. New York"
+      + " State law separately prohibits parking within 15 feet of a fire"
+      + " hydrant, which is 4.572 m.</p>"
+      + "<p>California AB 413 is summarised in the January 2025 report as passed"
+      + " in 2023 and taking effect in 2025. It makes a no parking zone of 20"
+      + " feet standard statewide, reduced to 15 feet where a locality installs"
+      + " curb extensions, overrides local law, recommends enforcement through"
+      + " paint or signage, and prohibits parking there for motor vehicles"
+      + " rather than for bicycles or scooters.</p>"
+  },
+  corner: {
+    title: "The arithmetic at one corner",
+    body: "<p>The corner is a curb regulation sign order annotated as"
+      + " daylighting, at Broadway and West 45 Street, installed 2019-01 at the"
+      + " south west corner and 10.5 m from the centre of the junction. The"
+      + " outcome is every reported crash within 30 m. The window is 36 months"
+      + " before installation and 24 months after it, with the installation"
+      + " month excluded because it is partly treated.</p>"
+      + "<div class=\"eqwrap\" id=\"eq-rate\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo><mo>=</mo><mfrac><mrow><mn>12</mn><msub><mi>Y</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo></mrow><mrow><mi>b</mi><mo>&#8722;</mo><mi>a</mi></mrow></mfrac></mrow></math><div class=\"mathfall\">R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</div><div class=\"eqcap\">The outcome at one site, as an annual rate over a window of months.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</code></details></div>"
+      + "<p>Before: 111 crashes over 36 months, so 12 times 111 divided by 36 is"
+      + " 37.0 per year. After: 40 crashes over 24 months, so 12 times 40"
+      + " divided by 24 is 20.0 per year.</p>"
+      + "<div class=\"eqwrap\" id=\"eq-delta\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>=</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo><mo>&#8722;</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><mn>0</mn></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</div><div class=\"eqcap\">The change at one site, after minus before.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</code></details></div>"
+      + "<p>The change at the corner is 20.0 minus 37.0, which is a fall of 17.0"
+      + " crashes per year. The three matched comparison intersections average"
+      + " 63.0 crashes before and 20.0 after, being 21.0 and 10.0 per year, so"
+      + " their mean change is a fall of 11.0. The estimate for this corner is"
+      + " the difference, a fall of 6.0 crashes per year.</p>"
+      + "<p>Every figure here is a sum shipped in data/explorer/units.json, one"
+      + " record per treated unit per outcome, for both the matched comparison"
+      + " rule and the corridor rule, so a reader can recompute the estimate for"
+      + " any selection.</p>"
+  },
+  outcomes: {
+    title: "The two published outcomes",
+    body: "<p>The January 2025 report publishes two outcomes, both counted as"
+      + " people rather than as crash events. The first is pedestrian injuries,"
+      + " being people on foot injured or killed. The second is total injuries,"
+      + " which counts every person hurt in a reported crash at the location,"
+      + " including drivers and passengers.</p>"
+      + "<p>One crash can injure several people, so an injury count is not a"
+      + " crash count. Four of the six outcomes reported here count crash"
+      + " events, which the report does not publish for any arm, and that is why"
+      + " 12 cells carry the tag outcome not published rather than a blank.</p>"
+  },
+  composition: {
+    title: "The composition of the hardened arm",
+    body: "<p>The published hardened arm holds 189 locations: 134 Citi Bike"
+      + " stations, 3 bicycle corrals, 33 turn calming projects, 14 neckdowns"
+      + " and 5 enhanced crossings. Those five device rows sum exactly to 189"
+      + " and their count weighted mean is minus 0.1391, which reproduces the"
+      + " published minus 0.14, so the aggregate is that weighted average and"
+      + " nothing else.</p>"
+      + "<p>The arm rebuilt here from published inventories holds 98 corners"
+      + " with a comparison group, out of 103 records: 84 e scooter corrals, 15"
+      + " rubber speed bumps and 4 bicycle islands. Four of the five published"
+      + " device rows cannot be rebuilt at all, and the reason is what the city"
+      + " publishes: the inventory holds 5 bikeshare records, all dated 2025;"
+      + " 2833 of 2858 bicycle corral records carry no installation date in any"
+      + " published form and the remaining 25 are dated 2025; and no published"
+      + " inventory of neckdowns exists. The enhanced crossings have since been"
+      + " retrieved, 197 records with 195 dated, so that row is now"
+      + " sourceable.</p>"
+      + "<p>The two arms therefore carry the same name and hold different"
+      + " objects, which is why the hardened row is not a like for like contrast"
+      + " even where the two figures agree.</p>"
+  },
+  ste: {
+    title: "The Safety Treatment Evaluation",
+    body: "<p>NYC DOT, Safety Treatment Evaluation 2005 to 2018, published in"
+      + " 2022, is a three page report whose sample size table is the source of"
+      + " the 266 curb and sidewalk extension treatments over 9.5 centreline"
+      + " miles, alongside 28 road diets, 542 conventional bicycle lanes, 146"
+      + " protected bicycle lanes, 177 pedestrian islands, 107 turn calming"
+      + " projects and 1446 leading pedestrian intervals.</p>"
+      + "<p>Its stated method compares an average of three years of crash data"
+      + " before installation against an average of two to three years after."
+      + " There is no comparison group, no confidence interval and no p value"
+      + " anywhere in the document. A citywide background trend is reported in a"
+      + " different section rather than differenced against: over the study"
+      + " period all injuries fell 0.4 per cent annually and killed or severely"
+      + " injured fell 2.8 per cent.</p>"
+      + "<p>Of its seven treatments, only the bicycle lanes and the two"
+      + " inventories already held carry published locations. Road diets,"
+      + " pedestrian islands and the curb and sidewalk extensions publish none,"
+      + " so obtaining the 266 requires a records request.</p>"
+  },
+  poscontrol: {
+    title: "The positive control",
+    body: "<p>Leading pedestrian intervals give people on foot a few seconds of"
+      + " walk signal before drivers get a green. It is a different treatment"
+      + " with a known mechanism, and it is estimated by the same design on the"
+      + " same crash table with the same comparison rule.</p>"
+      + "<p>On 6085 matched units, pedestrian crashes come back at 0.886 [0.855,"
+      + " 0.919] and all crashes at 0.923 [0.908, 0.937], with a placebo of"
+      + " 1.009 at p = 0.71 and a smallest detectable effect of 5.0 per cent. It"
+      + " survives multiplicity control at p below 0.0001.</p>"
+      + "<p>A null carries weight only from a design that can find an effect"
+      + " when one exists. This is that demonstration, and it rules out the"
+      + " objection that the daylighting nulls come from an instrument too blunt"
+      + " to see anything.</p>"
+  },
+  settle: {
+    title: "What would settle the question",
+    body: "<p>Three facts about the published record block a causal answer, and"
+      + " each has a remedy that costs the agency nothing beyond publication."
+      + "</p>"
+      + "<p>The 756 locations behind the January 2025 report are not published,"
+      + " so the cohort reproduced here is rebuilt from other inventories and is"
+      + " a different sample of the same programme. A reproduction of the"
+      + " published specification is therefore a reproduction of a method rather"
+      + " than of a sample.</p>"
+      + "<p>Neither comparison rule is safe, because both select comparisons on"
+      + " the outcome history. Matching on lagged crash counts is protective"
+      + " when selection acts on a transient component and harmful when it acts"
+      + " on a persistent one; a corridor rule behaves in the opposite way for"
+      + " the same reason.</p>"
+      + "<p>Local Law 66 obliges at least 100 intersections a year, so the"
+      + " eligible set is larger than the set treated in any one year."
+      + " Publishing the eligibility list and the order of treatment defines the"
+      + " comparison group before the outcome is observed, which neither of the"
+      + " two designs compared here can do after the fact.</p>"
+  }
+});
+</script>
+</body>
+</html>

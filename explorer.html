@@ -9,154 +9,465 @@
     --bg:#fbfbf9; --panel:#fff; --ink:#0b0b0b; --ink2:#52514e; --ink3:#898781;
     --grid:#e1e0d9; --axis:#c3c2b7; --line:#d8d7cf; --blue:#2a78d6;
     --orange:#eb6834; --green:#1baf7a;
+    /* The same two hues at a step dark enough to carry small text on the light
+       surface. The undarkened hues stay on the marks: bars, lines and the canvas. */
+    --okink:#0f7d55; --badink:#b4451a;
+    /* One family and three sizes: small for tables, captions and tags, base for
+       prose and controls, head for headings. The tile figure and the hero figure
+       are derived from the head size rather than being sizes of their own. The
+       fourth value, the micro size, is not a text size: it is used only for tags,
+       flag letters and the second line of a numeric cell. */
+    --fam:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --fs-s:11.8px; --fs-b:13.4px; --fs-h:19px; --fs-t:10.4px;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg:#14140f; --panel:#1c1c17; --ink:#f4f3ee; --ink2:#b9b7ad;
-            --ink3:#8b8980; --grid:#2e2e26; --axis:#45443a; --line:#2b2b23; }
+            --ink3:#8b8980; --grid:#2e2e26; --axis:#45443a; --line:#2b2b23;
+            --okink:#3fd39c; --badink:#ff8c5c; }
   }
   :root[data-theme="light"]{--bg:#fbfbf9;--panel:#fff;--ink:#0b0b0b;--ink2:#52514e;
-    --ink3:#898781;--grid:#e1e0d9;--axis:#c3c2b7;--line:#d8d7cf;}
+    --ink3:#898781;--grid:#e1e0d9;--axis:#c3c2b7;--line:#d8d7cf;
+    --okink:#0f7d55;--badink:#b4451a;}
   :root[data-theme="dark"]{--bg:#14140f;--panel:#1c1c17;--ink:#f4f3ee;
-    --ink2:#b9b7ad;--ink3:#8b8980;--grid:#2e2e26;--axis:#45443a;--line:#2b2b23;}
+    --ink2:#b9b7ad;--ink3:#8b8980;--grid:#2e2e26;--axis:#45443a;--line:#2b2b23;
+    --okink:#3fd39c;--badink:#ff8c5c;}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font:14.5px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-  .wrap{max-width:1720px;margin:0 auto;padding:20px 18px 60px}
+  body{margin:0;background:var(--bg);color:var(--ink);font:var(--fs-b)/1.55 var(--fam)}
+  .wrap{max-width:1720px;margin:0 auto;padding:18px 18px 48px}
   header{display:flex;gap:18px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
-  h1{font-size:22px;margin:0 0 6px;font-weight:650;letter-spacing:-.01em}
-  p.sub{margin:0;color:var(--ink2);max-width:96ch;font-size:13.6px}
-  p.note{margin:6px 0 0;color:var(--ink3);font-size:12.6px;max-width:100ch}
+  h1{font-size:var(--fs-h);margin:0 0 4px;font-weight:650;letter-spacing:-.01em}
+  p.sub{margin:0;color:var(--ink2);max-width:96ch}
+  p.note{margin:5px 0 0;color:var(--ink3);font-size:var(--fs-s);max-width:110ch}
   button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--axis);
-    border-radius:7px;padding:5px 10px;font-size:12.4px;cursor:pointer}
+    border-radius:7px;padding:4px 10px;font-size:var(--fs-s);cursor:pointer;font-family:var(--fam)}
   button.ghost:hover{color:var(--ink);border-color:var(--ink3)}
   button.ghost[aria-pressed="true"]{background:var(--blue);color:#fff;border-color:var(--blue)}
-  .layout{display:grid;grid-template-columns:290px 1fr 340px;gap:16px;margin-top:16px;align-items:start}
-  @media (max-width:1300px){.layout{grid-template-columns:280px 1fr}}
+  a.ghost{background:transparent;color:var(--ink2);border:1px solid var(--axis);
+    border-radius:7px;padding:4px 10px;font-size:var(--fs-s);cursor:pointer;
+    text-decoration:none;display:inline-block}
+  a.ghost:hover{color:var(--ink);border-color:var(--ink3)}
+
+  /* ---- the summary strip: four to six figures that decide how to read the page --- */
+  .strip{display:grid;gap:9px;margin:12px 0 0;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:8px 11px 9px}
+  .tile .tnum{font-size:calc(var(--fs-h) * 1.35);line-height:1.1;font-weight:650;
+    letter-spacing:-.015em;font-variant-numeric:tabular-nums}
+  .tile .tnum.tna{font-size:var(--fs-b);font-weight:500;color:var(--ink3);line-height:1.9}
+  .tile .tcap{font-size:var(--fs-s);color:var(--ink3);margin-top:1px}
+
+  .layout{display:grid;grid-template-columns:264px 1fr 366px;gap:16px;margin-top:12px;
+    align-items:start}
+  @media (max-width:1300px){.layout{grid-template-columns:264px 1fr}}
   @media (max-width:900px){.layout{grid-template-columns:1fr}}
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 13px}
-  .panel h3{font-size:12.6px;margin:0 0 8px;text-transform:uppercase;
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 11px}
+  .panel h3{font-size:var(--fs-s);margin:0 0 6px;text-transform:uppercase;
     letter-spacing:.05em;color:var(--ink3);font-weight:650}
-  .panel h3:not(:first-child){margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
-  label.row{display:flex;align-items:baseline;gap:7px;padding:3px 0;font-size:13px;cursor:pointer}
+  .panel h3.next{margin-top:16px}
+  label.row{display:flex;align-items:baseline;gap:7px;padding:2px 0;
+    font-size:var(--fs-s);line-height:1.35;cursor:pointer}
   label.row input{margin:0;flex:none;position:relative;top:2px}
-  .sw{width:9px;height:9px;border-radius:50%;flex:none;position:relative;top:3px}
-  .cnt{margin-left:auto;color:var(--ink3);font-size:11.6px;font-variant-numeric:tabular-nums}
+  .sw{width:9px;height:9px;border-radius:50%;flex:none;position:relative;top:2px}
+  .only{margin-left:auto;flex:none;border:1px solid var(--axis);
+    background:transparent;color:var(--ink3);border-radius:5px;font-size:10px;
+    padding:0 5px;cursor:pointer;opacity:0;transition:opacity .12s}
+  label.row:hover .only,label.row:focus-within .only{opacity:1}
+  .only:hover{color:var(--ink);border-color:var(--ink3)}
+  label.row:has(.only) .cnt{margin-left:6px}
+  .cnt{margin-left:auto;color:var(--ink3);font-size:var(--fs-s);
+    font-variant-numeric:tabular-nums;padding-left:6px}
   input[type=text],select{width:100%;background:var(--bg);color:var(--ink);
-    border:1px solid var(--axis);border-radius:6px;padding:5px 8px;font-size:13px}
+    border:1px solid var(--axis);border-radius:6px;padding:4px 7px;
+    font-size:var(--fs-s);font-family:var(--fam)}
   input[type=range]{width:100%}
-  .hint{color:var(--ink3);font-size:11.8px;margin-top:3px}
+  .hint{color:var(--ink3);font-size:var(--fs-s);margin-top:3px}
+
+  /* ---- disclosure: a group of controls, or a block of prose ---------------- */
+  details{font-size:var(--fs-s)}
+  details.grp{margin:0 0 5px}
+  details.grp>summary{list-style:none;display:flex;align-items:baseline;gap:7px;
+    cursor:pointer;padding:4px 7px;border-radius:7px;background:var(--grid);
+    color:var(--ink2);font-size:var(--fs-s);font-weight:650;
+    text-transform:uppercase;letter-spacing:.045em}
+  details.grp>summary::-webkit-details-marker{display:none}
+  details.grp>summary::before{content:"\25B8";color:var(--ink3);
+    width:8px;flex:none;text-align:center}
+  details.grp[open]>summary::before{content:"\25BE"}
+  details.grp>summary:hover{color:var(--ink);background:var(--axis)}
+  details.grp>summary:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+  details.grp>summary .cnt{text-transform:none;letter-spacing:0;font-weight:500}
+  details.grp .body{padding:6px 6px 4px}
+  /* a results disclosure states a sentence rather than a field name, so it is not set
+     in the small capitals the control groups use */
+  details.grp.res{margin-top:14px}
+  details.grp.res>summary{text-transform:none;letter-spacing:0}
+  details.prose{margin-top:6px}
+  details.prose>summary{list-style:none;cursor:pointer;color:var(--blue);
+    font-size:var(--fs-s);display:inline-flex;gap:5px;align-items:baseline}
+  details.prose>summary::-webkit-details-marker{display:none}
+  details.prose>summary::before{content:"\25B8";width:8px;flex:none}
+  details.prose[open]>summary::before{content:"\25BE"}
+  details.prose>summary:hover{text-decoration:underline}
+  details.prose>summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  details p{margin:5px 0;color:var(--ink3);font-size:var(--fs-s);line-height:1.55;
+    max-width:100ch}
+  details.prose[open]{padding-bottom:2px}
+
   #map{width:100%;background:var(--panel);border:1px solid var(--line);
     border-radius:10px;display:block;cursor:crosshair;touch-action:none}
   .tip{position:fixed;z-index:50;pointer-events:none;max-width:360px;background:var(--panel);
     color:var(--ink);border:1px solid var(--axis);border-radius:8px;padding:8px 10px;
-    font-size:12.3px;box-shadow:0 6px 22px rgba(0,0,0,.18);display:none}
-  table{border-collapse:collapse;width:100%;font-size:12.4px}
+    font-size:var(--fs-s);box-shadow:0 6px 22px rgba(0,0,0,.18);display:none}
+
+  /* ---- dense table: tight rows, tabular figures, sticky head, no side scroll -- */
+  table{border-collapse:collapse;width:100%;font-size:var(--fs-s)}
   th,td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
-  th{color:var(--ink3);font-weight:620;font-size:11.4px;text-transform:uppercase}
+  th{color:var(--ink3);font-weight:650;font-size:var(--fs-s);text-transform:uppercase}
   td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-  .tag{display:inline-block;padding:1px 6px;border-radius:20px;font-size:11px;
-    border:1px solid var(--axis);color:var(--ink2)}
-  .tag.ok{border-color:var(--green);color:var(--green)}
-  .tag.bad{border-color:var(--orange);color:var(--orange)}
-  .scroll{overflow:auto;max-height:420px}
+  table.dense{table-layout:fixed;line-height:1.25}
+  table.dense th{position:sticky;top:0;z-index:2;background:var(--panel);
+    padding:5px 4px;letter-spacing:.03em;border-bottom:1px solid var(--axis)}
+  table.dense td{padding:3px 3px;vertical-align:top}
+  table.dense .cls{font-weight:600;overflow-wrap:anywhere}
+  table.dense .ci{color:var(--ink3);display:block;font-size:var(--fs-t);line-height:1.35}
+  table.dense tr.refused td{color:var(--ink3);
+    background:repeating-linear-gradient(135deg,transparent,transparent 5px,
+      var(--grid) 5px,var(--grid) 6px)}
+  table.dense tr.refused .cls{font-weight:500}
+  .ordering{color:var(--ink3);font-size:var(--fs-s);margin:5px 0 6px}
+  dl.legend{display:grid;grid-template-columns:auto 1fr;gap:3px 8px;margin:5px 0 0;
+    font-size:var(--fs-s)}
+  dl.legend dt{text-align:right;white-space:nowrap}
+  dl.legend dd{margin:0;color:var(--ink3)}
+
+  /* ---- effect size as a bar about 1.0, direction as a symbol and a colour ---- */
+  .bar{position:relative;height:6px;border-radius:3px;background:var(--grid);
+    margin:2px 0 1px}
+  .bar i{position:absolute;top:0;height:6px;display:block}
+  .bar i.dn{background:var(--green);border-radius:3px 0 0 3px}
+  .bar i.up{background:var(--orange);border-radius:0 3px 3px 0}
+  .bar i.ref{background:repeating-linear-gradient(45deg,var(--ink3),var(--ink3) 1.5px,
+    transparent 1.5px,transparent 3.5px)}
+  .bar u{position:absolute;left:50%;top:-2px;width:1px;height:10px;
+    background:var(--axis);text-decoration:none}
+  .arrow{font-size:var(--fs-t);line-height:1;position:relative;top:-1px}
+  .arrow.dn{color:var(--okink)} .arrow.up{color:var(--badink)}
+  tr.refused .arrow{color:var(--ink3)}
+
+  .tag{display:inline-block;padding:0 5px;border-radius:20px;font-size:var(--fs-s);
+    border:1px solid var(--axis);color:var(--ink2);white-space:nowrap;line-height:1.5}
+  .tag.ok{border-color:var(--okink);color:var(--okink)}
+  .tag.bad{border-color:var(--badink);color:var(--badink)}
+  .tag.mini{padding:0 4px;font-size:var(--fs-t);color:var(--ink3)}
+  .tag.flag{padding:0 4px;font-size:var(--fs-t);font-weight:650;
+    border-color:var(--ink3);color:var(--ink3)}
+  table.dense .tag{font-size:var(--fs-t);padding:0 4px}
+  .scroll{overflow:auto;max-height:360px}
   .warn{background:color-mix(in srgb, var(--orange) 12%, transparent);
-    border:1px solid var(--orange);border-radius:8px;padding:9px 11px;
-    font-size:12.6px;color:var(--ink);margin-top:10px}
-  code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--grid);
+    border:1px solid var(--orange);border-radius:8px;padding:7px 10px;
+    font-size:var(--fs-s);color:var(--ink);margin-top:8px}
+  .warn:empty{display:none}
+  .warn>details>summary{color:var(--ink);font-weight:650}
+  .warn>details p{color:var(--ink2)}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:var(--fs-t);background:var(--grid);
     padding:1px 4px;border-radius:4px}
-  .stat{display:flex;justify-content:space-between;font-size:12.6px;padding:2px 0}
+  .stat{display:flex;justify-content:space-between;gap:10px;font-size:var(--fs-s);padding:1px 0}
   .stat b{font-variant-numeric:tabular-nums}
+
+  /* one dataset switch and its help icon on one line; the icon sits outside the
+     label so that pressing it does not toggle the switch. The icon is the shared
+     qhelp control, so one popover mechanism serves the whole page. */
+  .lrow{display:flex;align-items:baseline;gap:4px}
+  .lrow label.row{flex:1;min-width:0}
+  .lrow .qhelp{position:relative;top:2px}
+  /* the row of topic controls under the title: a short label, one control, one topic */
+  .qrow{display:flex;flex-wrap:wrap;gap:3px 14px;margin:7px 0 0;
+    font-size:var(--fs-s);color:var(--ink2)}
+  .qrow span{display:inline-flex;align-items:center;white-space:nowrap}
+  /* a dataset topic carries several register cards, so the shared popover scrolls
+     inside itself rather than running off the bottom of the screen */
+  body #pop{max-height:min(72vh,760px);overflow-y:auto}
+
+  .modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);display:flex;
+    align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto}
+  .modal[hidden]{display:none}
+  .sheet{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    max-width:920px;width:100%;padding:16px 20px 24px;
+    box-shadow:0 18px 60px rgba(0,0,0,.4)}
+  .sheethead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+  .sheet h2{font-size:var(--fs-h);margin:0;font-weight:650;letter-spacing:-.01em}
+  .sheet h4{font-size:var(--fs-s);margin:16px 0 2px;font-weight:650;text-transform:uppercase;
+    letter-spacing:.04em;color:var(--ink3)}
+  .sheet p{margin:6px 0;color:var(--ink2);max-width:94ch}
+  .sheet ul{margin:6px 0;padding-left:20px;color:var(--ink2);max-width:94ch}
+  .sheet li{margin:3px 0}
+  .src{border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin:8px 0}
+  .src>b{font-size:var(--fs-b)}
+  .src dl{margin:5px 0 0;display:grid;grid-template-columns:138px 1fr;gap:2px 10px;
+    font-size:var(--fs-s)}
+  .src dt{color:var(--ink3)}
+  .src dd{margin:0;color:var(--ink);overflow-wrap:anywhere}
+  @media (max-width:560px){.src dl{grid-template-columns:1fr}}
+
+  .kv{display:flex;justify-content:space-between;gap:10px;font-size:var(--fs-s);
+    padding:1px 0;line-height:1.4}
+  .kv b{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .big{font-size:var(--fs-b);font-weight:650;font-variant-numeric:tabular-nums;margin:0}
+  /* the one hero figure on the page: the estimate for the current selection */
+  .hero{font-size:calc(var(--fs-h) * 1.75);line-height:1.05;font-weight:650;
+    letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:2px 0 0}
+  .hero.refused{color:var(--ink3)}
+  .tagrow{display:flex;gap:5px;flex-wrap:wrap;margin:5px 0 2px}
+  .lab{font-size:var(--fs-s);color:var(--ink2);font-weight:650;margin-top:11px;
+    line-height:1.35}
+  .ctlrow{display:flex;gap:6px;margin-bottom:5px}
+
+  /* On paper the columns become sections, no box may clip its own content, and the
+     hatch that marks an excluded cell has to survive the printer. */
+  @media print {
+    body{background:#fff}
+    .layout{display:block}
+    .panel{break-inside:avoid;margin-bottom:12px}
+    .strip{grid-template-columns:repeat(3,1fr)}
+    .scroll{max-height:none;overflow:visible}
+    table.dense th{position:static}
+    tr.refused td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div>
+  <div style="min-width:0;flex:1 1 520px">
     <h1>NYC street treatment explorer</h1>
     <p class="sub">Every treatment drawn with its published geometry. Three defects
     in this study came from treating a geometry as something it is not, and each was
-    invisible in a table and obvious on a map. Pick an area by name or by drawing a
-    polygon, choose which sources to show, change the rule that decides what counts
-    as being at a junction, and watch what moves.</p>
+    invisible in a table and obvious on a map.</p>
+    <p class="qrow">
+      <span>Controls <button class="qhelp" type="button" data-help="controls"
+        aria-expanded="false" aria-label="About: what the controls do">?</button></span>
+      <span>Site selection <button class="qhelp" type="button" data-help="selection"
+        aria-expanded="false" aria-label="About: how sites are chosen">?</button></span>
+      <span>The two designs <button class="qhelp" type="button" data-help="designs"
+        aria-expanded="false"
+        aria-label="About: neither design is better in general">?</button></span>
+      <span>The two scales <button class="qhelp" type="button" data-help="scales"
+        aria-expanded="false"
+        aria-label="About: two scales, never comparable in magnitude">?</button></span>
+      <span>Provenance <button class="qhelp" type="button" data-help="provenance"
+        aria-expanded="false"
+        aria-label="About: provenance of the published analyses">?</button></span>
+    </p>
     <p class="note" id="metaline">loading</p>
   </div>
-  <div style="display:flex;gap:7px">
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <a class="ghost" href="analysis.html" title="analysis.html, the companion page for
+      the estimates and the comparison of the study designs">Analysis</a>
+    <button class="ghost" id="aboutbtn" type="button">About the data</button>
     <button class="ghost" id="basebtn" type="button" aria-pressed="true">Basemap</button>
     <button class="ghost" id="themebtn" type="button">Dark</button>
   </div>
 </header>
 
+<!-- ------------------------------------------------ the compact summary strip -->
+<div class="strip" id="strip"></div>
+
 <div class="layout">
   <!-- ------------------------------------------------------- left controls -->
   <div class="panel">
-    <h3>Area</h3>
-    <input type="text" id="areasearch" placeholder="Brooklyn, Fort Hamilton, Ocean Pkwy" autocomplete="off">
-    <div class="hint" id="areahint">type a borough or a street name</div>
-    <div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">
-      <button class="ghost" id="polybtn" type="button" aria-pressed="false">Draw polygon</button>
-      <button class="ghost" id="clearbtn" type="button">Clear area</button>
-    </div>
-    <div class="hint">click to add points, double click to close</div>
+    <details class="grp" open>
+      <summary>Area <span class="cnt" id="sumArea">whole city</span></summary>
+      <div class="body">
+        <input type="text" id="areasearch" placeholder="Brooklyn, Fort Hamilton, Ocean Pkwy" autocomplete="off">
+        <div class="hint" id="areahint">type a borough or a street name</div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+          <button class="ghost" id="polybtn" type="button" aria-pressed="false">Draw polygon</button>
+          <button class="ghost" id="clearbtn" type="button">Clear area</button>
+        </div>
+        <div class="hint">click to add points, double click to close</div>
+      </div>
+    </details>
 
-    <h3>Sources</h3>
-    <div id="layers"></div>
+    <details class="grp" open>
+      <summary>Sources <span class="cnt" id="sumSrc"></span></summary>
+      <div class="body" id="layers"></div>
+    </details>
 
-    <h3>Combine records at one corner</h3>
-    <label class="row"><input type="checkbox" id="combine">
-      <span>Combine overlapping records</span></label>
-    <input type="range" id="combineM" min="5" max="60" value="20" step="5">
-    <div class="hint">within <b id="combineMlab">20</b> m. A turn calming record and a
-    record on a published daylighting list can be one physical change filed twice, so
-    counting both overstates how much of the city is treated. A ring marks a corner
-    whose records come from more than one source.</div>
+    <details class="grp" open>
+      <summary>Subclass filters <button class="qhelp" type="button"
+        data-help="turncalming" aria-expanded="false"
+        aria-label="About: turn calming is eleven treatments">?</button>
+        <span class="cnt" id="sumSub"></span></summary>
+      <div class="body">
+        <div id="subclasses"></div>
+        <div class="hint" id="subhint"></div>
+      </div>
+    </details>
 
-    <h3>Placement</h3>
-    <div id="placements"></div>
-    <div class="hint" id="bandhint"></div>
+    <details class="grp">
+      <summary>Placement <span class="cnt" id="sumPlace"></span></summary>
+      <div class="body">
+        <div id="placements"></div>
+        <div class="hint" id="bandhint"></div>
+      </div>
+    </details>
 
-    <h3>Junction rule</h3>
-    <select id="rule"></select>
-    <div class="hint" id="rulehint"></div>
+    <details class="grp">
+      <summary>Junction rule <span class="cnt" id="sumRule"></span></summary>
+      <div class="body">
+        <select id="rule"></select>
+        <label class="row" style="margin:6px 0 2px">
+          <input type="checkbox" id="showctrl">
+          <span>show the comparison intersections for this selection</span>
+        </label>
+        <div class="hint" id="ctrlhint"></div>
+        <div class="hint" id="rulehint"></div>
+        <div id="rulewarn"></div>
+      </div>
+    </details>
 
-    <h3>Installed on or before</h3>
-    <input type="range" id="yr" min="1990" max="2026" value="2026" step="1">
-    <div class="hint"><b id="yrlab">2026</b></div>
+    <details class="grp">
+      <summary>Combine at one corner <span class="cnt" id="sumComb"></span></summary>
+      <div class="body">
+        <label class="row"><input type="checkbox" id="combine">
+          <span>Combine overlapping records</span></label>
+        <input type="range" id="combineM" min="5" max="60" value="20" step="5">
+        <div class="hint">within <b id="combineMlab">20</b> m</div>
+        <details class="prose">
+          <summary>Why one corner can carry two records</summary>
+          <p>A turn calming record and a record on a published daylighting list can be
+          one physical change filed twice, so counting both overstates how much of the
+          city is treated. A ring marks a corner whose records come from more than one
+          source.</p>
+        </details>
+      </div>
+    </details>
+
+    <details class="grp">
+      <summary>Installed on or before <button class="qhelp" type="button"
+        data-help="censoring" aria-expanded="false"
+        aria-label="About: right censoring of recent work">?</button>
+        <span class="cnt" id="sumYear"></span></summary>
+      <div class="body">
+        <input type="range" id="yr" min="1990" max="2026" value="2026" step="1">
+        <div class="hint"><b id="yrlab">2026</b></div>
+      </div>
+    </details>
   </div>
 
   <!-- ------------------------------------------------------------- the map -->
   <div>
-    <canvas id="map" height="640"></canvas>
-    <p class="note">Drag to pan, scroll to zoom, hover for a record. A line is drawn
-    as published. Two sources publish a <b>segment</b> and not a device: VZV speed
-    humps have a median length of 217 m and the Speed Reducer Tracking System 81 m,
-    so a line running through a junction does not mean a hump sits there.</p>
-    <p class="note" id="baseattr"></p>
+    <canvas id="map" height="720"></canvas>
+    <p class="note">Drag to pan, scroll to zoom, hover for a record.</p>
+    <details class="prose">
+      <summary>Where a published line is not a device</summary>
+      <p>A line is drawn as published. Two sources publish a <b>segment</b> rather than
+      a device: VZV speed humps have a median length of 217 m and the Speed Reducer
+      Tracking System 81 m, so a line running through a junction does not mean a hump
+      sits there.</p>
+      <p class="note" id="baseattr"></p>
+    </details>
     <div class="warn" id="geomwarn"></div>
   </div>
 
   <!-- ------------------------------------------------------- right results -->
   <div class="panel">
-    <h3>Selection</h3>
-    <div id="selstats"></div>
+    <h3>Estimate for this selection <button class="qhelp" type="button"
+      data-help="aggratio" aria-expanded="false"
+      aria-label="About: the live estimate for a selection">?</button></h3>
+    <div class="ctlrow">
+      <select id="lout" aria-label="outcome for the estimate of this selection"></select>
+      <select id="lrule" aria-label="which comparison locations to use"></select>
+    </div>
+    <div id="livebody"></div>
+    <!-- the two equations this panel evaluates, copied from data/web/assets.html -->
+    <div id="eqmain"><div class="eqwrap" id="eq-arith"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class="mathfall">\hat\theta \;=\; \frac{1}{n}\sum_{i=1}^{n}\left(\Delta_i \;-\; \frac{1}{|C_i|}\sum_{j\in C_i}\Delta_j\right)</div><div class="eqcap">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\hat\theta \;=\; \frac{1}{n}\sum_{i=1}^{n}\left(\Delta_i \;-\; \frac{1}{|C_i|}\sum_{j\in C_i}\Delta_j\right)</code></details></div></div>
+    <div id="liveplac"></div>
+    <div id="liveratio"></div>
+    <div id="eqratio"><div class="eqwrap" id="eq-aggratio"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>RR</mi><mi>agg</mi></msub><mo>=</mo><mfrac><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>before</mi></msup><mi>i</mi></msub></mrow><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>before</mi></msup><mi>i</mi></msub></mrow></mfrac></mrow></math><div class="mathfall">\text{RR}_{\text{agg}} \;=\; \frac{\sum_i T^{\text{after}}_i \big/ \sum_i T^{\text{before}}_i}{\sum_i C^{\text{after}}_i \big/ \sum_i C^{\text{before}}_i}</div><div class="eqcap">The descriptive aggregate rate ratio a browser can compute for any selection, carrying no unit effect and no calendar month effect.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\text{RR}_{\text{agg}} \;=\; \frac{\sum_i T^{\text{after}}_i \big/ \sum_i T^{\text{before}}_i}{\sum_i C^{\text{after}}_i \big/ \sum_i C^{\text{before}}_i}</code></details></div>
+      <p class="hint">The ratio can disagree in sign with the modelled estimate: for
+      hardened daylighting at a junction the aggregate ratio is about 0.72 and the
+      modelled estimate is about 1.15.</p></div>
+    <div class="warn" id="livewarn"></div>
+    <div id="livenotes"></div>
+    <details class="prose" id="windowgrp">
+      <summary>Which installations the window can hold</summary>
+      <p class="hint" id="livewindow"></p>
+    </details>
 
-    <h3>Crashes in the selection</h3>
+    <h3 class="next">Crashes in the selection</h3>
     <canvas id="spark" height="120"></canvas>
     <div class="hint" id="sparkhint"></div>
 
-    <h3>Effects</h3>
-    <select id="outcome"></select>
-    <div class="hint">estimates from the pipeline, filtered to the visible sources</div>
-    <div class="scroll"><table id="efftab"></table></div>
+    <details class="grp res" id="selgrp">
+      <summary>Selection breakdown <span class="cnt" id="sumSel"></span></summary>
+      <div class="body" id="selstats"></div>
+    </details>
+
+    <details class="grp res" id="effgrp">
+      <summary>Modelled estimates the manuscript reports
+        <button class="qhelp" type="button" data-help="fepois" aria-expanded="false"
+          aria-label="About: the fixed effects Poisson specification">?</button>
+        <span class="cnt" id="sumEff"></span></summary>
+      <div class="body">
+        <select id="outcome" aria-label="outcome for the precomputed estimates"></select>
+        <p class="ordering">Ordered by p ascending, excluded cells last.</p>
+        <div class="scroll"><table class="dense" id="efftab"></table></div>
+        <details class="prose">
+          <summary>The tags, the flags and the bar</summary>
+          <dl class="legend" id="efflegend"></dl>
+        </details>
+        <details class="prose">
+          <summary>Why the controls on the left do not move these rows</summary>
+          <p class="hint" id="effhint"></p>
+        </details>
+      </div>
+    </details>
   </div>
 </div>
+</div>
+
+<!-- --------------------------------------------------- source documentation -->
+<div class="modal" id="modal" role="dialog" aria-modal="true"
+     aria-labelledby="modaltitle" hidden>
+  <div class="sheet" id="sheet">
+    <div class="sheethead">
+      <h2 id="modaltitle"></h2>
+      <button class="ghost" id="modalclose" type="button">Close</button>
+    </div>
+    <div id="modalbody"></div>
+  </div>
 </div>
 
 <div class="tip" id="tip"></div>
 
 <script>
+  // Authorship and programme credit. Every page carries the same block, generated
+  // from one string so the three cannot disagree.
+  const CREDIT = '<h3>Author</h3>'
+    + '<p>Mehmet Kerem Turkcan, Associate Research Scientist, Columbia University. '
+    + '<a href="https://keremturkcan.com" target="_blank" rel="noopener">'
+    + 'keremturkcan.com</a>, '
+    + '<a href="mailto:mkt2126@columbia.edu">mkt2126@columbia.edu</a>.</p>'
+    + '<h3>Programme</h3>'
+    + '<p>This project was created for the Research Experience for Teachers '
+    + 'programme of the Center for Smart Streetscapes, a National Science '
+    + 'Foundation Engineering Research Center. '
+    + '<a href="https://center-for-smart-streetscapes-cs3.github.io/ret2026/" '
+    + 'target="_blank" rel="noopener">'
+    + 'center-for-smart-streetscapes-cs3.github.io/ret2026</a>.</p>'
+    + '<h3>Companion pages</h3>'
+    + '<p>Three pages share one set of estimates: the map of the treatments '
+    + '(<a href="explorer.html">explorer.html</a>), the statistical companion '
+    + '(<a href="analysis.html">analysis.html</a>) and the slide deck '
+    + '(<a href="slides.html">slides.html</a>).</p>';
 "use strict";
 const $ = s => document.querySelector(s);
 const KX = Math.cos(40.7 * Math.PI / 180) * 111320, KY = 111320;
+// The drawing height of the map canvas, in CSS pixels. The condensation of the
+// panels around it paid for the extra height, and fitTo() and draw() must agree.
+const MAPH = 720;
 
 const SRC_COLOR = {
   list2025:"#2a78d6", list2024:"#7a5bd6", signorders:"#1b9aaf",
@@ -167,57 +478,137 @@ const SRC_COLOR = {
 const CURB_COLOR = { hydrants:"#c2352b", busstops:"#2f6f9f" };
 const PLACEMENTS = ["at_junction","on_approach","mid_block","no_position"];
 const FAM_LABEL = {
-  daylighting:"Daylighting, signage", daylighting_hardened:"Daylighting, hardened",
+  published_list:"DOT published lists (mixed treatments)",
+  daylighting_signorder:"Daylighting by sign order",
+  daylighting:"Daylighting by sign order",
+  daylighting_hardened:"Daylighting, hardened",
   turn_calming:"Turn calming", vertical_deflection:"Vertical deflection",
   signal:"Signal timing", capital_project:"Capital projects",
-  curb_already_clear:"Curb already clear (context, not treatments)",
+  curb_already_clear:"Curb already clear (context rather than treatments)",
 };
+const FAM_ORDER = ["published_list","daylighting_signorder","daylighting",
+  "daylighting_hardened","turn_calming","vertical_deflection","signal",
+  "capital_project","curb_already_clear"];
+
+/* The three subclass dimensions a record can be filtered on. A record passes only if
+   it matches every dimension it carries, so leaving a dimension untouched filters
+   nothing. Turn calming is filtered on what was installed and on what that does; a
+   published list record is filtered on the class it is analysed under. */
+const SUBDIMS = [
+  {key:"c",    field:"c",    label:"Turn calming: what was installed",
+   help:"turncalming", only:t=>t.f==="turn_calming"},
+  {key:"mech", field:"mech", label:"Turn calming: what it does",
+   help:"turncalming", only:t=>t.f==="turn_calming"},
+  {key:"ac",   field:"ac",   label:"Published list: treatment at the location",
+   help:"cohorts", only:t=>!!t.coh},
+];
+
+/* A layer family whose subject the shared bundle already documents carries the topic
+   control beside its heading, so the left column names its subject and holds the
+   explanation one hover away. */
+const FAM_HELP = {
+  published_list:"cohorts", turn_calming:"turncalming",
+  curb_already_clear:"precleared",
+};
+
+/* The one control shape this page uses for an explanation: a question mark button
+   that names a topic in window.HELPTEXT, which the shared bundle inlined at the foot
+   of the page drives. */
+function qhelpFor(topic, label) {
+  const b = document.createElement("button");
+  b.className = "qhelp"; b.type = "button"; b.textContent = "?";
+  b.setAttribute("data-help", topic);
+  b.setAttribute("aria-expanded", "false");
+  b.setAttribute("aria-label", "About: " + label);
+  return b;
+}
 
 const S = {
   meta:null, tre:[], eff:[], areas:[], crashes:{},
   on:{}, place:{}, rule:null, year:2026, outcome:"n_ped",
   bbox:null, poly:null, drawing:false, view:null, drag:null, visible:[],
   curb:null, basemap:true, tileDirty:false,
-  combine:false, combineM:20, pinned:null,
+  combine:false, combineM:20, pinned:null, showCtrl:false,
+  sub:{}, subAll:{},
+  units:null, umeta:null, subsel:[], lout:null, crule:"m", missing:[],
+  tiles:{},
 };
 
 async function load() {
-  const get = async n => (await fetch("data/explorer/" + n)).json();
-  const [meta, tre, eff, areas, crashes] = await Promise.all(
-    ["meta.json","treatments.json","effects.json","areas.json","crashes.json"].map(get));
-  S.meta = meta; S.tre = tre; S.eff = eff; S.areas = areas; S.crashes = crashes;
+  const get = async n => {
+    const r = await fetch("data/explorer/" + n);
+    if (!r.ok) throw new Error(n + " returned " + r.status);
+    return r.json();
+  };
+  // Each payload is fetched on its own, so that one absent file costs the page the
+  // one thing that file carries and says so, rather than blanking every panel.
+  const soft = async (n, dflt) => {
+    try { return await get(n); } catch (e) { S.missing.push(n); return dflt; }
+  };
+  const [meta, tre] = await Promise.all([get("meta.json"), get("treatments.json")]);
+  S.meta = meta; S.tre = tre;
+  const [eff, areas, crashes, curb, units, umeta, ctrl] = await Promise.all([
+    soft("effects.json", []), soft("areas.json", []), soft("crashes.json", {}),
+    soft("curb.json", null), soft("units.json", null), soft("units_meta.json", null),
+    soft("controls.json", null)]);
+  S.eff = eff; S.areas = areas; S.crashes = crashes; S.curb = curb;
+  S.units = units; S.umeta = umeta; S.ctrl = ctrl;
   meta.layers.forEach(l => S.on[l.slug] = l.on);
-  // context layers are optional: an older payload has no curb.json and the page
-  // must still work, so the failure is swallowed rather than thrown
   (meta.curb_layers || []).forEach(l => S.on[l.slug] = l.on);
-  try { S.curb = await get("curb.json"); } catch (e) { S.curb = null; }
   PLACEMENTS.forEach(p => S.place[p] = p !== "no_position");
   S.rule = Object.keys(meta.rules || {})[0] || null;
+  prepareUnits();
   build();
   draw();
 }
 
-/* ------------------------------------------------------------------- panels */
+/* The install month of a unit is stored as the pipeline's month index, so it is
+   converted once to a calendar year here and the year cutoff then costs one
+   comparison per unit. units_meta.month_zero is the index of the first month of the
+   crash record, which is what makes the conversion exact rather than assumed. */
+function prepareUnits() {
+  if (!S.units || !S.umeta) return;
+  const base = S.umeta.month_zero || 0;
+  const c0 = String((S.umeta.crash || ["2012-07"])[0]).split("-");
+  const by = +c0[0], bm = +(c0[1] || 1);
+  for (const u of S.units) {
+    const k = u.t0 - base + (bm - 1);
+    u.iy = by + Math.floor(k / 12);
+    u.im = ((k % 12) + 12) % 12 + 1;
+  }
+  S.lout = (S.umeta.outcomes || [])[0] || null;
+  S.subsel = (S.umeta.subsets || []).map(s => selectorFor(s.name));
+}
+
+/* ------------------------------------------------------------------- panels
+   build() re draws the whole left panel, and the subclass "all" and "none" buttons
+   call it again, so every handler that is attached to something build() does not
+   itself create is attached through once(): a second build must not leave two pan
+   handlers on the map or two click handlers on a header button. */
+const wired = new Set();
+function once(key, fn) { if (wired.has(key)) return; wired.add(key); fn(); }
+
 function build() {
   const m = S.meta;
   const host = $("#layers"); host.textContent = "";
   const byFam = {};
   m.layers.forEach(l => (byFam[l.family] = byFam[l.family] || []).push(l));
   (m.curb_layers || []).forEach(l => (byFam[l.family] = byFam[l.family] || []).push(l));
-  for (const fam of ["daylighting","daylighting_hardened","turn_calming",
-                     "vertical_deflection","signal","capital_project",
-                     "curb_already_clear"]) {
+  for (const fam of FAM_ORDER) {
     if (!byFam[fam]) continue;
     const h = document.createElement("div");
-    h.style.cssText = "font-size:11.2px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin:8px 0 2px;font-weight:650";
+    h.style.cssText = "font-size:var(--fs-s);text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin:9px 0 2px;font-weight:650";
     h.textContent = FAM_LABEL[fam] || fam;
+    if (FAM_HELP[fam]) h.appendChild(qhelpFor(FAM_HELP[fam], FAM_LABEL[fam] || fam));
     host.appendChild(h);
     for (const l of byFam[fam]) {
       const isCurb = fam === "curb_already_clear";
       const n = isCurb ? ((m.counts || {})[l.slug] || 0)
                        : S.tre.filter(t => t.s === l.slug).length;
+      const row = document.createElement("div"); row.className = "lrow";
       const lab = document.createElement("label"); lab.className = "row";
-      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = l.on;
+      const cb = document.createElement("input"); cb.type = "checkbox";
+      cb.checked = S.on[l.slug] !== false;
       cb.addEventListener("change", () => { S.on[l.slug] = cb.checked; draw(); });
       const sw = document.createElement("span"); sw.className = "sw";
       sw.style.background = isCurb ? CURB_COLOR[l.slug]
@@ -225,9 +616,79 @@ function build() {
       const tx = document.createElement("span"); tx.textContent = l.label;
       const c = document.createElement("span"); c.className = "cnt";
       c.textContent = n.toLocaleString();
-      lab.append(cb, sw, tx, c); host.appendChild(lab);
+      lab.append(cb, sw, tx, c);
+      // the help icon carries the register entries for this one dataset as a topic of
+      // its own, so the same popover that explains a concept explains a source, and a
+      // keyboard reaches it in the ordinary tab order
+      const key = "layer_" + l.slug;
+      window.HELPTEXT = window.HELPTEXT || {};
+      window.HELPTEXT[key] = {title:l.label, body:layerInfoHtml(l)};
+      row.append(lab, qhelpFor(key, l.label)); host.appendChild(row);
     }
   }
+
+  // subclass switches, built from the records actually present so a class that is
+  // absent from the inventory never appears as an empty subset
+  const sh = $("#subclasses"); sh.textContent = "";
+  const notes = S.meta.mechanism_note || {};
+  for (const d of SUBDIMS) {
+    const counts = {};
+    for (const t of S.tre) {
+      if (!d.only(t)) continue;
+      const v = t[d.field];
+      if (v == null || v === "") continue;
+      counts[v] = (counts[v] || 0) + 1;
+    }
+    const keys = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+    if (!keys.length) continue;
+    S.sub[d.key] = S.sub[d.key] || {};
+    keys.forEach(k => { if (S.sub[d.key][k] === undefined) S.sub[d.key][k] = true; });
+
+    const head = document.createElement("div");
+    head.style.cssText = "font-size:var(--fs-s);text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin:9px 0 2px;font-weight:650";
+    head.textContent = d.label;
+    if (d.help) head.appendChild(qhelpFor(d.help, d.label));
+    sh.appendChild(head);
+    const tools = document.createElement("div");
+    tools.style.cssText = "display:flex;gap:6px;margin:2px 0 4px";
+    for (const [txt, val] of [["all", true], ["none", false]]) {
+      const b = document.createElement("button");
+      b.className = "ghost"; b.type = "button"; b.textContent = txt;
+      b.style.padding = "2px 7px";
+      b.addEventListener("click", () => {
+        keys.forEach(k => S.sub[d.key][k] = val);
+        build(); draw();
+      });
+      tools.appendChild(b);
+    }
+    sh.appendChild(tools);
+    for (const k of keys) {
+      const lab = document.createElement("label"); lab.className = "row";
+      const cb = document.createElement("input"); cb.type = "checkbox";
+      cb.checked = S.sub[d.key][k] !== false;
+      cb.addEventListener("change", () => {
+        S.sub[d.key][k] = cb.checked; draw(); subhint();
+      });
+      const tx = document.createElement("span");
+      tx.textContent = String(k).replace(/_/g," ");
+      if (notes[k]) tx.title = notes[k];
+      // one click isolates a subtype, because reaching a single treatment by
+      // unchecking every other box is the request the panel exists to serve
+      const only = document.createElement("button");
+      only.type = "button"; only.className = "only"; only.textContent = "only";
+      only.setAttribute("aria-label",
+        "show only " + String(k).replace(/_/g, " ") + " in " + d.label);
+      only.addEventListener("click", ev => {
+        ev.preventDefault();
+        keys.forEach(x => S.sub[d.key][x] = (x === k));
+        build(); draw();
+      });
+      const c2 = document.createElement("span"); c2.className = "cnt";
+      c2.textContent = counts[k].toLocaleString();
+      lab.append(cb, tx, only, c2); sh.appendChild(lab);
+    }
+  }
+  subhint();
 
   const ph = $("#placements"); ph.textContent = "";
   for (const p of PLACEMENTS) {
@@ -253,7 +714,10 @@ function build() {
     rs.appendChild(o);
   }
   rs.value = S.rule || "";
-  rs.addEventListener("change", () => { S.rule = rs.value; draw(); });
+  once("rule", () => rs.addEventListener("change",
+    () => { S.rule = rs.value; draw(); }));
+  const sc = $("#showctrl");
+  if (sc) sc.addEventListener("change", () => { S.showCtrl = sc.checked; draw(); });
   showRule();
 
   const os = $("#outcome"); os.textContent = "";
@@ -262,14 +726,133 @@ function build() {
     os.appendChild(o);
   }
   os.value = S.outcome;
-  os.addEventListener("change", () => { S.outcome = os.value; effects(); });
+  once("outcome", () => os.addEventListener("change",
+    () => { S.outcome = os.value; effects(); spark(); }));
+  $("#effhint").innerHTML =
+    "One row per subset the pipeline estimated, by fixed effects Poisson with unit "
+    + "and calendar month effects and a variance clustered on the match group, with a "
+    + "placebo, a pre treatment trend test and a minimum detectable effect. This is "
+    + "the falsification tested specification, and these are the modelled estimates "
+    + "the manuscript reports. The rows do not respond to the area, the switches or "
+    + "the filters on the left, because each subset was estimated with its own "
+    + "matched comparison intersections. The panel above, which does respond, "
+    + "computes different arithmetic.";
 
-  $("#geomwarn").textContent = S.meta.geometry_note || "";
+  // the two controls of the live panel: the outcome and which comparison locations
+  const lo = $("#lout"), lr = $("#lrule");
+  if (lo && lr) {
+    lo.textContent = ""; lr.textContent = "";
+    for (const k of ((S.umeta || {}).outcomes || [])) {
+      const o = document.createElement("option"); o.value = k;
+      o.textContent = outLabel(k); lo.appendChild(o);
+    }
+    if (S.lout) lo.value = S.lout;
+    for (const k of Object.keys((S.umeta || {}).rules || {})) {
+      const o = document.createElement("option"); o.value = k;
+      o.textContent = (S.umeta.rules[k] || k); lr.appendChild(o);
+    }
+    lr.value = S.crule;
+    once("live", () => {
+      lo.addEventListener("change", () => { S.lout = lo.value; live(); });
+      lr.addEventListener("change", () => { S.crule = lr.value; live(); });
+    });
+  }
+
+  once("modal", () => {
+    $("#aboutbtn").addEventListener("click", () => openModal(
+      "What this page is, and where every number in it comes from", aboutHtml()));
+    $("#modalclose").addEventListener("click", closeModal);
+    $("#modal").addEventListener("click", ev => {
+      if (ev.target === $("#modal")) closeModal();
+    });
+    $("#modal").addEventListener("keydown", trapTab);
+    addEventListener("keydown", ev => { if (ev.key === "Escape") closeModal(); });
+  });
+
+  // the geometry note is four lines of prose, so the box states what it is about and
+  // holds the note itself one click away
+  $("#geomwarn").innerHTML = S.meta.geometry_note
+    ? '<details><summary>Geometry caveat: a published line is not always a device'
+      + '</summary><p>' + esc(S.meta.geometry_note) + "</p></details>"
+    : "";
+  const miss = S.missing.length
+    ? ` ${S.missing.length} payload${S.missing.length > 1 ? "s" : ""} could not be `
+      + `read (${S.missing.join(", ")}), so the panels that need them say so.`
+    : "";
+  // the inventory line stays one line; the standing warning about the junction rule
+  // is a statement about that control, so it sits with the control
   $("#metaline").textContent =
-    `${S.tre.length.toLocaleString()} treatments, ${S.eff.length} estimates, `
-    + `${S.areas.length.toLocaleString()} searchable areas. `
-    + (S.meta.warning || "");
+    `${S.tre.length.toLocaleString()} treatments, ${S.eff.length} precomputed `
+    + `estimates, ${(S.units ? S.units.length : 0).toLocaleString()} treated units `
+    + `with per unit sums, ${S.areas.length.toLocaleString()} searchable areas.`
+    + miss;
+  const rw = $("#rulewarn");
+  if (rw) rw.innerHTML = prose("Why no single junction rule is correct",
+                               S.meta.warning || "");
 
+  effLegend();
+  syncSummaries();
+  once("chrome", () => wireChrome());
+}
+
+/* ------------------------------------------------- the collapsed group counts
+   Each group in the left panel states in its own summary how much it is doing, so
+   that a closed group is not a closed box. The area and the sources are the two a
+   reader touches first, and they are the two that open by default. */
+function syncSummaries() {
+  const set = (id, txt) => { const e = $(id); if (e) e.textContent = txt; };
+  set("#sumArea", S.poly && S.poly.length >= 3
+    ? S.poly.length + " point polygon"
+    : (S.bbox ? "area box" : "whole city"));
+  const all = [...((S.meta || {}).layers || []), ...((S.meta || {}).curb_layers || [])];
+  const on = all.filter(l => S.on[l.slug]).length;
+  set("#sumSrc", on + " of " + all.length + " on");
+  let hid = 0, tot = 0;
+  for (const d of SUBDIMS) {
+    const a = S.sub[d.key] || {};
+    for (const k in a) { tot++; if (a[k] === false) hid++; }
+  }
+  set("#sumSub", tot ? (hid ? hid + " of " + tot + " hidden" : "all " + tot + " shown")
+                     : "none in the inventory");
+  set("#sumPlace", PLACEMENTS.filter(p => S.place[p]).length + " of "
+    + PLACEMENTS.length + " shown");
+  set("#sumRule", S.rule || "none");
+  set("#sumComb", S.combine ? "on, within " + S.combineM + " m" : "off");
+  set("#sumYear", String(S.year));
+  const nCell = S.eff.filter(e => e.out === S.outcome).length;
+  set("#sumEff", S.eff.length ? nCell.toLocaleString() + " cells, "
+                                + outLabel(S.outcome)
+                              : "payload absent");
+}
+
+/* The tag column, the flag letters and the bar are defined once here rather than
+   spelled out in every row. */
+function effLegend() {
+  const rows = [
+    ["the order", "a cell is ranked on its adjusted p value where the payload carries "
+      + "one and on its unadjusted p value otherwise; a cell the admission rule excludes sits below "
+      + "every admissible cell, and a cell the placebo test excludes sits last of all, "
+      + "because an excluded cell is not evidence however small its p value"],
+    ["class", "the tag beside a class: the cell was estimated by class"],
+    ["matched", "the tag beside a class: the cell was estimated on placement matched "
+      + "records"],
+    ["&#9660;", "ratio below 1.0, fewer crashes at the treated units"],
+    ["&#9650;", "ratio above 1.0, more crashes at the treated units"],
+    ["the bar", "the ratio of the same cell drawn either side of 1.0, scaled to the "
+      + "largest ratio in the table; the second line below it is the 95 per cent "
+      + "interval"],
+    ["P", "the placebo test excludes this cell: placebo at least as large as the estimate"],
+    ["T", "a pre treatment trend is present"],
+    ["U", "underpowered, minimum detectable effect over 25 percent"],
+    ["hatched row", "not admissible: the admission rule excludes the cell, so it is not evidence "
+      + "and it sorts below the rest"],
+  ];
+  const el = $("#efflegend");
+  if (el) el.innerHTML = rows.map(r =>
+    "<dt>" + r[0] + "</dt><dd>" + r[1] + "</dd>").join("");
+}
+
+function wireChrome() {
   const as = $("#areasearch");
   as.addEventListener("input", () => {
     const q = as.value.trim().toLowerCase();
@@ -356,7 +939,7 @@ function bounds(list) {
   return [x0,y0,x1,y1];
 }
 function fitTo(bb) {
-  const c = $("#map"), w = c.clientWidth, h = 640, pad = 26;
+  const c = $("#map"), w = c.clientWidth, h = MAPH, pad = 26;
   const m0 = MERC(bb[1]), m1 = MERC(bb[3]);
   const s = Math.min((w-2*pad)/Math.max(1e-9,(bb[2]-bb[0])),
                      (h-2*pad)/Math.max(1e-9,(m1-m0)));
@@ -369,11 +952,16 @@ function unproj(px,py){const v=S.view;return [v.cx+(px-v.dx)/v.s, IMERC(v.cmy-(p
    Tiles are fetched from a public raster service and cached in memory. The page
    works without them: a tile that fails to load is skipped and never retried, so
    an offline copy of this file still draws every layer. */
-const TILE_URL = z => `https://basemaps.cartocdn.com/light_all/${z}/{x}/{y}.png`;
+function tileStyle() {
+  var t = document.documentElement.getAttribute("data-theme");
+  var dark = t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  return dark ? "dark_all" : "light_all";
+}
+const TILE_URL = z => `https://basemaps.cartocdn.com/${tileStyle()}/${z}/{x}/{y}.png`;
 const TILE_ATTR = "Basemap © OpenStreetMap contributors, © CARTO";
 const tiles = new Map();          // key "z/x/y" -> Image, or "bad"
 function tileFor(z,x,y) {
-  const k = z+"/"+x+"/"+y;
+  const k = tileStyle()+"/"+z+"/"+x+"/"+y;
   if (tiles.has(k)) return tiles.get(k);
   const img = new Image();
   img.crossOrigin = "anonymous";
@@ -428,6 +1016,13 @@ function shown(t){
   if (!S.on[t.s]) return false;
   if (!S.place[t.pl || "no_position"]) return false;
   if (t.y && t.y > S.year) return false;
+  for (const d of SUBDIMS) {
+    if (!d.only(t)) continue;              // the dimension does not apply
+    const v = t[d.field];
+    if (v == null) continue;               // the record does not carry it
+    const allow = S.sub[d.key];
+    if (allow && allow[v] === false) return false;
+  }
   return inArea(t);
 }
 
@@ -438,7 +1033,7 @@ function shown(t){
    Combining groups every visible record within combineM metres into one item, using
    union find over a grid, and the popup then lists what the corner actually carries.
    This is a display choice and it changes no estimate. */
-function combineVisible(list, radiusM) {
+function groupByRadius(list, radiusM) {
   const n = list.length, parent = new Int32Array(n);
   for (let i=0;i<n;i++) parent[i]=i;
   const find = a => { while(parent[a]!==a){parent[a]=parent[parent[a]];a=parent[a];} return a; };
@@ -468,7 +1063,11 @@ function combineVisible(list, radiusM) {
     const r = find(i);
     (groups.get(r) || groups.set(r,[]).get(r)).push(list[i]);
   }
-  return [...groups.values()].map(members => {
+  return [...groups.values()];
+}
+
+function combineVisible(list, radiusM) {
+  return groupByRadius(list, radiusM).map(members => {
     let lon=0, lat=0;
     for (const m of members) { lon+=m.lon; lat+=m.lat; }
     const srcs = [...new Set(members.map(m=>m.s))];
@@ -499,7 +1098,7 @@ function drawArea(g) {
 /* -------------------------------------------------------------------- draw */
 function draw() {
   const c = $("#map"), g = c.getContext("2d");
-  const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = 640;
+  const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = MAPH;
   if (c.width !== Math.round(w*dpr) || c.height !== Math.round(h*dpr)) {
     c.width = Math.round(w*dpr); c.height = Math.round(h*dpr);
     c.style.height = h+"px"; S.view = null;
@@ -536,6 +1135,41 @@ function draw() {
     g.globalAlpha = 1;
   }
 
+  // comparison intersections for the current selection, under the active rule.
+  // Drawn before the treatments so a treated dot always sits on top of its lines.
+  $("#ctrlhint") && ($("#ctrlhint").textContent = "");
+  if (S.showCtrl && S.ctrl && S.ctrl.units && S.units && S.rule) {
+    const CAP = 800;
+    const sel = mapSelection().units;
+    const use = sel.slice(0, CAP);
+    const col = S.rule === "m" ? "#2f7d64" : "#8a5a2b";
+    g.strokeStyle = col; g.fillStyle = col;
+    let drawn = 0;
+    for (const un of use) {
+      const e = S.ctrl.units[un.u];
+      const pts = e && e[S.rule];
+      if (!pts) continue;
+      const a = proj(un.lon, un.lat);
+      for (const p of pts) {
+        const q = proj(p[0], p[1]);
+        if ((q[0]<-8&&a[0]<-8)||(q[1]<-8&&a[1]<-8)||(q[0]>w+8&&a[0]>w+8)||(q[1]>h+8&&a[1]>h+8)) continue;
+        g.globalAlpha = .3;
+        g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(q[0], q[1]); g.stroke();
+        g.globalAlpha = .8;
+        g.beginPath(); g.arc(q[0], q[1], 2.6, 0, 6.2832); g.stroke();
+        drawn++;
+      }
+    }
+    g.globalAlpha = 1;
+    const note = $("#ctrlhint");
+    if (note) {
+      const nm = S.rule === "m" ? "matched Poisson design" : "corridor DiD design";
+      note.textContent = sel.length > CAP
+        ? `${drawn} comparison intersections under the ${nm}, for the first ${CAP} of ${sel.length} selected units; zoom or filter to see the rest`
+        : `${drawn} comparison intersections under the ${nm}; matched once over all units, so a per subset table rematches at the margin`;
+    }
+  }
+
   S.visible = [];
   let nSeg = 0;
 
@@ -565,6 +1199,9 @@ function draw() {
     stats(nSeg);
     spark();
     effects();
+    live();
+    renderStrip();
+    syncSummaries();
     return;
   }
 
@@ -601,6 +1238,22 @@ function draw() {
   stats(nSeg);
   spark();
   effects();
+  live();
+  renderStrip();
+  syncSummaries();
+}
+
+function subhint() {
+  const off = [];
+  for (const d of SUBDIMS) {
+    const a = S.sub[d.key] || {};
+    const n = Object.values(a).filter(v => v === false).length;
+    if (n) off.push(`${n} hidden in ${d.label.toLowerCase()}`);
+  }
+  const el = $("#subhint");
+  if (!el) return;
+  el.textContent = off.length ? off.join("; ") + "." : "nothing hidden";
+  syncSummaries();
 }
 
 function stats(nSeg) {
@@ -616,14 +1269,28 @@ function stats(nSeg) {
   const rule = S.rule ? ("lb_"+S.rule) : null;
   const byLab = {};
   if (rule) sel.forEach(t => { if (t[rule]) byLab[t[rule]]=(byLab[t[rule]]||0)+1; });
+  // the figures the strip at the top of the page carries, recorded here so that the
+  // strip and this breakdown can never disagree with each other
+  const ints = new Set();
+  sel.forEach(t => { if (t.ii != null) ints.add(t.ii); });
+  const allLayers = [...((S.meta || {}).layers || []),
+                     ...((S.meta || {}).curb_layers || [])];
+  S.tiles.records = sel.length;
+  S.tiles.ints = ints.size;
+  S.tiles.atj = byPl.at_junction || 0;
+  S.tiles.corners = nCorners;
+  S.tiles.srcOn = allLayers.filter(l => S.on[l.slug]).length;
+  S.tiles.srcTotal = allLayers.length;
+
   let html = `<div class="stat"><span>records drawn</span><b>${sel.length.toLocaleString()}</b></div>`;
+  html += `<div class="stat"><span>distinct intersections</span><b>${ints.size.toLocaleString()}</b></div>`;
   if (nCorners !== null) {
     html += `<div class="stat"><span>corners after combining</span><b>${nCorners.toLocaleString()}</b></div>`;
     html += `<div class="stat"><span>corners with several sources</span><b>${nMulti.toLocaleString()}</b></div>`;
     const dup = sel.length - nCorners;
     html += `<div class="stat"><span>records that share a corner</span><b>${dup.toLocaleString()}</b></div>`;
   }
-  html += `<div class="stat"><span>drawn as a line, not a point</span><b>${nSeg.toLocaleString()}</b></div>`;
+  html += `<div class="stat"><span>drawn as a line rather than a point</span><b>${nSeg.toLocaleString()}</b></div>`;
   for (const p of PLACEMENTS) if (byPl[p])
     html += `<div class="stat"><span>${p.replace(/_/g," ")}</span><b>${byPl[p].toLocaleString()}</b></div>`;
   if (Object.keys(byLab).length) {
@@ -632,6 +1299,30 @@ function stats(nSeg) {
       html += `<div class="stat"><span>${k.replace(/_/g," ")}</span><b>${byLab[k].toLocaleString()}</b></div>`;
   }
   $("#selstats").innerHTML = html;
+  const s = $("#sumSel");
+  if (s) s.textContent = sel.length.toLocaleString() + " records drawn";
+}
+
+/* ------------------------------------------------------------ the summary strip
+   Between four and six figures, each one a count of the current selection, so that
+   the first screen states what has been selected before it states anything about it.
+   A figure the page could not compute says so rather than showing a zero. */
+function renderStrip() {
+  const t = S.tiles || {};
+  const tiles = [
+    [t.records, "records drawn"],
+    [t.ints, "distinct intersections in the selection"],
+    [t.atj, "records at a junction"],
+    [t.srcOn, "of " + (t.srcTotal || 0) + " sources switched on"],
+    [t.units, "treated units in the estimate"],
+  ];
+  if (S.combine) tiles.push([t.corners, "corners after combining"]);
+  const host = $("#strip");
+  if (!host) return;
+  host.innerHTML = tiles.map(([v, cap]) =>
+    '<div class="tile"><div class="tnum' + (v == null ? " tna" : "") + '">'
+    + (v == null ? "not read" : Number(v).toLocaleString())
+    + '</div><div class="tcap">' + esc(cap) + "</div></div>").join("");
 }
 
 /* --------------------------------------------------------------- crash spark */
@@ -667,7 +1358,10 @@ function spark() {
   if (!ys.length) {
     g.fillText(`no crash record for these ${ints.size} intersections`, 6, 20);
     $("#sparkhint").textContent = ""; return; }
-  const key = S.outcome === "n_ped" ? 1 : (S.outcome === "n_injury" ? 2 : 0);
+  // crashes.json carries three series per intersection and year, so an outcome
+  // outside those three has no line here and the panel says which line it drew
+  const SPARK_KEY = {n_all:0, n_ped:1, n_injury:2};
+  const key = SPARK_KEY[S.outcome] != null ? SPARK_KEY[S.outcome] : 0;
   const vals = ys.map(y=>series[y][key]);
   const mx = Math.max(...vals, 1);
   const lo = ys[0], hi = ys[ys.length-1];
@@ -685,38 +1379,598 @@ function spark() {
   g.fillStyle = cs.getPropertyValue("--ink3").trim();
   g.fillText(String(lo), padL-10, h-4); g.fillText(String(hi), w-26, h-4);
   g.fillText(String(mx), 4, padT+8);
-  const label = S.outcome === "n_ped" ? "pedestrian crashes"
-    : (S.outcome === "n_injury" ? "crashes with an injury" : "all crashes");
-  $("#sparkhint").textContent =
-    `${label} per year across ${ints.size.toLocaleString()} intersections in the `
-    + `selection, ${lo} to ${hi}. This is a raw count and not an estimate: it has `
-    + `no comparison group.`;
+  const label = ["all crashes","pedestrian crashes","crashes with an injury"][key];
+  const sub = SPARK_KEY[S.outcome] != null ? ""
+    : `The yearly payload of this page carries all crashes, pedestrian crashes and `
+      + `crashes with an injury, so the outcome you chose above has no line here and `
+      + `the line drawn is all crashes.`;
+  // the first line names what is plotted and stays visible; the caveats collapse
+  const head = `${label} per year across ${ints.size.toLocaleString()} intersections `
+    + `in the selection, ${lo} to ${hi}.`;
+  $("#sparkhint").innerHTML = esc(head)
+    + '<details class="prose"><summary>What this line is not</summary><p>'
+    + `This is a raw count rather than an estimate: it has no comparison group.`
+    + (sub ? " " + esc(sub) : "") + "</p></details>";
 }
 
 /* ------------------------------------------------------------------ effects */
 function fmt(x,d=3){return (x==null||!isFinite(x))?"":Number(x).toFixed(d);}
+function signed(x,d){return (x==null||!isFinite(x))?"not defined"
+  :((x>0?"+":"")+Number(x).toFixed(d));}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,
+  c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function kv(a,b){return '<div class="kv"><span>'+a+'</span><b>'+b+'</b></div>';}
 function verdictTag(v){
   if(!v) return "";
-  if(v.startsWith("effect")||v.startsWith("reduction")) return '<span class="tag ok">benefit</span>';
-  if(v.startsWith("harm")||v.startsWith("increase")) return '<span class="tag bad">harm</span>';
+  if(v.startsWith("effect")||v.startsWith("reduction")) return '<span class="tag ok">reduction</span>';
+  if(v.startsWith("harm")||v.startsWith("increase")) return '<span class="tag bad">increase</span>';
   if(v.startsWith("null")) return '<span class="tag">null</span>';
   return `<span class="tag">refused</span>`;
 }
+
+/* ---------------------------------------------- ordering the cells by evidence
+   The default order of the table is the strength of the evidence in it. A cell is
+   ranked on its adjusted p value where the payload carries one and on its unadjusted
+   p value otherwise; a cell the admission rule excludes sits below every admissible cell; and a
+   cell the placebo test excludes sits last of all, because an excluded cell is not evidence
+   however small its p value. Nothing here recomputes anything: the gates are read
+   from the verdict the pipeline wrote. */
+function pAdjOf(e) {
+  for (const k of ["padj", "p_adj", "p_bh", "q"])
+    if (e[k] != null && isFinite(e[k])) return e[k];
+  return null;
+}
+function placeboRefuses(e) {
+  if (String(e.verdict || "").indexOf("placebo fails") >= 0) return true;
+  return e.plp != null && isFinite(e.plp) && e.plp < 0.05;
+}
+function gateRefuses(e) {
+  return String(e.verdict || "").indexOf("not interpretable") === 0;
+}
+function evidenceKey(e) {
+  const tier = placeboRefuses(e) ? 2 : (gateRefuses(e) ? 1 : 0);
+  const a = pAdjOf(e), p = a != null ? a : e.p;
+  return [tier, (p == null || !isFinite(p)) ? 2 : p];
+}
+function flagsFor(e) {
+  const v = String(e.verdict || ""), out = [];
+  if (v.indexOf("placebo fails") >= 0)
+    out.push(["P", "the placebo test excludes this cell: placebo at least as large as the estimate"]);
+  if (v.indexOf("pre treatment trend") >= 0)
+    out.push(["T", "a pre treatment trend is present"]);
+  if (v.indexOf("underpowered") >= 0)
+    out.push(["U", "underpowered, minimum detectable effect over 25 percent"]);
+  return out;
+}
+function srcTag(s) {
+  const short = s === "by class" ? "class"
+              : (s === "placement matched" ? "matched" : String(s || ""));
+  if (!short) return "";
+  return '<span class="tag mini" title="from: ' + esc(s) + '">' + esc(short) + "</span>";
+}
+function logRatio(x) {
+  return (x == null || !isFinite(x) || !(x > 0)) ? null : Math.log(x);
+}
+/* Direction as a symbol as well as a colour, because a reader may be colour blind
+   and because this page is printed. */
+function dirMark(x) {
+  const L = logRatio(x);
+  if (L == null || L === 0) return "";
+  return L < 0
+    ? '<span class="arrow dn" title="ratio below 1.0, fewer crashes at the treated units">&#9660;</span>'
+    : '<span class="arrow up" title="ratio above 1.0, more crashes at the treated units">&#9650;</span>';
+}
+/* The ratio drawn as a bar either side of 1.0, scaled to the largest ratio in the
+   table, so that the size of a cell is read without reading its digits. */
+function barCell(x, maxAbs, refused) {
+  const L = logRatio(x);
+  if (L == null) return '<div class="bar"><u></u></div>';
+  const f = maxAbs > 0 ? Math.min(1, Math.abs(L) / maxAbs) : 0;
+  const w = (f * 50).toFixed(1) + "%";
+  const side = L < 0 ? "right:50%" : "left:50%";
+  const cls = refused ? "ref" : (L < 0 ? "dn" : "up");
+  return '<div class="bar"><i class="' + cls + '" style="' + side + ";width:" + w
+    + '"></i><u></u></div>';
+}
+
 function effects() {
-  const onSrc = Object.keys(S.on).filter(k=>S.on[k]);
+  if (!S.eff.length) {
+    $("#efftab").innerHTML = "<tbody><tr><td>data/explorer/effects.json could not be "
+      + "read, so the precomputed estimates are absent from this page.</td></tr></tbody>";
+    return;
+  }
   const rows = S.eff.filter(e => e.out === S.outcome);
-  rows.sort((a,b)=>(a.irr??9)-(b.irr??9));
-  let html = "<thead><tr><th>class</th><th>from</th><th class=num>n</th>"
-    + "<th class=num>ratio</th><th class=num>p</th><th>verdict</th></tr></thead><tbody>";
-  for (const e of rows.slice(0,80)) {
-    html += `<tr><td>${e.cls}</td><td style="color:var(--ink3)">${e.src}</td>`
-      + `<td class=num>${e.n??""}</td>`
-      + `<td class=num>${fmt(e.irr)}<br><span style="color:var(--ink3);font-size:11px">${fmt(e.lo)} to ${fmt(e.hi)}</span></td>`
-      + `<td class=num>${fmt(e.p,3)}</td><td>${verdictTag(e.verdict)}`
-      + (e.plirr!=null?`<br><span style="color:var(--ink3);font-size:10.8px">placebo ${fmt(e.plirr)}</span>`:"")
-      + `</td></tr>`;
+  rows.sort((a, b) => {
+    const ka = evidenceKey(a), kb = evidenceKey(b);
+    return (ka[0] - kb[0]) || (ka[1] - kb[1]) || ((b.n || 0) - (a.n || 0));
+  });
+  const top = rows.slice(0, 80);
+  let maxAbs = 0;
+  for (const e of top) {
+    const L = logRatio(e.irr);
+    if (L != null && Math.abs(L) > maxAbs) maxAbs = Math.abs(L);
+  }
+  let html = '<colgroup><col style="width:30%"><col style="width:12%">'
+    + '<col style="width:26%"><col style="width:13%">'
+    + '<col style="width:19%"></colgroup>'
+    + "<thead><tr><th>class</th><th class=num>n</th><th class=num>ratio</th>"
+    + "<th class=num>p</th><th>verdict</th></tr></thead><tbody>";
+  for (const e of top) {
+    const out = placeboRefuses(e) || gateRefuses(e);
+    const fl = flagsFor(e).map(f =>
+      '<span class="tag flag" title="' + esc(f[1]) + '">' + f[0] + "</span>").join(" ");
+    html += "<tr" + (out ? ' class="refused"' : "") + ">"
+      + '<td><span class="cls">' + esc(e.cls) + "</span> " + srcTag(e.src)
+      + (fl ? " " + fl : "") + "</td>"
+      + "<td class=num>" + (e.n ?? "") + "</td>"
+      + "<td class=num>" + fmt(e.irr) + barCell(e.irr, maxAbs, out)
+      + '<span class="ci">' + fmt(e.lo) + " to " + fmt(e.hi) + "</span></td>"
+      + "<td class=num>" + fmt(e.p, 3) + "</td>"
+      + "<td>" + dirMark(e.irr) + " " + verdictTag(e.verdict)
+      + (e.plirr != null ? '<span class="ci">placebo ' + fmt(e.plirr) + "</span>" : "")
+      + "</td></tr>";
   }
   $("#efftab").innerHTML = html + "</tbody>";
+  syncSummaries();
+}
+
+/* =======================================================================
+   THE ESTIMATE FOR THE CURRENT SELECTION
+
+   data/explorer/units.json carries, for every treated unit whose installation falls
+   inside the window in units_meta.json, the four window sums an arithmetic difference
+   in differences needs, per outcome, per comparison rule and for the main and the
+   placebo window. A mean over any set of those units is therefore exact arithmetic,
+   and the arithmetic is the estimator the city published, so this panel reports the
+   city's own quantity for whatever the reader has selected.
+
+   It does not report the modelled quantity. Fixed effects Poisson with unit and
+   calendar month effects and a variance clustered on the match group is not refitted
+   in a browser, so the modelled per subset estimates are read from effects.json and
+   shown in their own block below.
+   ======================================================================= */
+
+const OUT_EXTRA = {
+  inj_ped: "pedestrians injured or killed",
+  n_vv_mot: "vehicle to vehicle with a driver or passenger harmed",
+};
+function outLabel(k) {
+  const m = ((S.meta && S.meta.outcomes) || []).find(o => o[0] === k);
+  return (m && m[1]) || OUT_EXTRA[k] || k;
+}
+
+/* ---- the correspondence between the subset catalogue and the switches here ----
+   A unit enters the selection when at least one of its catalogued subsets is active,
+   and a subset is active when a switch that publishes it is on and every subclass
+   value it names is on. Three kinds of subset are deliberately not used for the
+   selection: one that another already used subset contains, one that is the union of
+   subsets already used, and one that pools records across sources the switches here
+   control one at a time. Each is reported to the reader rather than dropped in
+   silence, because a reader cannot check a correspondence that is not shown. */
+const TC_CLASS = ["quick_kurb","hardened_centerline","median_extension","bike_island",
+  "rubber_speed_bump","davidsons","delineators","pegatracks","markings_only",
+  "left_turn_treatment","right_turn_treatment"];
+const SUB_HELD = {
+  turn_calming_at_junction:"contained in turn calming, every record",
+  tcm_narrowing:"the union of turn calming classes already used",
+  tcm_vertical:"the union of turn calming classes already used",
+  tcm_post:"the union of turn calming classes already used",
+  tcm_paint:"the union of turn calming classes already used",
+  tcm_unpublished:"the union of turn calming classes already used",
+  tc_with_daylighting:"contained in turn calming, every record",
+  tc_without_daylighting:"contained in turn calming, every record",
+  tc_dest_crosswalk:"contained in turn calming, every record",
+  tc_dest_stopbar:"contained in turn calming, every record",
+  tc_dest_intersection:"contained in turn calming, every record",
+  dot2024_only:"contained in the January to August 2024 cohort",
+  dot2025_only:"contained in the 2025 cohort",
+  dot_either_list:"the union of the two cohorts already used",
+};
+function selectorFor(name) {
+  if (SUB_HELD[name]) return {held: SUB_HELD[name]};
+  if (name === "turn_calming_all")
+    return {layers:["vzv_turn_calming"], pool:["c","mech"]};
+  if (name === "dot2024") return {layers:["list2024"], pool:["ac"]};
+  if (name === "dot2025") return {layers:["list2025"], pool:["ac"]};
+  if (name === "daylighting_hardened_at_junction")
+    return {layers:["corrals_escooter","corrals_bike"], atJunction:true};
+  if (name === "daylighting_signage_at_junction")
+    return {layers:["signorders"], atJunction:true};
+  if (name === "daylighting_at_junction")
+    return {unmapped:"it pools daylighting records across sources that the switches "
+      + "on this page control one at a time, so no combination of switches reproduces "
+      + "it. The two subsets it divides into, daylighting with a physical object and "
+      + "daylighting by sign and paint only, are used instead."};
+  let m = /^tc_(.+)$/.exec(name);
+  if (m && TC_CLASS.indexOf(m[1]) >= 0) {
+    const mech = (S.meta.tc_mechanism || {})[m[1]];
+    const need = [["c", m[1]]];
+    if (mech) need.push(["mech", mech]);
+    return {layers:["vzv_turn_calming"], need:need};
+  }
+  m = /^dot(2024|2025)_(.+)$/.exec(name);
+  if (m) return {layers:["list" + m[1]], need:[["ac", m[2]]]};
+  return {unmapped:"no switch on this page corresponds to it"};
+}
+function subOn(dim, val) {
+  const a = S.sub[dim];
+  return !(a && a[val] === false);
+}
+function dimWhole(dim) {
+  const a = S.sub[dim] || {};
+  return Object.keys(a).every(k => a[k] !== false);
+}
+function subsetActive(sel) {
+  if (!sel || sel.held || sel.unmapped) return false;
+  if (sel.atJunction && !S.place.at_junction) return false;
+  if (sel.layers && !sel.layers.some(l => S.on[l])) return false;
+  for (const nd of (sel.need || [])) if (!subOn(nd[0], nd[1])) return false;
+  for (const d of (sel.pool || [])) if (!dimWhole(d)) return false;
+  return true;
+}
+function layerHasSubset(slug) {
+  return S.subsel.some(s => s && s.layers && s.layers.indexOf(slug) >= 0);
+}
+
+function mapSelection() {
+  const cat = S.umeta.subsets || [];
+  const act = S.subsel.map(subsetActive);
+  const units = [];
+  for (const u of S.units) {
+    if (u.iy > S.year) continue;
+    if (!inArea(u)) continue;
+    let hit = false;
+    for (const i of u.s) if (act[i]) { hit = true; break; }
+    if (hit) units.push(u);
+  }
+  const per = {};
+  for (const u of units) for (const i of u.s) if (act[i]) per[i] = (per[i] || 0) + 1;
+  const contributing = Object.keys(per).map(i => ({
+    label: cat[i] ? cat[i].label : i, note: cat[i] ? cat[i].note : "", n: per[i]
+  })).sort((a, b) => b.n - a.n);
+  const armed = [];                       // subsets a switch turned on
+  act.forEach((a, i) => { if (a && !per[i]) armed.push(cat[i].label); });
+  const gaps = [];                        // switches the catalogue cannot represent
+  for (const l of (S.meta.layers || []))
+    if (S.on[l.slug] && !layerHasSubset(l.slug)) gaps.push(l.label);
+  const ctx = [];
+  for (const l of (S.meta.curb_layers || [])) if (S.on[l.slug]) ctx.push(l.label);
+  const held = [], unmapped = [];
+  cat.forEach((s, i) => {
+    const sel = S.subsel[i];
+    if (!sel) return;
+    if (sel.held) held.push(s.label + ": " + sel.held);
+    if (sel.unmapped) unmapped.push(s.label + ": " + sel.unmapped);
+  });
+  return {units:units, contributing:contributing, armed:armed, gaps:gaps,
+          ctx:ctx, held:held, unmapped:unmapped};
+}
+
+/* ---- the arithmetic ----
+   One item is one unit, or, when combining is on, one group of units within the
+   reader's radius. A group contributes the mean of its members, so a corner that two
+   sources filed separately enters the average once. */
+function itemStats(members, outcome, win, rule, pre, post) {
+  let k = 0, dd = 0, ta = 0, tp = 0, ca = 0, cp = 0, nc = 0;
+  for (const u of members) {
+    const cell = u.d && u.d[outcome] && u.d[outcome][win];
+    const cmp = cell && cell[rule];
+    if (!cmp) continue;
+    k++;
+    dd += 12 * (cell.ta / post - cell.tp / pre)
+        - 12 * (cmp.ca / post - cmp.cp / pre);
+    ta += cell.ta; tp += cell.tp; ca += cmp.ca; cp += cmp.cp; nc += cmp.n || 0;
+  }
+  if (!k) return null;
+  return {delta:dd/k, ta:ta/k, tp:tp/k, ca:ca/k, cp:cp/k, nc:nc/k};
+}
+function didFor(items, outcome, win, rule) {
+  const pre = S.umeta.pre, post = S.umeta.post;
+  const rows = [];
+  let skipped = 0;
+  for (const it of items) {
+    const st = itemStats(it, outcome, win, rule, pre, post);
+    if (st) rows.push(st); else skipped++;
+  }
+  const n = rows.length;
+  const o = {n:n, skipped:skipped, mean:null, sd:null, se:null, t:null, p:null,
+             lo:null, hi:null, rr:null, nc:null, sums:null};
+  if (!n) return o;
+  let s = 0, ncs = 0, Ta = 0, Tp = 0, Ca = 0, Cp = 0;
+  for (const r of rows) { s += r.delta; ncs += r.nc;
+    Ta += r.ta; Tp += r.tp; Ca += r.ca; Cp += r.cp; }
+  o.mean = s / n; o.nc = ncs / n; o.sums = {Ta:Ta, Tp:Tp, Ca:Ca, Cp:Cp};
+  if (n > 1) {
+    let ss = 0;
+    for (const r of rows) ss += (r.delta - o.mean) * (r.delta - o.mean);
+    o.sd = Math.sqrt(ss / (n - 1));
+    o.se = o.sd / Math.sqrt(n);
+    if (o.se > 0) {
+      o.t = o.mean / o.se;
+      o.p = tP(o.t, n - 1);
+      const q = tCrit(n - 1, 0.05);
+      o.lo = o.mean - q * o.se; o.hi = o.mean + q * o.se;
+    }
+  }
+  o.rr = (Tp > 0 && Cp > 0 && Ca > 0) ? (Ta / Tp) / (Ca / Cp) : null;
+  return o;
+}
+
+/* Student t, by the incomplete beta function, so the interval and the p value come
+   from one implementation and cannot disagree with each other. */
+function gammaln(x) {
+  const c = [76.18009172947146, -86.50532032941677, 24.01409824083091,
+             -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+  let y = x, tmp = x + 5.5, ser = 1.000000000190015;
+  tmp -= (x + 0.5) * Math.log(tmp);
+  for (let j = 0; j < 6; j++) ser += c[j] / ++y;
+  return -tmp + Math.log(2.5066282746310005 * ser / x);
+}
+function betacf(a, b, x) {
+  const EPS = 3e-14, FPMIN = 1e-300, qab = a + b, qap = a + 1, qam = a - 1;
+  let c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < FPMIN) d = FPMIN;
+  d = 1 / d;
+  let h = d;
+  for (let m = 1; m <= 400; m++) {
+    const m2 = 2 * m;
+    let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    const del = d * c; h *= del;
+    if (Math.abs(del - 1) < EPS) break;
+  }
+  return h;
+}
+function betai(a, b, x) {
+  if (!(x > 0)) return 0;
+  if (x >= 1) return 1;
+  const bt = Math.exp(gammaln(a + b) - gammaln(a) - gammaln(b)
+    + a * Math.log(x) + b * Math.log(1 - x));
+  return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a
+                                   : 1 - bt * betacf(b, a, 1 - x) / b;
+}
+function tP(t, df) {
+  if (!isFinite(t) || !(df >= 1)) return null;
+  return betai(df / 2, 0.5, df / (df + t * t));
+}
+function tCrit(df, alpha) {
+  if (!(df >= 1)) return null;
+  let lo = 0, hi = 400;
+  for (let i = 0; i < 90; i++) {
+    const mid = (lo + hi) / 2;
+    if (tP(mid, df) > alpha) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+function pfmt(p) {
+  if (p == null || !isFinite(p)) return "not defined";
+  return p < 0.0001 ? "less than 0.0001" : Number(p).toFixed(4);
+}
+
+/* The panel is written in three pieces, so that the equation for the arithmetic
+   estimator sits under the estimate and the equation for the aggregate ratio sits
+   under the ratio. An equation is hidden while the panel carries no figure for it to
+   describe. */
+function liveEq(on) {
+  for (const id of ["#eqmain", "#eqratio"]) {
+    const e = $(id); if (e) e.hidden = !on;
+  }
+}
+
+function live() {
+  const host = $("#livebody"), warn = $("#livewarn"),
+        notes = $("#livenotes"), winline = $("#livewindow"),
+        plachost = $("#liveplac"), ratiohost = $("#liveratio");
+  if (!host) return;
+  const wg = $("#windowgrp");
+  if (!S.units || !S.umeta || !S.lout) {
+    S.tiles.units = null;
+    host.innerHTML = '<p class="hint">This panel needs data/explorer/units.json and '
+      + 'data/explorer/units_meta.json, which src/make_unit_effects.py writes, and one '
+      + 'of them could not be read, so no estimate for the current selection is shown. '
+      + 'Every other panel on this page still works.</p>';
+    warn.textContent = ""; notes.innerHTML = ""; winline.textContent = "";
+    if (plachost) plachost.innerHTML = "";
+    if (ratiohost) ratiohost.innerHTML = "";
+    liveEq(false);
+    if (wg) wg.hidden = true;
+    return;
+  }
+  winline.textContent = S.umeta.censoring_note || "";
+  if (wg) wg.hidden = !S.umeta.censoring_note;
+  const sel = mapSelection();
+  const items = S.combine ? groupByRadius(sel.units, S.combineM)
+                          : sel.units.map(u => [u]);
+  const lab = outLabel(S.lout);
+  const ruleLab = (S.umeta.rules || {})[S.crule] || S.crule;
+  const main = didFor(items, S.lout, "m", S.crule);
+  const plac = didFor(items, S.lout, "p", S.crule);
+
+  S.tiles.units = main.n;
+
+  let counts = kv("units contributing", main.n.toLocaleString() + " of "
+    + S.units.length.toLocaleString());
+  if (S.combine)
+    counts += kv("units before combining", sel.units.length.toLocaleString());
+  if (main.skipped)
+    counts += kv("dropped, no comparison location under this rule",
+            main.skipped.toLocaleString());
+  if (main.n) counts += kv("comparison locations per unit, mean", fmt(main.nc, 1));
+
+  if (!main.n) {
+    let h0 = counts;
+    h0 += '<p class="hint">No unit in the catalogue matches this selection, so there '
+       + 'is nothing to estimate. Either every switched on source falls outside the '
+       + 'installation window quoted above, or the area holds no treated unit, or the '
+       + 'subclass filters have excluded every class the catalogue carries.</p>';
+    host.innerHTML = h0;
+    if (plachost) plachost.innerHTML = "";
+    if (ratiohost) ratiohost.innerHTML = "";
+    liveEq(false);
+    warn.innerHTML = warnBlock(mapWarnings(sel, main));
+    notes.innerHTML = mapNotes(sel);
+    return;
+  }
+
+  // the answer, first: the label of the quantity, the figure, its direction and
+  // whether it fails the placebo test, then the sentence that fixes the sign
+  const refused = plac.p != null && isFinite(plac.p) && plac.p < 0.05;
+  let h = '<div class="lab">Arithmetic difference in differences, the estimator the '
+     + 'city published, computed exactly</div>';
+  h += '<div class="hero' + (refused ? " refused" : "") + '">'
+     + signed(main.mean, 3) + '</div>';
+  h += '<div class="tagrow">' + liveDirTag(main.mean) + liveAdmitTag(plac.p) + '</div>';
+  h += '<div class="hint">change in ' + esc(lab) + ' per unit per year</div>';
+  h += prose("How to read the sign and the window",
+       'The figure is the treated change minus the change at its ' + ruleLab
+     + '. A negative number is a larger fall at the treated units than at the '
+     + 'comparison locations over ' + S.umeta.pre + ' months before and '
+     + S.umeta.post + ' months after.');
+  h += counts;
+  h += kv("standard error", main.se == null ? "not defined" : fmt(main.se, 3));
+  h += kv("95 per cent interval", main.lo == null ? "not defined"
+     : signed(main.lo, 3) + " to " + signed(main.hi, 3));
+  h += kv("t on " + (main.n - 1).toLocaleString() + " degrees of freedom",
+     main.t == null ? "not defined" : fmt(main.t, 2));
+  h += kv("two sided p", pfmt(main.p));
+  h += prose("What this arithmetic is", S.umeta.estimator_note || "");
+  host.innerHTML = h;
+
+  let hp = '<div class="lab">The same arithmetic on the placebo window</div>';
+  hp += kv("estimate", signed(plac.mean, 3));
+  hp += kv("standard error", plac.se == null ? "not defined" : fmt(plac.se, 3));
+  hp += kv("two sided p", pfmt(plac.p));
+  if (refused)
+    hp += '<div class="hint" style="color:var(--badink)">The placebo is significant at '
+       + 'the five per cent level for this selection, so the main number above should '
+       + 'not be read as an effect.</div>';
+  hp += prose("Why a placebo window is computed", 'the installation date moved '
+     + S.umeta.placebo_shift + ' months earlier, so the whole window lies before '
+     + 'installation and anything the arithmetic finds there is a failure of the '
+     + 'comparison rather than an effect of the treatment.');
+  if (plachost) plachost.innerHTML = hp;
+
+  let hr = '<div class="lab">Aggregate rate ratio, descriptive</div>';
+  hr += '<div class="big">' + (main.rr == null ? "not defined" : fmt(main.rr, 3))
+     + '</div>';
+  if (main.sums) {
+    hr += kv("treated, summed before and after",
+      fmt(main.sums.Tp, 1) + " and " + fmt(main.sums.Ta, 1));
+    hr += kv("comparison, summed before and after",
+      fmt(main.sums.Cp, 1) + " and " + fmt(main.sums.Ca, 1));
+  }
+  hr += prose("What the rate ratio is not", S.umeta.ratio_note || "");
+  hr += prose("How the comparison locations were matched",
+             S.umeta.matching_note || "");
+  if (ratiohost) ratiohost.innerHTML = hr;
+  liveEq(true);
+
+  warn.innerHTML = warnBlock(mapWarnings(sel, main));
+  notes.innerHTML = mapNotes(sel);
+}
+
+/* One collapsed block of prose, with a one line summary of what is inside it. */
+function prose(summary, body) {
+  if (!body) return "";
+  return '<details class="prose"><summary>' + esc(summary) + "</summary><p>"
+    + esc(body) + "</p></details>";
+}
+/* The direction of the selection estimate as a symbol and a colour and a word, and
+   whether the placebo test excludes the selection as a word rather than as a colour. */
+function liveDirTag(mean) {
+  if (mean == null || !isFinite(mean) || mean === 0) return "";
+  return mean < 0
+    ? '<span class="tag ok" title="a larger fall at the treated units than at the '
+      + 'comparison locations">&#9660; reduction</span>'
+    : '<span class="tag bad" title="a smaller fall, or a rise, at the treated units '
+      + 'than at the comparison locations">&#9650; increase</span>';
+}
+function liveAdmitTag(pp) {
+  if (pp == null || !isFinite(pp))
+    return '<span class="tag">placebo not defined</span>';
+  return pp < 0.05
+    ? '<span class="tag bad">this selection fails the placebo test</span>'
+    : '<span class="tag">placebo not significant</span>';
+}
+/* The things the selection asks for that the arithmetic cannot honour, counted in a
+   summary line and stated in full one click away. */
+function warnBlock(list) {
+  if (!list || !list.length) return "";
+  return '<details><summary>' + list.length + " note"
+    + (list.length > 1 ? "s" : "") + " on what this estimate cannot honour</summary>"
+    + list.map(t => "<p>" + t + "</p>").join("") + "</details>";
+}
+
+/* What the reader has asked for that this arithmetic cannot honour. Every item here
+   is a case where the selection on the left does not map onto the unit catalogue, and
+   it is stated rather than estimated around. */
+function mapWarnings(sel, main) {
+  const w = [];
+  if (sel.gaps.length)
+    w.push("Switched on and absent from this estimate: " + sel.gaps.join(", ")
+      + ". The unit catalogue carries no subset for "
+      + (sel.gaps.length > 1 ? "these sources" : "this source")
+      + ", so the map draws " + (sel.gaps.length > 1 ? "them" : "it")
+      + " and the number above does not include " + (sel.gaps.length > 1 ? "them" : "it")
+      + ".");
+  if (sel.ctx.length)
+    w.push("Also drawn and also absent: " + sel.ctx.join(", ")
+      + ". A hydrant bans parking within 15 feet by statute and a bus stop is a no "
+      + "standing zone, so a corner carrying either was already partly daylighted; "
+      + "neither is a treatment and neither carries an installation date.");
+  if (!S.place.at_junction)
+    w.push("At junction is switched off. A unit in the catalogue is a corner and it "
+      + "carries no placement, so the subsets that are themselves defined at a "
+      + "junction have been dropped from the estimate, and the placement switches can "
+      + "do nothing further to it.");
+  if (sel.armed.length) {
+    const head = sel.armed.slice(0, 3).join("; ");
+    w.push("Switched on and carrying no unit here: " + head
+      + (sel.armed.length > 3 ? "; and " + (sel.armed.length - 3) + " more" : "")
+      + ". A subset is empty when its installations fall outside the window quoted "
+      + "above, or outside the area, or outside the year cutoff.");
+  }
+  return w;
+}
+
+function mapNotes(sel) {
+  const rows = sel.contributing.map(c =>
+    '<div class="kv"><span>' + esc(c.label) + '</span><b>'
+    + c.n.toLocaleString() + '</b></div>').join("");
+  let h = '<details class="prose"><summary>Which catalogued subsets this selection '
+    + 'used</summary>'
+    + (rows || '<p>none</p>')
+    + '<p>A unit is counted once in the estimate and appears here under every subset '
+    + 'that contains it, so these counts sum to more than the number of units.</p>';
+  if (sel.held.length)
+    h += '<p>Held back because another subset already used contains it, or because it '
+      + 'is the union of subsets already used: ' + esc(sel.held.join("; ")) + '.</p>';
+  if (sel.unmapped.length)
+    h += '<p>No combination of switches on this page reproduces these subsets: '
+      + esc(sel.unmapped.join("; ")) + '</p>';
+  h += '</details>';
+  h += '<details class="prose"><summary>What does not reach this arithmetic</summary>'
+    + '<p>The junction rule relabels which records the map counts as being at a '
+    + "junction. The unit catalogue was built under the pipeline's own definition "
+    + 'of a junction, so changing the rule changes the map and the counts on the left '
+    + 'and leaves the estimate above unchanged.</p>'
+    + '<p>A unit is a corner, formed by grouping the records filed at one place, and '
+    + 'it carries no placement of its own, so the on approach, mid block and no '
+    + 'position switches change the map and leave the estimate as it is.</p>'
+    + (S.combine
+      ? '<p>Combining is on. Selected units within ' + S.combineM + ' m of one '
+        + 'another are treated as one corner and enter the average once, through the '
+        + 'mean of their own changes, so a physical change filed by two sources is '
+        + 'not counted twice.</p>'
+      : '<p>Combining is off, so every unit enters the average once on its own.</p>')
+    + '</details>';
+  return h;
 }
 
 /* --------------------------------------------------------------- map events */
@@ -725,7 +1979,7 @@ function wireMap() {
   c.addEventListener("pointermove", ev => {
     if (S.drag) {
       // the view centre is held in Mercator latitude, so a pan has to be applied
-      // there and not in degrees of latitude
+      // there rather than in degrees of latitude
       const a = unproj(S.drag.px, S.drag.py), b = unproj(ev.offsetX, ev.offsetY);
       S.view.cx -= b[0]-a[0]; S.view.cmy -= MERC(b[1])-MERC(a[1]);
       S.drag = {px:ev.offsetX, py:ev.offsetY}; draw(); return;
@@ -738,7 +1992,19 @@ function wireMap() {
   });
   c.addEventListener("pointerup", () => { S.drag = null; });
   // the popup deliberately survives a pointer leave; see hover()
-  c.addEventListener("pointerleave", () => { S.drag = null; });
+  c.addEventListener("pointerleave", ev => {
+    S.drag = null;
+    // The popup stays when a pen or a finger lifts, because that is the reason it
+    // is sticky at all. A mouse leaving the map is a reader moving on, so the
+    // popup fades unless it was pinned by a click.
+    if (ev.pointerType === "mouse" && !S.pinned) {
+      const tip = $("#tip");
+      tip.style.transition = "opacity .35s";
+      tip.style.opacity = "0";
+      setTimeout(() => { tip.style.display = "none"; tip.style.opacity = "1";
+                         tip.style.transition = ""; }, 360);
+    }
+  });
   c.addEventListener("click", ev => {
     if (S.drawing) {
       const [lon,lat] = unproj(ev.offsetX, ev.offsetY);
@@ -788,13 +2054,19 @@ function hover(ev) {
   const rows = [
     `<b>${t.c.replace(/_/g," ")}</b> <span style="color:var(--ink3)">${t.s}</span>`,
     t.a ? `at: ${t.a}` : "",
+    t.coh ? `on the ${t.coh === "dot2024" ? "January to August 2024" : "2025"} `
+      + `published list${t.oth ? ", and also on the other list" : ""}` : "",
+    t.ac ? `treatment at this location: ${String(t.ac).replace(/_/g," ")}`
+      + (t.coh === "dot2024" ? " <span style=\"color:var(--ink3)\">(recovered by "
+      + "proximity; the 2024 list publishes no type)</span>" : "") : "",
+    t.mech ? `mechanism: ${t.mech}` : "",
     `installed: ${t.d || "not recorded"} <span style="color:var(--ink3)">(${t.dp})</span>`,
     `geometry: ${t.gs.replace(/_/g," ")}${t.L!=null?`, length ${t.L} m`:""}`,
     t.dc!=null ? `distance to junction centre: ${t.dc} m` : "",
     t.de!=null ? `nearest endpoint to centre: ${t.de} m` : "",
     `corner: ${t.cor}   placement: ${(t.pl||"").replace(/_/g," ")}`,
     S.rule && t["lb_"+S.rule] ? `label under <code>${S.rule}</code>: ${t["lb_"+S.rule].replace(/_/g," ")}` : "",
-    t.L>60 ? `<span style="color:var(--orange)">this is a segment, not a device: the hump is somewhere on this ${t.L} m line</span>` : "",
+    t.L>60 ? `<span style="color:var(--orange)">this is a segment rather than a device: the hump is somewhere on this ${t.L} m line</span>` : "",
   ].filter(Boolean);
   showTip(rows, ev);
   S.pinned = t;
@@ -833,6 +2105,252 @@ function showTip(rows, ev) {
   tip.style.left=l+"px"; tip.style.top=tp+"px";
 }
 
+/* =======================================================================
+   SOURCE DOCUMENTATION
+
+   Every dataset the page draws is documented from the project's own source register,
+   which data/explorer/meta.json carries under "sources". The About button lists all of
+   them; the help icon beside a switch lists the entries for that one dataset. A switch
+   whose slug has no register entry says that it has none, because an empty box reads
+   as "nothing to declare" and that would be false.
+   ======================================================================= */
+
+const REG_FIELDS = [
+  ["publisher", "publisher"], ["identifier", "id"], ["access", "access"],
+  ["retrieved", "retrieved"], ["coverage", "coverage"], ["licence", "licence"],
+  ["rows", "rows"], ["used for", "roles"], ["documented limits", "notes"],
+];
+function srcCard(e, extra) {
+  let h = '<div class="src"><b>' + esc(e.name || "unnamed dataset") + "</b>";
+  if (extra) h += '<div class="hint">' + esc(extra) + "</div>";
+  h += "<dl>";
+  for (const f of REG_FIELDS) {
+    const v = e[f[1]];
+    h += "<dt>" + f[0] + "</dt><dd>"
+      + (v ? esc(v) : "not recorded in the register") + "</dd>";
+  }
+  return h + "</dl></div>";
+}
+
+/* The crash record and the basemap are not treatment layers, so they carry no switch
+   and no register key here. They are quoted from the same register file. */
+const CRASH_SRC = {
+  name: "Motor Vehicle Collisions, Crashes",
+  publisher: "NYC Open Data (City of New York), New York Police Department",
+  id: "h9gi-nx95",
+  access: "bulk CSV export of the whole table, rather than a radius query per site, "
+    + "because a radius query fixes the date floor at fetch time and returns a "
+    + "different answer as late reports are backfilled",
+  retrieved: "2026-07-23 to 2026-07-24",
+  coverage: "2012-07 to 2026-06-11, the maximum crash date at fetch time",
+  licence: "No per dataset licence stated; NYC Open Data Terms of Use apply",
+  rows: "reduced to data/crash_index.csv.gz for the study period; this page ships "
+    + "yearly counts per intersection in crashes.json",
+  roles: "the outcome for every design: treated counts, comparison counts, "
+    + "displacement counts and the citywide reference",
+  notes: "Property damage only crashes below the reporting threshold are absent, "
+    + "reporting practice changed with electronic reporting in 2016, and about 7 per "
+    + "cent of crashes citywide carry no coordinate. Those without one are recovered "
+    + "through a street pair gazetteer rather than dropped.",
+};
+const BASE_SRC = {
+  name: "Raster basemap tiles",
+  publisher: "OpenStreetMap contributors, tiles served by CARTO",
+  id: "basemaps.cartocdn.com light_all",
+  access: "HTTP request per tile from the browser, cached in memory for the session",
+  retrieved: "at the moment you look at the map",
+  coverage: "the current state of OpenStreetMap",
+  licence: "OpenStreetMap data is under the Open Database License; the tile service "
+    + "has its own terms",
+  rows: "not applicable",
+  roles: "background only, so that a reader can see which street a record sits on",
+  notes: "The basemap is the one thing on this page that needs a network connection. "
+    + "A tile that fails to load is skipped and never retried, so every layer still "
+    + "draws without it. No measurement uses the tiles.",
+};
+
+function layerInfoHtml(l) {
+  const reg = (((S.meta || {}).sources || {}).layers || {})[l.slug] || [];
+  const fam = ((S.meta || {}).family_labels || {})[l.family] || l.family;
+  const isCtx = l.family === "curb_already_clear";
+  let h = "<p>" + esc(l.label) + ", drawn as " + esc(fam) + ". ";
+  h += isCtx
+    ? "This is context rather than a treatment: it marks curb that was already clear "
+      + "before the programme reached it, it carries no installation date, and it "
+      + "enters no estimate on this page."
+    : "The map draws " + (S.tre.filter(t => t.s === l.slug).length).toLocaleString()
+      + " records from it.";
+  h += "</p>";
+  if (!isCtx && S.umeta) {
+    h += layerHasSubset(l.slug)
+      ? '<p class="hint">The estimate for the current selection can use this source, '
+        + 'through the subsets of the unit catalogue that it publishes.</p>'
+      : '<p class="hint">The unit catalogue has no subset for this source, so '
+        + 'switching it on changes the map and does not change the estimate for the '
+        + 'current selection. The panel on the right says so while it is on.</p>';
+  }
+  if (!reg.length) {
+    h += '<div class="src"><b>No register entry</b><div class="hint">The source '
+      + 'register in data/explorer/meta.json holds no entry keyed to this switch, so '
+      + 'this page can show none for it. The About button lists every entry the '
+      + 'register does hold.</div></div>';
+    return h;
+  }
+  h += '<p class="hint">' + reg.length + " register entr"
+    + (reg.length > 1 ? "ies feed" : "y feeds") + " this switch. An entry is attached "
+    + "to a switch by the files it declares, at most three per switch, so an entry may "
+    + "support the layer indirectly rather than being the file the layer is drawn "
+    + "from. Read the used for line of each entry for its own role.</p>";
+  return CREDIT + h + reg.map(e => srcCard(e)).join("");
+}
+
+function aboutHtml() {
+  const src = ((S.meta || {}).sources || {});
+  const layers = [...((S.meta || {}).layers || []),
+                  ...((S.meta || {}).curb_layers || [])];
+  const seen = new Map(), none = [];
+  for (const l of layers) {
+    const es = (src.layers || {})[l.slug] || [];
+    if (!es.length) { none.push(l.label); continue; }
+    for (const e of es) {
+      const k = (e.name || "") + "|" + (e.id || "");
+      if (!seen.has(k)) seen.set(k, {e:e, on:[]});
+      seen.get(k).on.push(l.label);
+    }
+  }
+  let h = "";
+  h += "<h4>What this page is</h4>"
+    + "<p>An inventory of street treatments, drawn at the position each source "
+    + "publishes, with the filters that decide what counts. It exists because three "
+    + "defects in this study came from treating a geometry as something it is not, "
+    + "and each was invisible in a table and obvious on a map. Everything is computed "
+    + "in your browser from static files in data/explorer, so the page runs from a "
+    + "local copy with no server and no build step.</p>";
+  h += "<h4>What this page cannot do</h4><ul>"
+    + "<li>It cannot fit the model the study reports. Fixed effects Poisson with unit "
+    + "and calendar month effects and a variance clustered on the match group is not "
+    + "refitted in a browser, so the modelled per subset estimates are read from a "
+    + "precomputed file and the live panel computes the city's arithmetic estimator "
+    + "instead.</li>"
+    + "<li>It cannot rematch comparison intersections for a selection you invent. "
+    + (S.umeta ? esc(S.umeta.matching_note) : "") + "</li>"
+    + "<li>It cannot include recent work. "
+    + (S.umeta ? esc(S.umeta.censoring_note) : "") + "</li>"
+    + "<li>It cannot tell you which study design is right. Neither design is better "
+    + "in general: each attains approximately the nominal rejection rate in one regime "
+    + "of site selection and rejects far too often in the other, and each design's "
+    + "bias runs in the direction of the estimate it reports.</li>"
+    + "<li>It cannot tell you what was installed at most turn calming corners. Turn "
+    + "calming is eleven distinct treatments, and for 907 of 1,491 records the city "
+    + "publishes that a turn was treated without publishing what was put there.</li>"
+    + "<li>It cannot treat a published list as a treatment type. The two DOT lists are "
+    + "cohorts of locations, so a class shown for a 2024 record is recovered from the "
+    + "inventory at the same corner rather than published.</li></ul>";
+  h += "<h4>The three specifications</h4>"
+    + "<p>(i) The published specification, which is the city's own: crash record 2017 "
+    + "to 2023, installations 2019 to 2021, 24 months each side, corridor comparison "
+    + "locations, an unweighted mean of per unit changes in annual injuries and a one "
+    + "sample t test. (ii) The published specification, extended record, being the "
+    + "same design components carried to the full crash record 2012-07 to 2026-05 and "
+    + "to an eight year installation window, across every subset. (iii) The "
+    + "falsification tested specification, which is this study's: matched comparison "
+    + "intersections, fixed effects Poisson with unit and calendar month effects, a "
+    + "CRV1 variance clustered on the match group, 36 months before and 24 after, a "
+    + "placebo on every cell and a Benjamini and Hochberg correction within each "
+    + "outcome.</p>"
+    + "<p>Across 40 subsets and 6 outcomes the two designs agree in sign in 125 of 241 "
+    + "cells, which is what chance gives; the published specification returns 75 "
+    + "significant reductions and the falsification tested specification returns 1; and "
+    + "the number of cells both designs call a significant reduction is zero. Under the "
+    + "falsification tested specification a placebo test excludes 117 of 235 cells, 39 are "
+    + "significant before the Benjamini and Hochberg correction and 14 after, and 13 of "
+    + "those 14 have a failing placebo; the single survivor is an increase rather than a "
+    + "reduction, so no reduction survives falsification and multiplicity control "
+    + "together. The hardened daylighting cells fail the placebo test under this "
+    + "study's own admission rule, so they are not presented here as a finding.</p>";
+  h += "<h4>Datasets drawn on this page</h4>"
+    + '<p class="hint">' + seen.size + " distinct datasets support the switches in the "
+    + "left panel, taken from the project source register of "
+    + ((src.count != null) ? src.count : "an unstated number of")
+    + " rows. An entry is attached to a switch by the files it declares, so the switch "
+    + "it is listed under is where this page shows it rather than a claim that the "
+    + "switch is drawn from it alone.</p>";
+  for (const v of seen.values())
+    h += srcCard(v.e, "shown on this page under: " + v.on.join(", "));
+  if (none.length)
+    h += '<div class="src"><b>Switches with no register entry</b><div class="hint">'
+      + esc(none.join(", ")) + ". The register holds nothing keyed to "
+      + (none.length > 1 ? "these switches" : "this switch")
+      + ", and this page therefore shows nothing for "
+      + (none.length > 1 ? "them" : "it") + " rather than an empty box.</div></div>";
+  h += "<h4>The crash record</h4>" + srcCard(CRASH_SRC);
+  h += "<h4>The basemap</h4>" + srcCard(BASE_SRC);
+  h += "<h4>The per unit sums behind the live estimate</h4>";
+  h += S.umeta
+    ? '<div class="src"><b>data/explorer/units.json and units_meta.json</b><dl>'
+      + "<dt>written by</dt><dd>src/make_unit_effects.py</dd>"
+      + "<dt>units</dt><dd>" + S.units.length.toLocaleString()
+      + " treated corners</dd>"
+      + "<dt>crash record</dt><dd>" + esc((S.umeta.crash || []).join(" to ")) + "</dd>"
+      + "<dt>installations</dt><dd>"
+      + esc((S.umeta.install_window || []).join(" to ")) + "</dd>"
+      + "<dt>windows</dt><dd>" + S.umeta.pre + " months before, " + S.umeta.post
+      + " months after, placebo shifted " + S.umeta.placebo_shift
+      + " months earlier</dd>"
+      + "<dt>counting radius</dt><dd>" + S.umeta.radius_m + " m of the corner</dd>"
+      + "<dt>what it carries</dt><dd>the four window sums per unit, per outcome, per "
+      + "comparison rule and per window, and nothing else</dd>"
+      + "<dt>documented limits</dt><dd>" + esc(S.umeta.matching_note) + "</dd>"
+      + "</dl></div>"
+    : "<p>The per unit payload could not be read, so the live estimate is absent.</p>";
+  return h;
+}
+
+/* ------------------------------------------------------------------- modal */
+let modalReturn = null;
+function openModal(title, html) {
+  const m = $("#modal");
+  if (!m) return;
+  modalReturn = document.activeElement;
+  $("#modaltitle").textContent = title;
+  $("#modalbody").innerHTML = html;
+  m.hidden = false;
+  $("#modalclose").focus();
+}
+function closeModal() {
+  const m = $("#modal");
+  if (!m || m.hidden) return;
+  m.hidden = true;
+  if (modalReturn && modalReturn.focus) modalReturn.focus();
+  modalReturn = null;
+}
+/* Tab stays inside the panel while it is open, so a keyboard reader does not walk out
+   of a dialog that still covers the page. */
+function trapTab(ev) {
+  if (ev.key !== "Tab") return;
+  const f = [].slice.call($("#sheet").querySelectorAll(
+    "button, a[href], select, input, [tabindex]"))
+    .filter(e => !e.disabled && e.getAttribute("tabindex") !== "-1");
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+  else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+}
+
+/* On paper there is no click, so every disclosure on the page opens for printing and
+   returns to the state the reader left it in afterwards. Nothing on this page is
+   reachable only on a screen. */
+addEventListener("beforeprint", () => {
+  document.querySelectorAll("details").forEach(d => {
+    if (!d.open) { d.setAttribute("data-shut", "1"); d.open = true; }
+  });
+});
+addEventListener("afterprint", () => {
+  document.querySelectorAll("details").forEach(d => {
+    if (d.getAttribute("data-shut")) { d.open = false; d.removeAttribute("data-shut"); }
+  });
+});
+
 addEventListener("error", ev => {
   const m = $("#metaline");
   if (m) m.textContent = "This page failed: " + ev.message;
@@ -840,6 +2358,164 @@ addEventListener("error", ev => {
 load().catch(e => { $("#metaline").textContent = "Could not load data: " + e.message
   + ". The page needs data/explorer/*.json, and a browser will not read them from "
   + "file:// on some systems; serve the folder with python -m http.server."; });
+</script>
+
+<!-- ---------------------------------------------------------------------------
+     The shared web asset bundle, generated by src/make_web_assets.py and inlined
+     verbatim from data/web/assets.html: the equation styles, the one popover every
+     question mark control reuses, and window.HELPTEXT.
+     -------------------------------------------------------------------------- -->
+<!-- generated by src/make_web_assets.py: do not edit -->
+<style>/* ---------------------------------------------------------------- equations */
+.eqwrap{margin:10px 0;padding:8px 10px;border:1px solid var(--line);
+  border-radius:8px;background:color-mix(in srgb, var(--ink) 3%, transparent)}
+.eqwrap math{font-size:1.12em;display:block;width:max-content;max-width:100%;
+  margin:2px auto 4px;overflow-x:auto;overflow-y:hidden;padding-bottom:2px;
+  scrollbar-width:thin}
+.eqcap{font-size:var(--fs-s);color:var(--ink2);line-height:1.4}
+.eqsrc{margin-top:4px}
+.eqsrc summary{font-size:var(--fs-s);color:var(--ink3);cursor:pointer}
+.eqsrc code{display:block;margin-top:4px;padding:6px 8px;background:var(--grid);
+  border-radius:6px;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12px;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+.mathfall{display:none;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12.5px;color:var(--ink);white-space:pre-wrap}
+.nomathml .eqwrap math{display:none}
+.nomathml .mathfall{display:block}
+
+/* ------------------------------------------------------------------ popover */
+.qhelp{display:inline-flex;align-items:center;justify-content:center;
+  width:15px;height:15px;margin-left:5px;border-radius:50%;
+  border:1px solid var(--axis);background:transparent;color:var(--ink3);
+  font-size:10.5px;line-height:1;font-weight:700;cursor:help;padding:0;
+  vertical-align:middle;flex:none}
+.qhelp:hover,.qhelp:focus-visible{color:var(--ink);border-color:var(--ink3);
+  background:color-mix(in srgb, var(--ink) 8%, transparent);outline:none}
+.qhelp[aria-expanded="true"]{background:var(--blue);border-color:var(--blue);
+  color:#fff}
+#pop{position:fixed;z-index:120;max-width:min(560px, 92vw);display:none;
+  background:var(--panel);color:var(--ink);border:1px solid var(--axis);
+  border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.26);
+  padding:12px 14px;font-size:var(--fs-s);line-height:1.5}
+#pop h4{margin:0 0 6px;font-size:var(--fs-b);font-weight:650}
+#pop p{margin:0 0 7px}
+#pop p:last-child{margin-bottom:0}
+#pop .pin{position:absolute;top:7px;right:9px;font-size:11px;color:var(--ink3)}
+#pop.pinned{border-color:var(--blue)}
+#popscrim{position:fixed;inset:0;z-index:119;display:none;background:transparent}</style>
+<div id="popscrim"></div>
+<div id="pop" role="dialog" aria-live="polite"></div>
+<script>window.HELPTEXT = {"placebo":{"title":"The placebo test","body":"<p>The estimate is recomputed with one change: the installation date of every treated\nsite is moved back in time, far enough that the whole analysis window falls in months\nbefore anything was built. The corners, the comparison locations, the estimator and the\noutcome all stay as they were. Because no treatment exists anywhere in that window, the\nhonest answer is no effect.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_shift\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>s</mi><mo>=</mo><mi>max</mi><mo>(</mo><mrow><mi>pre</mi><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">s \\;=\\; \\max\\!\\left(\\text{pre},\\; \\text{post}+1\\right)</div><div class=\"eqcap\">The placebo displacement, chosen so the placebo window ends before installation.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>s \\;=\\; \\max\\!\\left(\\text{pre},\\; \\text{post}+1\\right)</code></details></div>\n<p>Moving the date back only by the length of the before period is not sufficient. Under\na before period of 24 months and an after period of 24 months, that displacement puts\nthe final month of the placebo window on the installation month itself, which is partly\ntreated. Taking the larger of the before period and one month more than the after period\nends the placebo window at month minus one, so every month of it lies strictly before\ninstallation.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_window\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mo>[</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>]</mo><mo>&#160;</mo><mo>&#160;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>&#8804;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mn>1</mn></mrow></math><div class=\"mathfall\">\\left[\\,t_i - s - \\text{pre},\\;\\; t_i - s + \\text{post}\\,\\right], \\qquad t_i - s + \\text{post} \\;\\le\\; t_i - 1</div><div class=\"eqcap\">The placebo window, every month of it before the installation month.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\left[\\,t_i - s - \\text{pre},\\;\\; t_i - s + \\text{post}\\,\\right], \\qquad t_i - s + \\text{post} \\;\\le\\; t_i - 1</code></details></div>\n<p>A cell is read only when the placebo is consistent with no effect.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_test\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msup><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mi>plac</mi></msup><mo>=</mo><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>(</mo><mrow><msub><mi>t</mi><mi>i</mi></msub><mo>&#8594;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi></mrow><mo>)</mo><mo>,</mo><mo>&#160;</mo><msup><mi>p</mi><mi>plac</mi></msup><mo>&#8805;</mo><mn>0.05</mn></mrow></math><div class=\"mathfall\">\\hat\\theta^{\\text{plac}} \\;=\\; \\hat\\theta\\big(t_i \\to t_i - s\\big), \\qquad \\text{admit the cell only if } p^{\\text{plac}} \\ge 0.05</div><div class=\"eqcap\">The placebo estimate and the condition a cell must satisfy to be read.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta^{\\text{plac}} \\;=\\; \\hat\\theta\\big(t_i \\to t_i - s\\big), \\qquad \\text{admit the cell only if } p^{\\text{plac}} \\ge 0.05</code></details></div>\n<p>Because a decrease can appear in a window that contains no treatment, a decrease in\nthe real window with a failing placebo is reliably present and reliably not caused by the\ninstallation. The p value answers whether a result could have arisen by chance. The\nplacebo answers whether the specification produces that result without a treatment, and\nthose are different questions.</p>"},"why_flagged":{"title":"Why a significant decrease can still be flagged","body":"<p>Suppose a cell returns a decrease at p below 0.01, and the placebo on months\ncontaining no treatment also returns a decrease of similar size. Both cannot be caused by\nthe treatment, because in the placebo window there was no treatment. So the\nspecification produces decreases at these corners whether or not anything is installed,\nand the decrease in the real window cannot be attributed to the installation.</p>\n<p>The city selects sites on a deteriorating crash record, and it selects them on its own\npublished risk criterion: treated corners are 3.6 to 20.2 times more likely to be a\ndesignated Vision Zero priority intersection than an intersection carrying no device. A\ncorner chosen because its count is high tends to fall afterwards whether or not it is\ntreated, which is regression to the mean, and a before and after comparison attributes\nthat fall to whatever was installed.</p>\n<p>A flagged cell is evidence of no effect and it is evidence of an effect in neither\ndirection. It is a cell in which the design cannot separate the treatment from the reason\nthe site was chosen.</p>"},"arith":{"title":"The published estimator","body":"<p>For a site i with installation month t_i, Y_i(a,b) counts the outcome inside 30 m of\ni over the months from t_i plus a up to t_i plus b, and R_i(a,b) expresses that count as\nan annual rate.</p>\n<div class=\"eqwrap\" id=\"eq-rate\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo><mo>=</mo><mfrac><mrow><mn>12</mn><msub><mi>Y</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo></mrow><mrow><mi>b</mi><mo>&#8722;</mo><mi>a</mi></mrow></mfrac></mrow></math><div class=\"mathfall\">R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</div><div class=\"eqcap\">The outcome at one site, as an annual rate over a window of months.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</code></details></div>\n<div class=\"eqwrap\" id=\"eq-delta\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>=</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo><mo>&#8722;</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><mn>0</mn></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</div><div class=\"eqcap\">The change at one site, after minus before.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</code></details></div>\n<p>The estimate is the unweighted mean over treated sites of the change at the site minus\nthe mean change at that site's own comparison locations, tested against zero.</p>\n<div class=\"eqwrap\" id=\"eq-arith\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</div><div class=\"eqcap\">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</code></details></div>\n<div class=\"eqwrap\" id=\"eq-ttest\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>t</mi><mo>=</mo><mfrac><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mrow><msub><mi>s</mi><mi>d</mi></msub><mo>/</mo><msqrt><mi>n</mi></msqrt></mrow></mfrac></mrow></math><div class=\"mathfall\">t \\;=\\; \\frac{\\hat\\theta}{s_d/\\sqrt{n}}</div><div class=\"eqcap\">The test the published estimator uses, a two sided one sample t test on n minus 1 degrees of freedom.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>t \\;=\\; \\frac{\\hat\\theta}{s_d/\\sqrt{n}}</code></details></div>\n<p>Every treated site enters with weight one over n whatever its crash count, so the\nquantity estimated is the change at the mean treated corner. The scale is a difference in\ncounts per intersection per year, in which zero means no effect.</p>"},"fepois":{"title":"The fixed effects Poisson specification","body":"<p>The panel holds every unit k, treated and comparison together, and every calendar\nmonth t. A unit effect absorbs the level at a corner and a calendar month effect absorbs\na citywide shock common to that month.</p>\n<div class=\"eqwrap\" id=\"eq-fepois\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi mathvariant='double-struck'>E</mi><mo>[</mo><msub><mi>Y</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>&#8739;</mo><mi>&#945;</mi><mo>,</mo><mi>&#947;</mi><mo>,</mo><mi>D</mi><mo>]</mo><mo>=</mo><mi>exp</mi><mo>(</mo><mrow><msub><mi>&#945;</mi><mi>k</mi></msub><mo>+</mo><msub><mi>&#947;</mi><mi>t</mi></msub><mo>+</mo><mi>&#946;</mi><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\mathbb{E}\\!\\left[Y_{kt} \\mid \\alpha,\\gamma,D\\right] \\;=\\; \\exp\\!\\left(\\alpha_k + \\gamma_t + \\beta\\, D_{kt}\\right)</div><div class=\"eqcap\">The fixed effects Poisson specification, with a unit effect and a calendar month effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\mathbb{E}\\!\\left[Y_{kt} \\mid \\alpha,\\gamma,D\\right] \\;=\\; \\exp\\!\\left(\\alpha_k + \\gamma_t + \\beta\\, D_{kt}\\right)</code></details></div>\n<div class=\"eqwrap\" id=\"eq-treatind\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>=</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>k</mi><mo>&#160;</mo><mi>treated</mi><mo>}</mo><mo>&#183;</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>t</mi><mo>&gt;</mo><msub><mi>t</mi><mrow><mi>i</mi><mo>(</mo><mi>k</mi><mo>)</mo></mrow></msub><mo>}</mo></mrow></math><div class=\"mathfall\">D_{kt} \\;=\\; \\mathbf{1}\\{k \\text{ treated}\\}\\cdot\\mathbf{1}\\{t &gt; t_{i(k)}\\}</div><div class=\"eqcap\">The treatment indicator, one after installation at a treated unit and zero everywhere else.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>D_{kt} \\;=\\; \\mathbf{1}\\{k \\text{ treated}\\}\\cdot\\mathbf{1}\\{t &gt; t_{i(k)}\\}</code></details></div>\n<p>The month at event time zero is excluded, because an installation month is partly\ntreated. Inference uses the CRV1 cluster robust variance estimator with standard errors\nclustered by match group, in which a match group is a treated unit together with its own\ncomparison locations. The reported quantity is a rate ratio.</p>\n<div class=\"eqwrap\" id=\"eq-irr\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>IRR</mi><mo>=</mo><mi>exp</mi><mo>(</mo><mover><mi>&#946;</mi><mo>&#94;</mo></mover><mo>)</mo></mrow></math><div class=\"mathfall\">\\text{IRR} \\;=\\; \\exp(\\hat\\beta)</div><div class=\"eqcap\">The quantity reported from that specification, a rate ratio in which one means no effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{IRR} \\;=\\; \\exp(\\hat\\beta)</code></details></div>\n<p>Because the specification weights a unit by its expected count, high exposure corners\ndominate the estimate, and the quantity is the proportional change in the total count.\nThe published estimator gives the change at the mean corner instead, so the two answer\ndifferent questions and their magnitudes are not comparable.</p>"},"bh":{"title":"Adjustment for multiple subsets","body":"<p>Each outcome is estimated over m subsets, so a nominal p value does not control the\nfalse positive rate across the family. Benjamini and Hochberg adjustment is applied\nwithin each outcome, over the subsets, after sorting the p values in ascending order.</p>\n<div class=\"eqwrap\" id=\"eq-bh\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><msup><mi>p</mi><mi>BH</mi></msup><mo>(</mo><mi>k</mi><mo>)</mo></msub><mo>=</mo><munder><mi>min</mi><mrow><mi>j</mi><mo>&#8805;</mo><mi>k</mi></mrow></munder><mi>min</mi><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mfrac><mrow><mi>m</mi><msub><mi>p</mi><mo>(</mo><mi>j</mi><mo>)</mo></msub></mrow><mi>j</mi></mfrac></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">p^{\\text{BH}}_{(k)} \\;=\\; \\min_{j \\ge k}\\; \\min\\!\\left(1,\\; \\frac{m\\, p_{(j)}}{j}\\right)</div><div class=\"eqcap\">Benjamini and Hochberg adjustment within one outcome over m subsets.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>p^{\\text{BH}}_{(k)} \\;=\\; \\min_{j \\ge k}\\; \\min\\!\\left(1,\\; \\frac{m\\, p_{(j)}}{j}\\right)</code></details></div>\n<p>A cell is read only when the adjusted p value falls below 0.05, when the placebo is\nconsistent with no effect, and when at least 25 treated units contribute.</p>"},"mde":{"title":"The smallest detectable effect","body":"<p>A null is uninformative without the size of the effect the cell could have found. The\nminimum detectable effect at 80 per cent power follows from the standard error of the log\nrate ratio.</p>\n<div class=\"eqwrap\" id=\"eq-mde\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>MDE</mi><mo>=</mo><mn>100</mn><mo>(</mo><mrow><mn>1</mn><mo>&#8722;</mo><msup><mi>e</mi><mrow><mo>&#8722;</mo><mn>2.802</mn><mover><mi>se</mi><mo>&#94;</mo></mover></mrow></msup></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\text{MDE} \\;=\\; 100\\left(1 - e^{-2.802\\,\\widehat{\\text{se}}}\\right)</div><div class=\"eqcap\">The smallest effect the cell could detect at 80 per cent power, as a percentage.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{MDE} \\;=\\; 100\\left(1 - e^{-2.802\\,\\widehat{\\text{se}}}\\right)</code></details></div>\n<p>A null with a bound of 6 per cent excludes a moderate benefit. A null with a bound of\n60 per cent excludes almost nothing.</p>"},"aggratio":{"title":"The live estimate for a selection","body":"<p>A browser cannot fit a fixed effects Poisson specification, so a selection is\nestimated by the published arithmetic estimator, which is an exact computation from the per site\nsums the page carries.</p>\n<div class=\"eqwrap\" id=\"eq-arith\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</div><div class=\"eqcap\">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</code></details></div>\n<p>A descriptive aggregate rate ratio is shown beside it.</p>\n<div class=\"eqwrap\" id=\"eq-aggratio\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>RR</mi><mi>agg</mi></msub><mo>=</mo><mfrac><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>before</mi></msup><mi>i</mi></msub></mrow><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>before</mi></msup><mi>i</mi></msub></mrow></mfrac></mrow></math><div class=\"mathfall\">\\text{RR}_{\\text{agg}} \\;=\\; \\frac{\\sum_i T^{\\text{after}}_i \\big/ \\sum_i T^{\\text{before}}_i}{\\sum_i C^{\\text{after}}_i \\big/ \\sum_i C^{\\text{before}}_i}</div><div class=\"eqcap\">The descriptive aggregate rate ratio a browser can compute for any selection, carrying no unit effect and no calendar month effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{RR}_{\\text{agg}} \\;=\\; \\frac{\\sum_i T^{\\text{after}}_i \\big/ \\sum_i T^{\\text{before}}_i}{\\sum_i C^{\\text{after}}_i \\big/ \\sum_i C^{\\text{before}}_i}</code></details></div>\n<p>That ratio carries no unit effect, no calendar month effect and no cluster robust\nvariance, so it is not the modelled quantity the manuscript reports and it can disagree\nin sign with it. For hardened daylighting at a junction the aggregate ratio is about 0.72\nand the modelled estimate is about 1.15.</p>\n<p>Comparison intersections were matched once over the union of treated units, because a\nbrowser cannot rematch for an arbitrary selection, so a selection that coincides with a\npublished subset differs slightly from the published estimate for it.</p>"},"drift":{"title":"The pre treatment drift and the admission rule","body":"<p>The crash record at treated sites falls before installation, at 0.464 per cent per\nmonth at physical sites. Compounded over the 24 months of an after period, that drift\nalone produces a factor.</p>\n<div class=\"eqwrap\" id=\"eq-drift\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>trend</mi><mn>24</mn></msub><mo>=</mo><msup><mo>(</mo><mrow><mn>1</mn><mo>+</mo><mi>&#948;</mi></mrow><mo>)</mo><mn>24</mn></msup><mo>,</mo><mo>&#160;</mo><mi>share</mi><mo>=</mo><mfrac><mrow><mi>log</mi><msub><mi>trend</mi><mn>24</mn></msub></mrow><mrow><mi>log</mi><mover><mi>&#952;</mi><mo>&#94;</mo></mover></mrow></mfrac></mrow></math><div class=\"mathfall\">\\text{trend}_{24} = (1+\\delta)^{24}, \\qquad \\text{share} = \\frac{\\log \\text{trend}_{24}}{\\log \\hat\\theta}</div><div class=\"eqcap\">The compounded pre treatment drift, and the share of an estimate it accounts for.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{trend}_{24} = (1+\\delta)^{24}, \\qquad \\text{share} = \\frac{\\log \\text{trend}_{24}}{\\log \\hat\\theta}</code></details></div>\n<p>A cell is refused when the drift accounts for 60 per cent or more of the estimate, and\nwhen the placebo rejects no effect, and it is marked underpowered when the smallest\ndetectable effect exceeds 25 per cent.</p>"},"scales":{"title":"Two scales, never comparable in magnitude","body":"<p>The published specification and its extension to the full record report a difference in\ncounts per intersection per year, in which zero means no effect and a negative value\nmeans fewer crashes. The falsification tested specification reports a rate ratio, in\nwhich one means no effect and a value below one means fewer crashes.</p>\n<p>A value of 0.9 on the ratio scale and a value of minus 0.14 on the difference scale\ncannot be compared, ordered or averaged together. Each column group on this page carries\nits own scale in its header for that reason.</p>"},"cohorts":{"title":"The two published location lists","body":"<p>The city has published two location lists, a document covering January to August 2024\nand a spreadsheet covering 2025. Each is a cohort of locations rather than a treatment\ntype. The 2025 list holds sign only daylighting at 278 locations, e scooter corrals at\n190, street improvement projects at 141, turn calming outside a street improvement project\nat 88, bicycle corrals at 25, bikeshare at 5 and a direction change at 1.</p>\n<p>The 2024 list publishes no treatment type for any of its 271 records, so the class\nshown for a 2024 record is recovered from the inventory at the same corner. Tested against\nthe 2025 list, where the type is published, that recovery reproduces turn calming exactly\nand sign only daylighting on 80.6 per cent of records, and it fails on street improvement\nprojects at 7.1 per cent.</p>\n<p>The two lists are almost disjoint: 13 of the 271 records of the 2024 list lie within 50\nm of a 2025 record.</p>"},"turncalming":{"title":"Turn calming is eleven treatments","body":"<p>The inventory publishes eleven classes of turn calming, which differ in mechanism: a\nplastic curb line, a raised centre line, a lengthened median, a channelising island, a\nrubber bump, vertical posts of two kinds, a surface treatment, paint alone, and two\nclasses that record only the direction of the turn.</p>\n<p>Those last two classes carry the material string generic turn treatment and account for\n907 of 1491 records, which is 61 per cent. For most of the programme the city records that\na turn was treated and does not record what was installed. Any turn calming result is an\nestimate for that mixture.</p>"},"censoring":{"title":"Right censoring of recent work","body":"<p>An after period of a stated length can only be filled where that many months of crash\nrecord exist after an installation. The crash record ends 2026-05, so an installation in\n2025 cannot support 24 months of follow up.</p>\n<p>Each subset therefore receives the longest after period its own records can fill, and\nthat value is reported in every row. The 2025 published list supports 12 months and\nretains 173 of its 728 records. The 2024 list supports 24 months and retains all 271,\nwhile carrying a single imputed installation month for every one of them, so that design\ncannot separate the treatment from a citywide shock in that month except through the\ncomparison group.</p>"},"precleared":{"title":"Curb that was already clear","body":"<p>New York State law prohibits parking within 15 feet of a fire hydrant, and a bus stop\nis a no standing zone as long as a bus, so a corner carrying either was already daylighted\nin part before the programme reached it. At the working radius of 12 m, 20.5 per cent of\ndaylighted corners at a junction were already clear, against 16.6 per cent of\nintersections carrying no device.</p>\n<p>The observation belongs to the agency rather than to this study. Its January 2025 report\ncontains a hydrant zone analysis, defines a hydrant zone as hydrants and bus stops, and\nreports a 30 per cent higher normalised injury rate at 7558 such intersections. That\nanalysis compares intersections that have a hydrant zone against those that do not, so it\ncannot separate cleared curb from whatever caused a hydrant to be sited there. The test in\nthis study compares treated corners against other treated corners.</p>"},"provenance":{"title":"Provenance of the published analyses","body":"<p>No published analysis of daylighting carries a comparison group, a significance test\nand published locations at the same time. The January 2025 report has a comparison group\nand a significance test and publishes no locations. The Safety Treatment Evaluation it\nrelies on has neither a comparison group nor a significance test. The four case study\ncities in the report have published nothing.</p>\n<p>The analysis reproduced here is an agency report with no journal article and no\npreprint. Its comparison rule is given in one sentence, and resolving it into something\nimplementable required settling eight separate ambiguities. No attribution radius is\nstated, no confidence interval accompanies any estimate, and neither code nor data is\nreleased.</p>\n<p>The 756 analysed locations are not published, so the cohort reproduced here is rebuilt\nfrom other inventories: 98 hardened units against their 189, holding different objects.\nTheirs is 134 Citi Bike stations, 3 bicycle corrals, 33 turn calming projects, 14\nneckdowns and 5 enhanced crossings. Ours is 84 e scooter corrals, 15 rubber speed bumps\nand 4 bicycle islands. The reproduction shows that the published values are what the\npublished specification produces, and it does not show that the published locations were\nanalysed again.</p>"},"selection":{"title":"How sites are chosen","body":"<p>The city designates 304 Vision Zero priority intersections, being the intersections\nthat cumulatively account for 15 per cent of a borough's pedestrian killed or seriously\ninjured total. Treated corners are far more likely to be one than an intersection carrying\nno device: signage only at 3.6 times the rate of the comparison pool, hardened at 5.8\ntimes, and turn calming at 20.2 times.</p>\n<p>Co treatment is larger still. 65.5 per cent of hardened daylighting corners lie within\n40 m of a street improvement project corridor, against 20.7 per cent of the comparison\npool, and 76.8 per cent of turn calming corners lie on a retimed corridor against 19.7 per\ncent.</p>\n<p>A comparison group balanced on crash history and geometry is unbalanced on both of\nthese.</p>"},"designs":{"title":"The two designs, and which analysis uses which","body":"<p>Two designs appear throughout these pages, and each one is a pair of a comparison\ngroup and an estimator.</p>\n<p><b>The corridor DiD design</b> is the city's: the comparison group is up to three\nintersections carrying no daylighting along each street of the treated intersection\nwithin one mile, and the estimator is the unweighted mean of per unit changes in an\nannual rate, tested with a one sample t test. Specification 1, the published analysis,\nand specification 2, the same analysis on the extended record, both use it. Its\nestimate is a difference, so zero means no effect.</p>\n<p><b>The matched Poisson design</b> is this study's: the comparison group is three\nintersections per treated unit chosen by Mahalanobis matching on borough, geometry and\ntwo blocks of pre treatment crash history with the final pre year withheld, and the\nestimator is fixed effects Poisson with unit and calendar month effects, clustered on\nthe match group. Specification 3 uses it. Its estimate is a rate ratio, so one means no\neffect.</p>\n<p>Neither is the better instrument in general. Calibration on this crash record shows\neach attains roughly the nominal false positive rate in one regime of site selection\nand rejects far too often in the other, and each design's bias runs in the direction of\nthe estimate it reports: the corridor group produces false reductions on 34 to 88 per\ncent of null draws under selection on a transient increase, and the matched group\nproduces false increases on 78 per cent of null draws under selection on a persistent\nlevel. Across 40 subsets and 6 outcomes the two agree on direction in 118 of 233\nestimable cells, which is chance; the corridor DiD design returns 76 significant\nreductions, the matched Poisson design returns 0 significant reductions, and no cell is\ncalled a significant reduction by both.</p>"}};</script>
+<script>/* ---------------------------------------------------- help popovers and math
+   One popover element is reused by every control. Hovering opens it, clicking pins
+   it so a reader can select the text inside, Escape and a click outside close it.
+   The content comes from HELPTEXT, which is inlined above, so the page needs no
+   network to explain itself. */
+(function () {
+  "use strict";
+  var pop = document.getElementById("pop");
+  var scrim = document.getElementById("popscrim");
+  if (!pop) return;
+  var pinned = false, current = null, hideTimer = null;
+
+  function place(anchor) {
+    var r = anchor.getBoundingClientRect();
+    pop.style.display = "block";
+    pop.style.visibility = "hidden";
+    var w = pop.offsetWidth, h = pop.offsetHeight;
+    var left = Math.min(Math.max(8, r.left - 8), innerWidth - w - 8);
+    var top = r.bottom + 8;
+    if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 8);
+    pop.style.left = left + "px";
+    pop.style.top = top + "px";
+    pop.style.visibility = "visible";
+  }
+
+  function open(anchor, pin) {
+    var key = anchor.getAttribute("data-help");
+    var t = (window.HELPTEXT || {})[key];
+    if (!t) {
+      pop.innerHTML = "<h4>No description available</h4><p>This control names "
+        + "the topic " + key + ", for which no text has been written.</p>";
+    } else {
+      pop.innerHTML = "<h4>" + t.title + "</h4>" + t.body
+        + (pin ? "<span class='pin'>click away or press Escape to close</span>" : "");
+    }
+    if (current && current !== anchor) current.setAttribute("aria-expanded", "false");
+    current = anchor;
+    anchor.setAttribute("aria-expanded", "true");
+    pinned = !!pin;
+    pop.classList.toggle("pinned", pinned);
+    scrim.style.display = pinned ? "block" : "none";
+    place(anchor);
+  }
+
+  function close() {
+    if (current) current.setAttribute("aria-expanded", "false");
+    pop.style.display = "none";
+    scrim.style.display = "none";
+    pinned = false; current = null;
+  }
+
+  document.addEventListener("pointerover", function (ev) {
+    var a = ev.target.closest ? ev.target.closest(".qhelp") : null;
+    if (!a || pinned) return;
+    clearTimeout(hideTimer);
+    open(a, false);
+  });
+  document.addEventListener("pointerout", function (ev) {
+    var a = ev.target.closest ? ev.target.closest(".qhelp") : null;
+    if (!a || pinned) return;
+    hideTimer = setTimeout(function () { if (!pinned) close(); }, 220);
+  });
+  pop.addEventListener("pointerenter", function () { clearTimeout(hideTimer); });
+  pop.addEventListener("pointerleave", function () {
+    if (!pinned) hideTimer = setTimeout(close, 160);
+  });
+  document.addEventListener("click", function (ev) {
+    var a = ev.target.closest ? ev.target.closest(".qhelp") : null;
+    if (a) { ev.preventDefault(); open(a, true); return; }
+    if (pinned && !pop.contains(ev.target)) close();
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") close();
+    if ((ev.key === "Enter" || ev.key === " ")
+        && document.activeElement
+        && document.activeElement.classList
+        && document.activeElement.classList.contains("qhelp")) {
+      ev.preventDefault();
+      open(document.activeElement, true);
+    }
+  });
+
+  /* A browser without MathML shows the LaTeX source instead of empty space. */
+  try {
+    var probe = document.createElement("div");
+    probe.innerHTML = "<math><mfrac><mn>1</mn><mn>2</mn></mfrac></math>";
+    document.body.appendChild(probe);
+    var ok = probe.firstChild && probe.firstChild.getBoundingClientRect().height > 12;
+    document.body.removeChild(probe);
+    if (!ok) document.documentElement.classList.add("nomathml");
+  } catch (e) { document.documentElement.classList.add("nomathml"); }
+})();</script>
+<!-- page local topics: the sentences this page carries that no shared topic covers -->
+<script>
+Object.assign(window.HELPTEXT, {
+  controls: {
+    title: "What the controls do",
+    body: "<p>Pick an area by name or by drawing a polygon, choose which sources to "
+      + "draw, change the rule that decides what counts as being at a junction, set "
+      + "the year an installation must fall on or before, and combine the records "
+      + "filed at one corner. Every panel recounts as each control moves.</p>"
+      + "<p>The panel on the right estimates whatever is selected, by the arithmetic "
+      + "difference in differences the city published, and reports its placebo beside "
+      + "it. The table under that panel holds the modelled estimates the manuscript "
+      + "reports, and no control on the left moves them, because every subset there "
+      + "was estimated with its own matched comparison intersections.</p>"
+      + "<p>Every dataset carries its register entries behind the question mark beside "
+      + "its own switch, and the About the data button lists all of them together.</p>"
+  }
+});
 </script>
 </body>
 </html>
