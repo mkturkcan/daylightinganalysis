@@ -70,6 +70,102 @@
   label.row{display:flex;align-items:baseline;gap:6px;padding:1px 0;
     font-size:var(--fs);cursor:pointer}
   label.row input{margin:0;flex:none;position:relative;top:2px}
+  /* ---- the explorer's design language, applied to this page's rail and table */
+  /* a grid item's implicit min-width is auto, so the table's minimum widths were
+     pushing the whole page wider than the viewport; zero lets the scroll container
+     do its job */
+  .layout>main,.layout>aside{min-width:0}
+  /* methodology: a measured column, act subsections as cards, quiet equations */
+  #methodology .dbody>p,#methodology p.body{max-width:74ch}
+  #methodology h3{margin:18px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
+  #methodology h3:first-of-type{border-top:0;padding-top:0;margin-top:6px}
+  #methodology .eqwrap{max-width:74ch}
+  /* the supplementary panels read as a designed list rather than bare links */
+  #supp>details{border:1px solid var(--line);border-radius:8px;margin:7px 0;
+    background:color-mix(in srgb, var(--ink) 2%, transparent)}
+  #supp>details>summary{cursor:pointer;list-style:none;display:flex;gap:8px;
+    align-items:baseline;padding:8px 11px;font-weight:650;font-size:var(--fs-s);
+    color:var(--ink2)}
+  #supp>details>summary::before{content:"\25B8";color:var(--ink3);font-size:10px}
+  #supp>details[open]>summary::before{content:"\25BE"}
+  #supp>details>.dbody,#supp>details>div{padding:2px 11px 10px}
+  /* review batch pass 2 */
+  /* P1: the verdict is never clipped */
+  #tablehost td.c-read,#tablehost th.c-read{position:sticky;right:0;
+    background:var(--panel);z-index:1;
+    box-shadow:-6px 0 8px -6px rgba(0,0,0,.35)}
+  #tablehost thead th.c-read{z-index:3}
+  .c-treat{max-width:190px}
+  /* P2: header rhythm */
+  thead tr.subrow th{vertical-align:bottom;line-height:1.25}
+  thead th .qhelp{vertical-align:baseline}
+  /* P10: three tints that survive both themes, with seams */
+  :root{--g1:#eef2f8;--g2:#e7eefb;--g3:#e9f2ea;--gseam:#c9c7bc}
+  :root[data-theme="dark"],:root:not([data-theme="light"]) body.darkish{}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){--g1:#20242c;--g2:#1c2334;--g3:#1d2a20;
+      --gseam:#3a3f49}}
+  :root[data-theme="dark"]{--g1:#20242c;--g2:#1c2334;--g3:#1d2a20;
+    --gseam:#3a3f49}
+  #tablehost td.g1.c-e1,#tablehost th.g1.c-e1,
+  #tablehost td.g2.c-est,#tablehost th.g2.c-est,
+  #tablehost td.g3.c-est,#tablehost th.g3.c-est{border-left:1px solid var(--gseam)}
+  /* P6: counts never widow */
+  aside .cnt{white-space:nowrap;flex:0 0 auto;margin-left:auto}
+  .famgrp>summary .cnt{white-space:nowrap}
+  /* P5: live tiles share one row */
+  #livetiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:8px}
+  /* P9: the strip is three cards with one bottom edge */
+  .strip{align-items:stretch}
+  .strip .rule{border:1px solid var(--line);border-radius:9px;
+    padding:8px 11px;background:var(--panel)}
+  .keytile{outline-color:var(--blue) !important}
+  /* P12: pills */
+  #topics .qitem{border:1px solid var(--line);border-radius:999px;
+    padding:2px 4px 2px 10px;background:color-mix(in srgb, var(--ink) 3%, transparent)}
+  #topics .qgrp{font-size:var(--fs-t);text-transform:uppercase;
+    letter-spacing:.05em;color:var(--ink3);font-weight:650;margin:8px 0 3px}
+  /* P4: the lab form on one grid */
+  #labcard .toolbar{display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 14px;
+    align-items:end}
+  #labcard .toolbar label{display:flex;flex-direction:column;gap:3px;
+    font-size:var(--fs-s);color:var(--ink3)}
+  #labcard .toolbar select,#labcard .toolbar input{width:100%}
+  /* P11: the page ends on purpose */
+  footer.pagefoot{margin:20px 0 44px;color:var(--ink3);font-size:var(--fs-s)}
+  .detmeta{display:grid;grid-template-columns:92px 1fr;
+    gap:4px 12px;max-width:76ch;margin:8px 0 14px}
+  .detmeta>.k{color:var(--ink3);font-size:var(--fs-s)}
+  .detmeta>div:first-child{grid-column:1/-1}
+  .famgrp{border:1px solid var(--line);border-radius:8px;margin:6px 0;
+    background:color-mix(in srgb, var(--ink) 2%, transparent)}
+  .famgrp>summary{cursor:pointer;list-style:none;display:flex;gap:8px;
+    align-items:center;padding:6px 9px;font-weight:650;font-size:var(--fs-s);
+    color:var(--ink2)}
+  .famgrp>summary::before{content:"\25B8";color:var(--ink3);font-size:10px;
+    transition:transform .12s}
+  .famgrp[open]>summary::before{transform:rotate(90deg)}
+  .famgrp>summary .cnt{margin-left:auto}
+  .famgrp .fambody{padding:1px 9px 7px}
+  .famgrp .row{padding:2px 0}
+  aside h3{font-size:var(--fs-s);text-transform:uppercase;letter-spacing:.05em;
+    color:var(--ink3);font-weight:650;margin:12px 0 5px}
+  aside h3:first-child{margin-top:2px}
+  /* table: quiet zebra inside each group tint, a hover, and a header shadow so
+     scrolling reads as depth rather than as clutter */
+  #tablehost tbody tr:not(.det):hover td{background:color-mix(in srgb,
+    var(--ink) 5%, transparent)}
+  #tablehost thead{box-shadow:0 2px 0 var(--line)}
+  #tablehost .est{font-variant-numeric:tabular-nums}
+  #tablehost td{font-variant-numeric:tabular-nums}
+  .strip{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+  .strip .tile{flex:1 1 240px}
+  .strip .rule{flex:2 1 380px;margin:0;align-self:center}
+  #topics .qrow{display:flex;flex-wrap:wrap;gap:4px 14px;margin:4px 0 2px}
+  #topics .qitem{display:inline-flex;align-items:center;gap:4px;
+    font-size:var(--fs-s);color:var(--ink2);white-space:nowrap}
   .cnt{margin-left:auto;color:var(--ink3);font-size:var(--fs-s);
     font-variant-numeric:tabular-nums;padding-left:8px}
   input[type=text],select{width:100%;background:var(--bg);color:var(--ink);
@@ -106,6 +202,7 @@
   .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));
     gap:8px;margin:11px 0 5px}
   .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:8px}
+  .keytile{outline:2px solid var(--orange);outline-offset:-2px}
   .tile{border:1px solid var(--line);border-radius:9px;padding:7px 10px;
     background:var(--panel)}
   .tiles .tile{background:var(--bg)}
@@ -209,7 +306,8 @@
   .c-n{min-width:38px}
   .c-e1{min-width:66px}.c-p1{min-width:52px}
   .c-est{min-width:52px}.c-p{min-width:58px}.c-pl{min-width:58px}.c-mde{min-width:44px}
-  .c-read{min-width:86px;max-width:114px}
+  .c-read{min-width:172px}
+  .c-read .tag{white-space:normal;line-height:1.25}
   button.tgl{flex:none;width:15px;height:15px;padding:0;border-radius:4px;
     border:1px solid var(--axis);background:transparent;color:var(--ink3);
     font-size:var(--fs-s);line-height:1;cursor:pointer;margin-right:5px}
@@ -248,83 +346,10 @@
 </header>
 <p class="pageerr" id="pageerr"></p>
 
-<!-- ------------------------------------------------------- the summary strip -->
-<div class="strip" id="strip"></div>
-<p class="rule">A cell is one subset on one outcome. The five figures above count
-cells over every subset and every outcome rather than over the current selection.</p>
+
 
 <!-- ----------------------------------------- the topics, one control for each -->
-<section class="panel" id="topics">
-  <h2>Definitions, cautions and provenance</h2>
-  <div class="qrow">
-    <span class="qitem">the placebo test<button class="qhelp" type="button"
-      data-help="placebo" aria-expanded="false"
-      aria-label="About: the placebo test">?</button></span>
-    <span class="qitem">a flagged decrease<button class="qhelp" type="button"
-      data-help="why_flagged" aria-expanded="false"
-      aria-label="About: why a significant decrease can still be flagged">?</button></span>
-    <span class="qitem">reading a flag<button class="qhelp" type="button"
-      data-help="flagread" aria-expanded="false"
-      aria-label="About: how to read a flag">?</button></span>
-    <span class="qitem">two scales<button class="qhelp" type="button"
-      data-help="scales" aria-expanded="false"
-      aria-label="About: two scales, never comparable in magnitude">?</button></span>
-    <span class="qitem">how sites are chosen<button class="qhelp" type="button"
-      data-help="selection" aria-expanded="false"
-      aria-label="About: how sites are chosen">?</button></span>
-    <span class="qitem">neither design wins<button class="qhelp" type="button"
-      data-help="designs" aria-expanded="false"
-      aria-label="About: neither design is better in general">?</button></span>
-    <span class="qitem">pre treatment drift<button class="qhelp" type="button"
-      data-help="drift" aria-expanded="false"
-      aria-label="About: the pre treatment drift and the admission rule">?</button></span>
-    <span class="qitem">provenance<button class="qhelp" type="button"
-      data-help="provenance" aria-expanded="false"
-      aria-label="About: provenance of the published analyses">?</button></span>
-    <span class="qitem">the reproduction<button class="qhelp" type="button"
-      data-help="reproduction" aria-expanded="false"
-      aria-label="About: what the reproduction establishes">?</button></span>
-    <span class="qitem">the supporting evaluation<button class="qhelp" type="button"
-      data-help="stequote" aria-expanded="false"
-      aria-label="About: the supporting evaluation">?</button></span>
-    <span class="qitem">the published lists<button class="qhelp" type="button"
-      data-help="cohorts" aria-expanded="false"
-      aria-label="About: the two published location lists">?</button></span>
-    <span class="qitem">turn calming classes<button class="qhelp" type="button"
-      data-help="turncalming" aria-expanded="false"
-      aria-label="About: turn calming is eleven treatments">?</button></span>
-    <span class="qitem">recent work<button class="qhelp" type="button"
-      data-help="censoring" aria-expanded="false"
-      aria-label="About: right censoring of recent work">?</button></span>
-    <span class="qitem">curb already clear<button class="qhelp" type="button"
-      data-help="precleared" aria-expanded="false"
-      aria-label="About: curb that was already clear">?</button></span>
-  </div>
-  <details id="orient1">
-    <summary>How to read this page: three specifications on two scales, and what each
-      column group carries</summary>
-    <div class="dbody">
-      <p class="body">Choose a set of treatments and an outcome. Every result appears
-      three times, once under each of the three specifications the manuscript reports,
-      with the statistics that bear on whether it can be believed: the estimate with
-      its 95 per cent interval, the p value, the adjusted p value where one exists, the
-      placebo and its p value, the smallest detectable effect, the unit counts and a
-      verdict. The three specifications sit on two different scales, so each column
-      group carries its own scale and no two of them are comparable in magnitude.</p>
-      <div class="cards" id="speccards"></div>
-    </div>
-  </details>
-  <details id="orient2">
-    <summary>Before reading a number on this page: the cautions that decide how every
-      figure must be read</summary>
-    <div class="dbody" id="orientfacts"></div>
-  </details>
-  <details id="orient3">
-    <summary>Provenance: the crash record, the windows, the radius, the placebo shift
-      and every other setting behind these numbers</summary>
-    <div class="dbody"><p class="note" id="metaline">loading the payloads</p></div>
-  </details>
-</section>
+
 
 <div class="layout">
   <!-- ------------------------------------------------------------- selectors -->
@@ -353,15 +378,6 @@ cells over every subset and every outcome rather than over the current selection
       <summary>The caution that belongs to each subset</summary>
       <div class="dbody" id="subnotesbody"></div>
     </details>
-
-    <h3>Comparison rule for the live estimate</h3>
-    <select id="rule"></select>
-    <div class="hint" id="rulehint"></div>
-
-    <details id="omittedcard">
-      <summary>Subsets that carry no estimate, and why each one carries none</summary>
-      <div class="dbody" id="omitted"></div>
-    </details>
    </div>
   </aside>
 
@@ -373,7 +389,7 @@ cells over every subset and every outcome rather than over the current selection
       <p class="rule" id="scaleline"></p>
       <div class="toolbar">
         <label class="ghost" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
-          <input type="checkbox" id="placeboreq" checked>
+          <input type="checkbox" id="placeboreq">
           placebo requirement
           <button class="qhelp" type="button" data-help="placebo_switch"
             aria-expanded="false" aria-label="About: the placebo requirement switch">?</button>
@@ -400,23 +416,131 @@ cells over every subset and every outcome rather than over the current selection
       </details>
     </section>
 
-    <!-- ------------------------------------------- the methodology, with its math -->
+    <!-- the summary strip, below the analysis it summarises -->
+    <div class="strip" id="strip"></div>
+
+    <section class="panel" id="conclusions">
+      <h2>What each specification concludes</h2>
+      <ol class="pts" style="list-style:decimal;padding-left:24px">
+        <li><b>Published specification.</b> The published values reproduce: 6 of 6
+        comparable estimates fall inside our intervals and agree in sign, so the
+        computation is not in question. The significant group is 70.9 per cent Citi
+        Bike stations, individually not significant; its only individually
+        significant component is 14 neckdowns, which are curb reconstructions; no
+        component is the posts or granite blocks the report defines the treatment
+        as.</li>
+        <li><b>Act 2: Extension of the DOT analysis.</b> Held fixed and taken to
+        the study subsets, the corridor DiD design returns 76 significant
+        reductions in 233 estimable cells (87 once the positive controls are
+        included), including cells no mechanism connects,
+        and its own placebo rejects: displaced into months before any installation
+        it still reports significant reductions. A reduction from this design is a
+        property of the comparison group rather than evidence about a
+        treatment.</li>
+        <li><b>Act 3: Method (ours).</b> <span id="funnel-conclusions">The placebo test excludes some
+        cells; the counts load with the payload.</span> The single cell surviving everything is an
+        increase in the 2025 sign only cohort on 12 months of follow up, from a
+        design that produces false increases on 78 per cent of null draws under
+        selection on a persistent level. No reduction survives. The defensible
+        summary is that the evidence neither establishes nor excludes a pedestrian
+        injury benefit, and that sign and marking daylighting is a tight null whose
+        own placebo still fails.</li>
+      </ol>
+    </section>
+
+    <section class="panel" id="livecard">
+      <h2>The live estimate for this selection<button class="qhelp" type="button"
+        data-help="aggratio" aria-expanded="false"
+        aria-label="About: the live estimate for a selection">?</button></h2>
+      <h3>Comparison rule for the live estimate</h3>
+    <select id="rule"></select>
+    <div class="hint" id="rulehint"></div>
+
+    <details id="omittedcard">
+      <summary>Subsets that carry no estimate, and why each one carries none</summary>
+      <div class="dbody" id="omitted"></div>
+    </details>
+
+      <div class="tiles" id="livetiles"></div>
+      <details id="livecard2">
+        <summary>What the live estimate is computed from, and the sums behind the two
+          figures</summary>
+        <div class="dbody">
+          <p class="body" id="liveintro">loading the per unit sums</p>
+          <div id="livedetail"></div>
+        </div>
+      </details>
+      <div id="livenotes"></div>
+    </section>
+
+    <section class="panel" id="labcard">
+
+      <h2>Run the estimator yourself
+        <button class="qhelp" type="button" data-help="lab"
+          aria-expanded="false" aria-label="About: the custom analysis">?</button></h2>
+      <p class="rule">The corridor DiD estimator on a window you choose, computed in
+      this page from monthly counts per treated corner. Choose the installation
+      window, the before and after period, the outcome and the comparison rule; the
+      panel reports the estimate, its placebo, and how many units the window admits.
+      The treatments used are the ones selected in the left column.</p>
+      <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+        <label>outcome <select id="lab-out"></select></label>
+        <label>comparison <select id="lab-rule">
+          <option value="c">corridor DiD comparison group</option>
+          <option value="m">matched comparison group</option>
+        </select></label>
+        <label>model <select id="lab-model">
+          <option value="did">mean difference, one sample t (DOT design)</option>
+          <option value="ppml">Poisson PPML, two way fixed effects (this paper's model)</option>
+        </select></label>
+        <details style="grid-column:1/-1">
+        <summary class="hint" style="cursor:pointer">restrict by place
+          (optional): boroughs, or a bounding box</summary>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
+        <label>region <select id="lab-region" multiple size="3"
+          title="hold Ctrl to choose several boroughs; none chosen means the whole city">
+          <option value="Manhattan">Manhattan</option>
+          <option value="Bronx">Bronx</option>
+          <option value="Brooklyn">Brooklyn</option>
+          <option value="Queens">Queens</option>
+          <option value="Staten Island">Staten Island</option>
+        </select></label>
+        <label>box <input type="text" id="lab-bbox" size="21"
+          placeholder="west,south,east,north (lon,lat,lon,lat)"
+          title="blank means no box"></label>
+        </div>
+        </details>
+        <label>before <select id="lab-pre">
+          <option>12</option><option selected>24</option><option>36</option>
+        </select> months</label>
+        <label>after <select id="lab-post">
+          <option>3</option><option>6</option><option>12</option>
+          <option selected>24</option>
+        </select> months</label>
+        <label>installed from <input type="month" id="lab-a" value="2019-01"></label>
+        <label>to <input type="month" id="lab-b" value="2021-12"></label>
+        <button class="ghost" id="lab-run" type="button">Estimate</button>
+      </div>
+      <div id="lab-body" class="dbody"><p class="rule">The monthly payload loads on
+      the first estimate, once, about ten megabytes.</p></div>
+    </section>
+
     <section class="panel" id="methodology">
       <h2>Methodology</h2>
-      <details id="methodology-body" open>
+      <details id="methodology-body">
         <summary>The three specifications, their equations and the placebo
           displacement</summary>
         <div class="dbody">
 
-      <h3>1. Published specification</h3>
+      <h3>Act 1: Replication of the DOT analysis, as published</h3>
       <p class="body">The design NYC DOT published: the crash record 2017 to 2023,
       installations 2019 to 2021, 24 months on each side of the installation month,
       corridor comparison locations on the treated corner's own streets, an unweighted
       mean of per unit changes in annual injuries, and a two sided one sample t test. The
       scale is a difference in counts per intersection per year, in which zero means no
       effect.</p>
-      <p class="body">For a site i with installation month t_i, Y_i(a,b) counts the
-      outcome inside 30 m of i over the months from t_i plus a up to t_i plus b, and
+      <p class="body">For site i, the window count is the
+      outcome inside 30 m of i over the months from a months after installation up to b months after it, and
       R_i(a,b) expresses that count as an annual rate. The change at the site is the after
       rate minus the before rate.</p>
       <div class="eqwrap" id="eq-rate"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo><mo>=</mo><mfrac><mrow><mn>12</mn><msub><mi>Y</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo></mrow><mrow><mi>b</mi><mo>&#8722;</mo><mi>a</mi></mrow></mfrac></mrow></math><div class="mathfall">R_i(a,b) \;=\; \frac{12\, Y_i(a,b)}{b-a}</div><div class="eqcap">The outcome at one site, as an annual rate over a window of months.</div><details class="eqsrc"><summary>LaTeX source</summary><code>R_i(a,b) \;=\; \frac{12\, Y_i(a,b)}{b-a}</code></details></div>
@@ -429,7 +553,7 @@ cells over every subset and every outcome rather than over the current selection
       <div class="eqwrap" id="eq-arith"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class="mathfall">\hat\theta \;=\; \frac{1}{n}\sum_{i=1}^{n}\left(\Delta_i \;-\; \frac{1}{|C_i|}\sum_{j\in C_i}\Delta_j\right)</div><div class="eqcap">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\hat\theta \;=\; \frac{1}{n}\sum_{i=1}^{n}\left(\Delta_i \;-\; \frac{1}{|C_i|}\sum_{j\in C_i}\Delta_j\right)</code></details></div>
       <div class="eqwrap" id="eq-ttest"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>t</mi><mo>=</mo><mfrac><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mrow><msub><mi>s</mi><mi>d</mi></msub><mo>/</mo><msqrt><mi>n</mi></msqrt></mrow></mfrac></mrow></math><div class="mathfall">t \;=\; \frac{\hat\theta}{s_d/\sqrt{n}}</div><div class="eqcap">The test the published estimator uses, a two sided one sample t test on n minus 1 degrees of freedom.</div><details class="eqsrc"><summary>LaTeX source</summary><code>t \;=\; \frac{\hat\theta}{s_d/\sqrt{n}}</code></details></div>
 
-      <h3>2. Published specification, extended record</h3>
+      <h3>Act 2: Extension of the DOT analysis</h3>
       <p class="body">The same four components, being the corridor comparison rule, the
       annual rate, the unweighted mean of per unit changes and the one sample t test,
       carried to the full crash record 2012-07 to 2026-05, to an installation window of
@@ -438,7 +562,7 @@ cells over every subset and every outcome rather than over the current selection
       record, the installation window, the before period and the set of subsets change.
       The scale is again a difference in counts per intersection per year.</p>
 
-      <h3>3. Falsification tested specification</h3>
+      <h3>Act 3: Method (ours)</h3>
       <p class="body">The design of this study: three matched comparison intersections
       per treated unit, a fixed effects Poisson model carrying a unit effect and a
       calendar month effect, a cluster robust variance of type CRV1 clustered on the match
@@ -484,12 +608,7 @@ cells over every subset and every outcome rather than over the current selection
       the installation. The p value answers whether a result could have arisen by chance.
       The placebo answers whether the specification produces that result without a
       treatment, and those are different questions.</p>
-      <p class="note">Over the 240 cells the placebo test excludes 117 of the 235 that carry a
-      placebo; 39 cells are significant before Benjamini and Hochberg adjustment and 14
-      after it; 13 of those 14 carry a placebo that rejects no effect, and the single
-      cell that survives everything is an increase in the 2025 sign only cohort rather
-      than a reduction. No reduction survives falsification and multiplicity control
-      together.</p>
+      <p class="note" id="funnel-methods">loading the funnel counts</p>
 
       <h3>Adjustment for multiple subsets</h3>
       <p class="body">Each outcome is estimated over m subsets, being 43 here, so a
@@ -501,7 +620,7 @@ cells over every subset and every outcome rather than over the current selection
       when the placebo is consistent with no effect, and when at least 25 treated units
       contribute.</p>
 
-      <h3>The smallest detectable effect</h3>
+      <h3>The minimum detectable effect</h3>
       <p class="body">A null is uninformative without the size of the effect the cell
       could have found, so every cell carries the minimum detectable effect at 80 per cent
       power, two sided, which follows from the standard error of the log rate ratio. A
@@ -529,7 +648,7 @@ cells over every subset and every outcome rather than over the current selection
           <p class="body">The installation date is moved back by the larger of the before
           period and one month more than the after period. Moving it back only by the before
           period is not sufficient: with 24 months on each side, that places the final month
-          of the placebo window on the installation month itself, which is partly treated. A
+          of the placebo window on t_i itself, which is partly treated. A
           displacement of at least the after period plus one month ends the placebo window at
           month minus one, so every month of it is strictly before installation.</p>
           <p class="body">A cell is admitted only when three conditions hold together.
@@ -555,14 +674,13 @@ cells over every subset and every outcome rather than over the current selection
           applies.</p>
           <div class="detgrid">
             <div class="detblk">
-              <b>not in the report</b>
-              <p class="body">The report does not form this subset at all. This covers 240 of
-              the 240 cells. A subset such as turn calming by quick kurb, or the 2025
+              <b>subset not in DOT report</b>
+              <p class="body">The report does not form this subset at all. This covers <span id="absent-notreport">most</span> cells. A subset such as turn calming by quick kurb, or the 2025
               published list split by treatment, has no published counterpart because the
               report never separated it.</p>
             </div>
             <div class="detblk">
-              <b>outcome not published</b>
+              <b>DOT published injuries only</b>
               <p class="body">The report forms this arm and reports it only on injuries
               counted as people. It publishes no crash event outcome for any arm, so a row
               whose outcome counts crashes has nothing to compare against. This covers 12
@@ -629,80 +747,70 @@ cells over every subset and every outcome rather than over the current selection
       </details>
     </section>
 
-    <section class="panel" id="livecard">
-      <h2>The live estimate for this selection<button class="qhelp" type="button"
-        data-help="aggratio" aria-expanded="false"
-        aria-label="About: the live estimate for a selection">?</button></h2>
-      <div class="tiles" id="livetiles"></div>
-      <details id="livecard2">
-        <summary>What the live estimate is computed from, and the sums behind the two
-          figures</summary>
-        <div class="dbody">
-          <p class="body" id="liveintro">loading the per unit sums</p>
-          <div id="livedetail"></div>
-        </div>
-      </details>
-      <div id="livenotes"></div>
-    </section>
-        <section class="panel" id="conclusions">
-      <h2>What each specification concludes</h2>
-      <ol class="pts" style="list-style:decimal;padding-left:24px">
-        <li><b>Published specification.</b> The published values reproduce: 6 of 6
-        comparable estimates fall inside our intervals and agree in sign, so the
-        computation is not in question. The significant group is 70.9 per cent Citi
-        Bike stations, individually not significant; its only individually
-        significant component is 14 neckdowns, which are curb reconstructions; no
-        component is the posts or granite blocks the report defines the treatment
-        as.</li>
-        <li><b>Published specification, extended record.</b> Held fixed and taken to
-        40 subsets on 6 outcomes, the corridor DiD design returns 76 significant
-        reductions in 233 estimable cells, including cells no mechanism connects,
-        and its own placebo rejects: displaced into months before any installation
-        it still reports significant reductions. A reduction from this design is a
-        property of the comparison group rather than evidence about a
-        treatment.</li>
-        <li><b>Falsification tested specification.</b> The placebo test excludes 117
-        of 235 cells; 39 are significant before adjustment, 14 after, and 13 of
-        those 14 fail the placebo test. The single cell surviving everything is an
-        increase in the 2025 sign only cohort on 12 months of follow up, from a
-        design that produces false increases on 78 per cent of null draws under
-        selection on a persistent level. No reduction survives. The defensible
-        summary is that the evidence neither establishes nor excludes a pedestrian
-        injury benefit, and that sign and marking daylighting is a tight null whose
-        own placebo still fails.</li>
-      </ol>
-    </section>
-<section class="panel" id="labcard">
-      <h2>Run the estimator yourself
-        <button class="qhelp" type="button" data-help="lab"
-          aria-expanded="false" aria-label="About: the custom analysis">?</button></h2>
-      <p class="rule">The corridor DiD estimator on a window you choose, computed in
-      this page from monthly counts per treated corner. Choose the installation
-      window, the before and after period, the outcome and the comparison rule; the
-      panel reports the estimate, its placebo, and how many units the window admits.
-      The treatments used are the ones selected in the left column.</p>
-      <div class="toolbar" style="flex-wrap:wrap;gap:8px">
-        <label>outcome <select id="lab-out"></select></label>
-        <label>comparison <select id="lab-rule">
-          <option value="c">corridor DiD comparison group</option>
-          <option value="m">matched comparison group</option>
-        </select></label>
-        <label>before <select id="lab-pre">
-          <option>12</option><option selected>24</option><option>36</option>
-        </select> months</label>
-        <label>after <select id="lab-post">
-          <option>3</option><option>6</option><option>12</option>
-          <option selected>24</option>
-        </select> months</label>
-        <label>installed from <input type="month" id="lab-a" value="2019-01"></label>
-        <label>to <input type="month" id="lab-b" value="2021-12"></label>
-        <button class="ghost" id="lab-run" type="button">Estimate</button>
-      </div>
-      <div id="lab-body" class="dbody"><p class="rule">The monthly payload loads on
-      the first estimate, once, about eight megabytes.</p></div>
-    </section>
+    <section class="panel" id="topics">
+  <h2>Definitions, cautions and provenance</h2>
+  <div class="qgrp">Definitions</div>
+  <div class="qrow">
+    <span class="qitem">the placebo test<button class="qhelp" type="button"
+      data-help="placebo" aria-expanded="false"
+      aria-label="About: the placebo test">?</button></span>
+    <span class="qitem">a flagged decrease<button class="qhelp" type="button"
+      data-help="why_flagged" aria-expanded="false"
+      aria-label="About: why a significant decrease can still be flagged">?</button></span>
+    <span class="qitem">reading a flag<button class="qhelp" type="button"
+      data-help="flagread" aria-expanded="false"
+      aria-label="About: how to read a flag">?</button></span>
+    <span class="qitem">two scales<button class="qhelp" type="button"
+      data-help="scales" aria-expanded="false"
+      aria-label="About: two scales, never comparable in magnitude">?</button></span>
+    <span class="qitem">how sites are chosen<button class="qhelp" type="button"
+      data-help="selection" aria-expanded="false"
+      aria-label="About: how sites are chosen">?</button></span>
+    <span class="qitem">neither design wins<button class="qhelp" type="button"
+      data-help="designs" aria-expanded="false"
+      aria-label="About: neither design is better in general">?</button></span>
+    <span class="qitem">pre treatment drift<button class="qhelp" type="button"
+      data-help="drift" aria-expanded="false"
+      aria-label="About: the pre treatment drift and the admission rule">?</button></span>
+    <span class="qitem">provenance<button class="qhelp" type="button"
+      data-help="provenance" aria-expanded="false"
+      aria-label="About: provenance of the published analyses">?</button></span>
+    <span class="qitem">the reproduction<button class="qhelp" type="button"
+      data-help="reproduction" aria-expanded="false"
+      aria-label="About: what the reproduction establishes">?</button></span>
+    <span class="qitem">the supporting evaluation<button class="qhelp" type="button"
+      data-help="stequote" aria-expanded="false"
+      aria-label="About: the supporting evaluation">?</button></span>
+    <span class="qitem">the published lists<button class="qhelp" type="button"
+      data-help="cohorts" aria-expanded="false"
+      aria-label="About: the two published location lists">?</button></span>
+    <span class="qitem">turn calming classes<button class="qhelp" type="button"
+      data-help="turncalming" aria-expanded="false"
+      aria-label="About: turn calming is eleven treatments">?</button></span>
+    <span class="qitem">recent work<button class="qhelp" type="button"
+      data-help="censoring" aria-expanded="false"
+      aria-label="About: right censoring of recent work">?</button></span>
+    <span class="qitem">curb already clear<button class="qhelp" type="button"
+      data-help="precleared" aria-expanded="false"
+      aria-label="About: curb that was already clear">?</button></span>
+  </div>
+  </section>
 
-    <details class="panel" id="agreecard">
+
+    
+
+
+    <!-- ------------------------------------------- the methodology, with its math -->
+    
+
+    
+        
+
+
+    <section class="panel" id="supp">
+      <h2>Supplementary panels</h2>
+      <p class="rule">The agreement funnel, the calibration, the specification path, the reproduction in full, the component table and the limitations, each one click away.</p>
+<details class="panel" id="agreecard">
       <summary>Do the two designs agree? The falsification funnel and the count of
         cells both designs call a reduction</summary>
       <div class="dbody" id="agreebody"></div>
@@ -738,6 +846,9 @@ cells over every subset and every outcome rather than over the current selection
         treatments pooled under one name, and a hardened arm its own admission rule refuses</summary>
       <div class="dbody" id="limitbody"></div>
     </details>
+    </section>
+
+    
 
     <details class="dis" id="aboutsec">
       <summary>About: author, programme and the companion pages
@@ -747,7 +858,12 @@ cells over every subset and every outcome rather than over the current selection
       </summary>
       <div class="dbody" id="aboutbody"></div>
     </details>
-  </main>
+    <footer class="pagefoot">
+    <div id="metaline">loading the payload settings</div>
+    <div>The map of the treatments and the slide deck carry the same numbers.
+      Estimates by src/stats_subsets.py; payloads by src/make_analysis_data.py.</div>
+  </footer>
+</main>
 </div>
 </div>
 
@@ -827,7 +943,7 @@ const FILES = ["meta", "subsets", "outcomes", "cells", "spec1", "calibration",
                "paths", "agreement", "methods", "limitations"];
 const P = {};
 const S = {
-  placeboReq: true, out: null, rule: "c", sel: new Set(), q: "",
+  placeboReq: false, out: null, rule: "c", sel: new Set(), q: "",
             sort: { key: "evidence", dir: 1 }, units: null, unitsErr: null,
             open: new Set() };
 
@@ -992,22 +1108,46 @@ function buildStrip() {
   const F = bad("agreement") ? null : P.agreement.funnel;
   const O = bad("agreement") ? null : P.agreement.overall;
   const cells = F ? F.cells : (bad("meta") ? null : P.meta.counts.cells);
+  let studyBoth = null, pcBoth = null;
+  if (!bad("cells")) {
+    const cc = P.cells.cells.filter(c =>
+      c.dot_p != null && c.dot_p < 0.05 && c.dot_diff < 0
+      && c.p != null && c.p < 0.05 && c.irr < 1);
+    studyBoth = cc.filter(c => c.family !== "positive_control").length;
+    pcBoth = cc.length - studyBoth;
+  }
   const rows = [
-    [cells, "cells estimated", null],
-    [F ? F.placebo_refuses : null, "cells the placebo test excludes", "placebo"],
-    [F ? F.significant_after_bh : null, "significant after adjustment", "bh"],
-    [F ? F.surviving_both : null, "surviving placebo and adjustment", "placebo"],
-    [O ? O.both_significant_reduction : null, "a reduction under both designs",
+    [cells, "cells estimated (one cell = one subset \u00D7 one outcome)", null],
+    [studyBoth,
+     "study subsets showing a reduction under both the DOT design (Act 2) and "
+     + "this paper's method (Act 3)"
+     + (pcBoth ? "; " + pcBoth + " positive control cells do agree, all of "
+        + "them the leading pedestrian interval" : ""),
      "designs"],
   ];
   rows.forEach(([v, k, topic]) => {
     const d = el("div", "tile");
+    if (k.indexOf("reduction") >= 0) d.classList.add("keytile");
     d.appendChild(el("div", "v", v == null ? "n.a." : fint(v)));
     const cap = el("div", "k", k);
     if (topic) cap.appendChild(qh(topic, k));
     d.appendChild(cap);
     host.appendChild(d);
   });
+  // the funnel middle lives in one sentence, with the 240 against 235
+  // discrepancy resolved rather than shipped
+  if (F) {
+    const line = el("p", "rule");
+    line.textContent = "Of the " + fint(F.cells)
+      + " cells (positive controls included), "
+      + fint(F.placebo_refuses) + " of the " + fint(F.placebo_available || 235)
+      + " that carry a placebo test fail it (the rest carry none); "
+      + fint(F.significant_after_bh) + " are significant after adjustment; "
+      + fint(F.surviving_both) + " both passes its placebo and stays significant. The placebo is a diagnostic "
+      + "here, and the filter that sets failing cells aside is the switch in "
+      + "the table toolbar.";
+    host.appendChild(line);
+  }
 }
 
 function buildMeta() {
@@ -1017,10 +1157,11 @@ function buildMeta() {
       + "with python src/make_analysis_data.py. If this page is open from a file:// "
       + "path, some browsers refuse to read local JSON, so serve the folder with "
       + "python -m http.server.";
-    $("#metaline").textContent = t;
+    if ($("#metaline")) $("#metaline").textContent = t;
     $("#pageerr").textContent = t;
     return;
   }
+  if (!$("#metaline")) return;
   const c = m.counts, st = m.settings;
   $("#metaline").textContent =
     `${c.cells} cells, being ${c.subsets} subsets over ${c.outcomes} outcomes; `
@@ -1033,6 +1174,7 @@ function buildMeta() {
 /* ------------------------------------------------------------- orientation */
 function buildOrient() {
   const host = $("#speccards");
+  if (!host) return;
   host.innerHTML = "";
   if (bad("methods")) { say("#speccards", "methods", "methods.json"); }
   else {
@@ -1058,6 +1200,7 @@ function buildOrient() {
     });
   }
   const f = $("#orientfacts");
+  if (!f) return;
   f.innerHTML = "";
   const facts = [];
   if (!bad("methods")) facts.push(P.methods.neither_is_correct);
@@ -1123,10 +1266,19 @@ function buildSubsets() {
   P.subsets.families.forEach(fam => {
     const members = fam.members.map(n => byName[n]).filter(subsetMatches);
     if (!members.length) return;
-    const h = el("div", "famhead");
-    h.appendChild(el("span", null, fam.label));
-    h.appendChild(el("span", "cnt", fam.n + " subsets"));
-    host.appendChild(h);
+    const nSel = members.filter(s => S.sel.has(s.name)).length;
+    const det = el("details", "famgrp");
+    if (nSel || S.q) det.open = true;
+    const sum = el("summary");
+    sum.appendChild(el("span", null, fam.label));
+    sum.appendChild(el("span", "cnt",
+      nSel ? nSel + " of " + members.length + " selected"
+           : members.length + " subsets"));
+    det.appendChild(sum);
+    host.appendChild(det);
+    const body = el("div", "fambody");
+    det.appendChild(body);
+    const hostFam = body;
     const tools = el("div");
     tools.style.cssText = "display:flex;gap:5px;margin:1px 0 3px";
     [["all", true], ["none", false]].forEach(([t, v]) => {
@@ -1138,7 +1290,7 @@ function buildSubsets() {
       });
       tools.appendChild(b);
     });
-    host.appendChild(tools);
+    hostFam.appendChild(tools);
     members.forEach(s => {
       shown.push(s);
       const lab = el("label", "row");
@@ -1152,7 +1304,7 @@ function buildSubsets() {
       const tx = el("span", null, s.label);
       const c = el("span", "cnt", fint(s.records) + " rec");
       lab.append(cb, tx, c);
-      host.appendChild(lab);
+      hostFam.appendChild(lab);
     });
   });
   if (!host.children.length) {
@@ -1235,6 +1387,7 @@ const SORTS = {
   s3p: c => c.p_bh == null ? c.p : c.p_bh,
   s3pl: c => c.placebo_p,
   s3mde: c => c.mde_pct,
+  s3pr: c => c.prob_reduction,
 };
 
 /* The default ordering is by strength of evidence on the falsification tested
@@ -1275,9 +1428,9 @@ function evidenceCmp(a, b) {
 }
 
 function nmOf(i) {
-  const fallback = ["Published specification",
-                    "Published specification, extended record",
-                    "Falsification tested specification"];
+  const fallback = ["DOT design, as published (Act 1)",
+                    "DOT design, full record (Act 2)",
+                    "3. This paper\u2019s method: matched Poisson (Act 3)"];
   if (bad("methods")) return fallback[i];
   const s = P.methods.specifications[i];
   return (s && s.name) || fallback[i];
@@ -1386,17 +1539,25 @@ function renderTable() {
   host.innerHTML = "";
   const om = outcomeMeta(S.out);
   buildLegend(om);
-  const gateNote = S.placeboReq ? "" :
-    " The placebo requirement is OFF: a failing placebo is shown as a warning" +
-    " rather than an exclusion, and what becomes significant under the matched" +
-    " Poisson design is increases rather than reductions.";
-  $("#orderline").textContent = gateNote +
-    "Order: adjusted p ascending, then unadjusted p, on column group 3, with cells the "
-    + "placebo test excludes last, then cells not identified.";
-  $("#scaleline").textContent =
-    "Scales: groups 1 and 2 are a difference in " + om.unit + " per intersection per "
-    + "year, no effect is 0; group 3 is a rate ratio, no effect is 1, so the two are "
-    + "not comparable in magnitude.";
+  const gateNote = S.placeboReq
+    ? " Placebo filter ON: cells whose placebo test rejects no effect are" +
+      " marked excluded by placebo, whatever their p, and sort below all" +
+      " passing cells. "
+    : "";
+  $("#orderline").textContent = gateNote + (S.placeboReq
+    ? "Order: adjusted p ascending, then unadjusted p, on column group 3; cells whose placebo test fails sort below all passing cells; cells with no group 3 estimate sort last."
+    : "Order: adjusted p ascending, then unadjusted p, on column group 3; cells with no group 3 estimate sort last. Placebo failures are NOT demoted while the placebo filter is off.");
+  $("#scaleline").textContent = "";
+  const lg = $("#legendbody");
+  if (lg && !lg.dataset.scaleRow) {
+    lg.dataset.scaleRow = "1";
+    const p0 = el("p", "body",
+      "Scales: groups 1 and 2 are a difference in " + om.unit
+      + " per intersection per year, no effect is 0; group 3 is a rate ratio, "
+      + "no effect is 1. A difference and a rate ratio are never comparable in "
+      + "magnitude.");
+    lg.insertBefore(p0, lg.firstChild);
+  }
   if (bad("cells")) { say(host, "cells", "cells.json"); return; }
   const rows = cellsFor(S.out);
   if (S.sort.key === "evidence") {
@@ -1455,48 +1616,55 @@ function renderTable() {
   const groupHead = (n, title, scaleTxt, cls, span, topic) => {
     const x = th(null, cls, span);
     const t = el("span", "gtitle", n + ". " + title);
-    t.appendChild(qh(topic, title));
+    if (topic) t.appendChild(qh(topic, title));
     x.appendChild(t);
     const sc = el("span", "gscale", scaleTxt);
-    sc.appendChild(qh("scales", "two scales, never comparable in magnitude"));
+    // one scales control for the table, on the first group only
+    if (n === 1) sc.appendChild(qh("scales",
+      "two scales, never comparable in magnitude"));
     x.appendChild(sc);
     return x;
   };
   gr.appendChild(sortTh("Treatment", "label", "c-treat"));
   gr.lastChild.rowSpan = 2;
-  gr.appendChild(sortTh("Units", "units", "num c-n"));
+  gr.appendChild(sortTh("Units (spec 3)", "units", "num c-n", null, null));
+  gr.lastChild.title = "treated units entering this paper's matched Poisson; specifications 1 and 2 use their own unit counts, shown in the row detail";
   gr.lastChild.rowSpan = 2;
   gr.appendChild(groupHead(1, nmOf(0), "difference, no effect is 0", "g1", 4,
     "arith"));
   gr.appendChild(groupHead(2, nmOf(1), "difference, no effect is 0", "g2", 4,
-    "arith"));
-  gr.appendChild(groupHead(3, nmOf(2), "rate ratio, no effect is 1", "g3", 4,
+    null));
+  gr.appendChild(groupHead(3, nmOf(2), "rate ratio, no effect is 1", "g3", 5,
     "fepois"));
-  const rd = th("Reading", "c-read", null, 2);
+  const rd = th("Verdict", "c-read", null, 2);
   gr.appendChild(rd);
   thead.appendChild(gr);
 
   const sr = el("tr", "subrow");
-  // the unit of the third group's smallest detectable effect sits in its heading, so
+  // the unit of the third group's minimum detectable effect sits in its heading, so
   // that the cell below it carries a bare number and the column stays narrow. The p
   // column of the third group is the one carrying an adjusted p value, so only that
   // heading carries the topic of the adjustment, while the placebo column and the
   // smallest detectable column carry theirs in every group.
-  [["g1", "s1", "s1p", null, "s1mde", "c-e1", "c-p1", "Smallest detectable", null],
-   ["g2", "s2", "s2p", "s2pl", "s2mde", "c-est", "c-p", "Smallest detectable", null],
+  [["g1", "s1", "s1p", null, "s1mde", "c-e1", "c-p1", "MDE 80%", null, false],
+   ["g2", "s2", "s2p", "s2pl", "s2mde", "c-est", "c-p", "MDE 80%", null, false],
    ["g3", "s3", "s3p", "s3pl", "s3mde", "c-est", "c-p",
-    "Smallest detectable, per cent", "bh"]]
-   .forEach(([cls, k, kp, kpl, kmde, ce, cp, mdelab, ptopic]) => {
+    "MDE 80%, per cent", "bh", true]]
+   .forEach(([cls, k, kp, kpl, kmde, ce, cp, mdelab, ptopic, hasEB]) => {
     sr.appendChild(sortTh("Estimate", k, cls + " num " + ce));
     sr.appendChild(sortTh("p", kp, cls + " num " + cp, ptopic,
       "adjustment for multiple subsets"));
-    const pl = kpl ? sortTh("Placebo", kpl, cls + " num c-pl", "placebo",
-                            "the placebo test")
+    const wantQ = cls === "g3";           // one ? per topic, on group 3
+    const pl = kpl ? sortTh("Placebo", kpl, cls + " num c-pl",
+                            wantQ ? "placebo" : null, "the placebo test")
                    : th("Placebo", cls + " num c-pl");
-    if (!kpl) pl.appendChild(qh("placebo", "the placebo test"));
     sr.appendChild(pl);
-    sr.appendChild(sortTh(mdelab, kmde, cls + " num c-mde", "mde",
-      "the smallest detectable effect"));
+    sr.appendChild(sortTh(mdelab, kmde, cls + " num c-mde",
+      wantQ ? "mde" : null, "the minimum detectable effect"));
+    if (hasEB) {
+      sr.appendChild(sortTh("Pr(IRR<1)", "s3pr", cls + " num c-pr", "bayes",
+        "the hierarchical Bayesian reading"));
+    }
   });
   thead.appendChild(sr);
   t.appendChild(thead);
@@ -1505,7 +1673,7 @@ function renderTable() {
   if (!rows.length) {
     const tr = el("tr");
     const td = el("td", null, "No subset is selected. Choose one on the left.");
-    td.colSpan = 15;
+    td.colSpan = 16;
     tr.appendChild(td); tb.appendChild(tr);
   }
   rows.forEach(c => addRow(tb, c, om, MX));
@@ -1630,7 +1798,13 @@ function detailFor(c, om, s1) {
       + "two sided");
     put(k3, "units", fint(c.n_units) + " treated units, three matched comparison "
       + "intersections each, drawn from " + fint(c.pool_candidates) + " candidates");
-    put(k3, "pipeline verdict", c.verdict);
+    let pv2 = c.verdict;
+    if (/^null, bounded at \d+ per cent/.test(pv2)) {
+      pv2 += " (the interval covers 1; a true effect of that size or larger "
+        + "would have been detected at 80 per cent power, and smaller effects "
+        + "remain unexcluded)";
+    }
+    put(k3, "pipeline verdict", pv2);
   }
   grid.appendChild(b3);
   td.appendChild(grid);
@@ -1673,17 +1847,19 @@ function detailFor(c, om, s1) {
   // ---- the subset itself
   const sub = el("div", "kv");
   sub.appendChild(el("div", "k", "the subset"));
+  sub.className = (sub.className ? sub.className + " " : "") + "detmeta";
   sub.appendChild(el("div", null, c.note));
   sub.appendChild(el("div", "k", "the sample"));
   sub.appendChild(el("div", null,
-    `${fint(c.records_catalogue)} records in the subset; installs `
-    + `${c.install_first} to ${c.install_last}; ${c.pre} months before and `
-    + `${c.post} after; ${fint(c.records_censored)} of ${fint(c.records_total)} `
-    + `records set aside because ${c.post} months of record do not exist after them`));
+    `${fint(c.records_catalogue)} records in the subset; `
+    + `${fint(c.records_censored)} set aside because ${c.post} months of record `
+    + `do not exist after their installs; the ${fint(c.records_kept)} analysed `
+    + `records were installed ${c.install_first} to ${c.install_last}; windows: `
+    + `${c.pre} months before, ${c.post} after`));
   if (c.one_install_date) {
     sub.appendChild(el("div", "k", "caution"));
     const w = el("div");
-    w.appendChild(el("span", "tag warn", "one installation month for every unit"));
+    w.appendChild(el("span", "tag warn", "a single imputed installation month is shared by every unit"));
     sub.appendChild(w);
   }
   td.appendChild(sub);
@@ -1715,7 +1891,8 @@ function addRow(tb, c, om, MX) {
   td0.appendChild(tg);
   td0.appendChild(lab);
   if (c.one_install_date) {
-    td0.appendChild(el("span", "tag warn", "! one install month"));
+    td0.appendChild(el("span", "tag warn", "! install month imputed"));
+    td0.lastChild.title = "all records of this cohort share a single imputed installation month; event time and the placebo displacement inherit that assumption"
   }
   tg.addEventListener("click", () => {
     const on = det.classList.toggle("on");
@@ -1745,7 +1922,7 @@ function addRow(tb, c, om, MX) {
       "pub. " + fdiff(s1.dot_did, 2)));
     tr.appendChild(numCell("g1 c-p1", fp(s1.our_p), "pub. " + fp(s1.dot_p)));
     tr.appendChild(numCell("g1 c-pl", fdiff(s1.placebo_did), "p " + fp(s1.placebo_p)));
-    tr.appendChild(numCell("g1 c-mde", fdiff(s1.our_mde)));
+    tr.appendChild(numCell("g1 c-mde", "\u00B1" + nf(Math.abs(s1.our_mde), 4)));
   }
 
   // -------- specification 2, the same components on the extended record
@@ -1758,48 +1935,81 @@ function addRow(tb, c, om, MX) {
       Math.abs(c.dot_diff) / MX.s2, c.dot_diff > 0, adm2(c), S.placeboReq && ref2));
     tr.appendChild(numCell("g2 c-p", fp(c.dot_p)));
     tr.appendChild(numCell("g2 c-pl", fdiff(c.dot_placebo), "p " + fp(c.dot_placebo_p)));
-    tr.appendChild(numCell("g2 c-mde", fdiff(c.dot_mde)));
+    tr.appendChild(numCell("g2 c-mde", c.dot_mde == null ? "n.a." : "\u00B1" + nf(Math.abs(c.dot_mde), 4)));
   }
 
   // -------- specification 3, the falsification tested one
   if (c.irr == null) {
-    tr.appendChild(spanCell("g3", "not identified"));
+    const ni3 = spanCell("g3", "not identified");
+    ni3.colSpan = 5;
+    tr.appendChild(ni3);
   } else {
     const r3 = c.spec3_reading || {};
-    tr.appendChild(estCell("g3 c-est", fratio(c.irr),
-      Math.abs(Math.log(c.irr)) / MX.s3, c.irr > 1, adm3(c), refuses3(c)));
+    const e3 = estCell("g3 c-est", fratio(c.irr),
+      Math.abs(Math.log(c.irr)) / MX.s3, c.irr > 1, adm3(c), refuses3(c));
+    if (placeboFails3(c)) {
+      const pf = el("span", "small");
+      pf.style.display = "block";
+      pf.textContent = "placebo fails ("
+        + (c.placebo_irr == null ? "" : fratio(c.placebo_irr)) + ")";
+      e3.appendChild(pf);
+    }
+    tr.appendChild(e3);
     tr.appendChild(numCell("g3 c-p", fp(c.p), "(" + fp(c.p_bh) + ")"));
     tr.appendChild(numCell("g3 c-pl", fratio(c.placebo_irr), "p " + fp(c.placebo_p)));
     tr.appendChild(numCell("g3 c-mde",
       c.mde_pct == null || !isFinite(c.mde_pct) ? "n.a." : nf(c.mde_pct, 0)));
+    const prv = c.prob_reduction;
+    const prtxt = prv == null ? "n.a."
+      : prv < 0.005 ? "<0.01" : prv > 0.995 ? ">0.99" : nf(prv, 2);
+    const prc = numCell("g3 c-pr", prtxt,
+      c.eb_irr == null ? "" : "shrunk IRR " + nf(c.eb_irr, 3));
+    prc.title = c.eb_irr == null ? "" :
+      "posterior median " + nf(c.eb_irr, 3) + " [" + nf(c.eb_lo, 3) + ", "
+      + nf(c.eb_hi, 3) + "] under the hierarchical model; inherits any design "
+      + "bias in the raw estimates";
+    tr.appendChild(prc);
   }
 
   // -------- the reading, as visual state rather than as sentences
   const rd = el("td", "c-read");
-  if (S.placeboReq) {
-    rd.appendChild(tagFor(c.spec3_reading));
+  // The payload reading is neutral: the effect on its own terms. The strict
+  // admission rule is applied only when the reader turns it on, and the placebo
+  // travels as a diagnostic chip either way.
+  if (S.placeboReq && placeboFails3(c)
+      && !["underpowered", "not read", "not identified"]
+           .includes((c.spec3_reading || {}).state)) {
+    rd.appendChild(tagFor({ state: "excluded by placebo", why: "the placebo filter is on "
+      + "and the placebo on this cell rejects no effect at p "
+      + fp(c.placebo_p) }));
   } else {
-    const st = adm3(c) ? (c.irr > 1 ? "increase" : "reduction")
-                       : (c.spec3_reading || {}).state === "underpowered"
-                         ? "underpowered" : "null";
-    rd.appendChild(tagFor({ state: st, why: "read with the placebo requirement "
-      + "switched off; multiplicity control and the unit floor still apply" }));
-    if (placeboFails3(c)) {
-      const w = el("span", "tag warn", "placebo fails");
-      w.title = "the placebo on the withheld year rejects no effect at "
-        + fp(c.placebo_p) + "; with the requirement on, this row is excluded";
-      rd.appendChild(w);
-    }
+    rd.appendChild(tagFor(c.spec3_reading));
+  }
+  if (c.placebo_flag === "fails" || placeboFails3(c)) {
+    const w = el("span", "tag warn", "placebo fails");
+    w.title = "the placebo rejects no effect at p " + fp(c.placebo_p)
+      + (c.placebo_tost_p != null ? "; TOST equivalence p " + fp(c.placebo_tost_p) : "");
+    rd.appendChild(w);
+  } else if (c.placebo_tost_p != null && c.placebo_tost_p < 0.05) {
+    const w = el("span", "tag ok", "placebo equivalent (TOST)");
+    w.title = "Schuirmann two one sided tests against bounds of 10 per cent each "
+      + "way: p_TOST " + fp(c.placebo_tost_p) + ", so the placebo is "
+      + "statistically equivalent to no effect within that band";
+    rd.appendChild(w);
   }
   const adm = admissibleUnder(c, s1);
   const nums = [];
   if (adm.indexOf(nmOf(0)) >= 0) nums.push("1");
   if (adm.indexOf(nmOf(1)) >= 0) nums.push("2");
   if (adm.indexOf(nmOf(2)) >= 0) nums.push("3");
+  const failsP = placeboFails3(c);
   const a = el("span", "small",
-    nums.length ? "admissible under " + nums.join(", ") : "none admissible");
-  a.title = adm.length ? "admissible under: " + adm.join("; ")
-                       : "no specification returns an admissible finding here";
+    nums.length
+      ? "significant after adjustment under " + nums.join(", ")
+        + (failsP ? "; placebo fails" : "")
+      : "no significant finding");
+  a.title = adm.length ? "significant under: " + adm.join("; ")
+                       : "no specification returns a significant finding here";
   rd.appendChild(a);
   tr.appendChild(rd);
   tb.appendChild(tr);
@@ -1940,14 +2150,14 @@ function renderLive() {
     S.rule === "c" ? "The city's published estimator, computed exactly"
                    : "The city's estimator on matched comparison intersections",
     fdiff(L.main.est),
-    `95 per cent interval ${fdiff(L.main.lo)} to ${fdiff(L.main.hi)}; difference in `
-    + `${om.unit} per intersection per year, where no effect is 0`));
-  tiles.appendChild(tile("Its t statistic and p value",
-    nf(L.main.t, 3), `on ${fint(L.main.df)} degrees of freedom, p `
-    + fp(L.main.p) + `; one sample t test against zero`));
+    `95 per cent interval ${fdiff(L.main.lo)} to ${fdiff(L.main.hi)}; p `
+    + fp(L.main.p) + ` (t ${nf(L.main.t, 2)} on ${fint(L.main.df)} df); `
+    + `difference in ${om.unit} per intersection per year, where no effect is `
+    + `0; minimum detectable difference ±${nf(Math.abs(L.main.mde), 4)} `
+    + `at 80 per cent power`));
   tiles.appendChild(tile("Its placebo",
     L.placebo ? fdiff(L.placebo.est) : "n.a.",
-    L.placebo ? `p ${fp(L.placebo.p)} on the same units with the installation month `
+    L.placebo ? `p ${fp(L.placebo.p)} on the same units with t_i `
       + `moved back ${P.meta.settings.placebo_shift} months`
       : "not computable on this selection"));
   const clash = aggSignClash(L);
@@ -1957,8 +2167,6 @@ function renderLive() {
     + "manuscript",
     clash ? el("span", "tag warn", "↕ disagrees in sign") : null,
     clash));
-  tiles.appendChild(tile("Smallest difference detectable here",
-    fdiff(L.main.mde), "at 80 per cent power, two sided"));
 
   // the sums the two figures are built from, so a reader can recompute them
   const tb = el("table");
@@ -2006,7 +2214,7 @@ function renderLive() {
           + `Set the comparison rule to corridor comparison locations to put the two `
           + `on one design.`));
       ul.appendChild(el("li", null,
-        `Falsification tested specification, from the pipeline: a rate ratio of `
+        `Act 3: Method (ours), from the pipeline: a rate ratio of `
         + `${fratio(c.irr)} with p ${fp(c.p)}. The aggregate rate ratio above is `
         + `${fratio(L.rr)}, which carries no unit effects, no calendar month effects `
         + `and no cluster robust variance, so the two are different quantities.`));
@@ -2122,6 +2330,7 @@ function buildAgreementStatic() {
 
 function renderAgreement() {
   const host = $("#agreetab");
+  if (!host) return;
   if (!host) return;
   host.innerHTML = "";
   if (bad("cells") || bad("agreement")) return;
@@ -2767,6 +2976,7 @@ function tsv() {
     ["spec3_pool_candidates", c => c.pool_candidates],
     ["spec3_verdict", c => c.verdict],
     ["spec3_state", c => c.spec3_reading.state],
+    ["s3pr", c => c.prob_reduction],
     ["agree_on_sign", c => c.agree_on_sign],
   ];
   const head = [
@@ -2846,7 +3056,40 @@ function readHash() {
 }
 
 /* ------------------------------------------------------------------- wiring */
+
+// The placebo funnel is stated in three places; every one renders from the same
+// payload so the page cannot contradict itself (it did, before this function).
+function fillFunnel() {
+  const F = bad("agreement") ? null : P.agreement.funnel;
+  if (!F) return;
+  const el1 = $("#funnel-methods");
+  if (el1) el1.textContent =
+    "Over the " + fint(F.cells) + " cells the placebo test rejects no effect in "
+    + fint(F.placebo_refuses) + " of the " + fint(F.placebo_available)
+    + " that carry a placebo; " + fint(F.significant_before_bh)
+    + " cells are significant before Benjamini and Hochberg adjustment and "
+    + fint(F.significant_after_bh) + " after it; "
+    + fint(F.after_bh_with_failing_placebo) + " of those "
+    + fint(F.significant_after_bh)
+    + " carry a placebo that rejects no effect. No daylighting or turn calming "
+    + "reduction survives falsification and multiplicity control together.";
+  const el2 = $("#funnel-conclusions");
+  if (el2) el2.textContent =
+    "The placebo test rejects no effect in " + fint(F.placebo_refuses) + " of "
+    + fint(F.placebo_available) + " cells; " + fint(F.significant_before_bh)
+    + " are significant before adjustment, " + fint(F.significant_after_bh)
+    + " after, and " + fint(F.after_bh_with_failing_placebo) + " of those "
+    + fint(F.significant_after_bh) + " fail the placebo test.";
+  const el3 = $("#absent-notreport");
+  if (el3 && !bad("cells")) {
+    const n = P.cells.cells.filter(c =>
+      (c.spec1_absent || {}).tag === "subset not in DOT report").length;
+    el3.textContent = fint(n) + " of the " + fint(P.cells.cells.length);
+  }
+}
+
 function renderAll() {
+  fillFunnel();
   renderTable();
   renderAgreement();
   renderLive();
@@ -2972,7 +3215,7 @@ load().catch(e => {
 #popscrim{position:fixed;inset:0;z-index:119;display:none;background:transparent}</style>
 <div id="popscrim"></div>
 <div id="pop" role="dialog" aria-live="polite"></div>
-<script>window.HELPTEXT = {"placebo":{"title":"The placebo test","body":"<p>The estimate is recomputed with one change: the installation date of every treated\nsite is moved back in time, far enough that the whole analysis window falls in months\nbefore anything was built. The corners, the comparison locations, the estimator and the\noutcome all stay as they were. Because no treatment exists anywhere in that window, the\nhonest answer is no effect.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_shift\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>s</mi><mo>=</mo><mi>max</mi><mo>(</mo><mrow><mi>pre</mi><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">s \\;=\\; \\max\\!\\left(\\text{pre},\\; \\text{post}+1\\right)</div><div class=\"eqcap\">The placebo displacement, chosen so the placebo window ends before installation.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>s \\;=\\; \\max\\!\\left(\\text{pre},\\; \\text{post}+1\\right)</code></details></div>\n<p>Moving the date back only by the length of the before period is not sufficient. Under\na before period of 24 months and an after period of 24 months, that displacement puts\nthe final month of the placebo window on the installation month itself, which is partly\ntreated. Taking the larger of the before period and one month more than the after period\nends the placebo window at month minus one, so every month of it lies strictly before\ninstallation.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_window\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mo>[</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>]</mo><mo>&#160;</mo><mo>&#160;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>&#8804;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mn>1</mn></mrow></math><div class=\"mathfall\">\\left[\\,t_i - s - \\text{pre},\\;\\; t_i - s + \\text{post}\\,\\right], \\qquad t_i - s + \\text{post} \\;\\le\\; t_i - 1</div><div class=\"eqcap\">The placebo window, every month of it before the installation month.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\left[\\,t_i - s - \\text{pre},\\;\\; t_i - s + \\text{post}\\,\\right], \\qquad t_i - s + \\text{post} \\;\\le\\; t_i - 1</code></details></div>\n<p>A cell is read only when the placebo is consistent with no effect.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_test\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msup><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mi>plac</mi></msup><mo>=</mo><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>(</mo><mrow><msub><mi>t</mi><mi>i</mi></msub><mo>&#8594;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi></mrow><mo>)</mo><mo>,</mo><mo>&#160;</mo><msup><mi>p</mi><mi>plac</mi></msup><mo>&#8805;</mo><mn>0.05</mn></mrow></math><div class=\"mathfall\">\\hat\\theta^{\\text{plac}} \\;=\\; \\hat\\theta\\big(t_i \\to t_i - s\\big), \\qquad \\text{admit the cell only if } p^{\\text{plac}} \\ge 0.05</div><div class=\"eqcap\">The placebo estimate and the condition a cell must satisfy to be read.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta^{\\text{plac}} \\;=\\; \\hat\\theta\\big(t_i \\to t_i - s\\big), \\qquad \\text{admit the cell only if } p^{\\text{plac}} \\ge 0.05</code></details></div>\n<p>Because a decrease can appear in a window that contains no treatment, a decrease in\nthe real window with a failing placebo is reliably present and reliably not caused by the\ninstallation. The p value answers whether a result could have arisen by chance. The\nplacebo answers whether the specification produces that result without a treatment, and\nthose are different questions.</p>"},"why_flagged":{"title":"Why a significant decrease can still be flagged","body":"<p>Suppose a cell returns a decrease at p below 0.01, and the placebo on months\ncontaining no treatment also returns a decrease of similar size. Both cannot be caused by\nthe treatment, because in the placebo window there was no treatment. So the\nspecification produces decreases at these corners whether or not anything is installed,\nand the decrease in the real window cannot be attributed to the installation.</p>\n<p>The city selects sites on a deteriorating crash record, and it selects them on its own\npublished risk criterion: treated corners are 3.6 to 20.2 times more likely to be a\ndesignated Vision Zero priority intersection than an intersection carrying no device. A\ncorner chosen because its count is high tends to fall afterwards whether or not it is\ntreated, which is regression to the mean, and a before and after comparison attributes\nthat fall to whatever was installed.</p>\n<p>A flagged cell is evidence of no effect and it is evidence of an effect in neither\ndirection. It is a cell in which the design cannot separate the treatment from the reason\nthe site was chosen.</p>"},"arith":{"title":"The published estimator","body":"<p>For a site i with installation month t_i, Y_i(a,b) counts the outcome inside 30 m of\ni over the months from t_i plus a up to t_i plus b, and R_i(a,b) expresses that count as\nan annual rate.</p>\n<div class=\"eqwrap\" id=\"eq-rate\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo><mo>=</mo><mfrac><mrow><mn>12</mn><msub><mi>Y</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo></mrow><mrow><mi>b</mi><mo>&#8722;</mo><mi>a</mi></mrow></mfrac></mrow></math><div class=\"mathfall\">R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</div><div class=\"eqcap\">The outcome at one site, as an annual rate over a window of months.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</code></details></div>\n<div class=\"eqwrap\" id=\"eq-delta\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>=</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo><mo>&#8722;</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><mn>0</mn></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</div><div class=\"eqcap\">The change at one site, after minus before.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</code></details></div>\n<p>The estimate is the unweighted mean over treated sites of the change at the site minus\nthe mean change at that site's own comparison locations, tested against zero.</p>\n<div class=\"eqwrap\" id=\"eq-arith\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</div><div class=\"eqcap\">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</code></details></div>\n<div class=\"eqwrap\" id=\"eq-ttest\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>t</mi><mo>=</mo><mfrac><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mrow><msub><mi>s</mi><mi>d</mi></msub><mo>/</mo><msqrt><mi>n</mi></msqrt></mrow></mfrac></mrow></math><div class=\"mathfall\">t \\;=\\; \\frac{\\hat\\theta}{s_d/\\sqrt{n}}</div><div class=\"eqcap\">The test the published estimator uses, a two sided one sample t test on n minus 1 degrees of freedom.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>t \\;=\\; \\frac{\\hat\\theta}{s_d/\\sqrt{n}}</code></details></div>\n<p>Every treated site enters with weight one over n whatever its crash count, so the\nquantity estimated is the change at the mean treated corner. The scale is a difference in\ncounts per intersection per year, in which zero means no effect.</p>"},"fepois":{"title":"The fixed effects Poisson specification","body":"<p>The panel holds every unit k, treated and comparison together, and every calendar\nmonth t. A unit effect absorbs the level at a corner and a calendar month effect absorbs\na citywide shock common to that month.</p>\n<div class=\"eqwrap\" id=\"eq-fepois\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi mathvariant='double-struck'>E</mi><mo>[</mo><msub><mi>Y</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>&#8739;</mo><mi>&#945;</mi><mo>,</mo><mi>&#947;</mi><mo>,</mo><mi>D</mi><mo>]</mo><mo>=</mo><mi>exp</mi><mo>(</mo><mrow><msub><mi>&#945;</mi><mi>k</mi></msub><mo>+</mo><msub><mi>&#947;</mi><mi>t</mi></msub><mo>+</mo><mi>&#946;</mi><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\mathbb{E}\\!\\left[Y_{kt} \\mid \\alpha,\\gamma,D\\right] \\;=\\; \\exp\\!\\left(\\alpha_k + \\gamma_t + \\beta\\, D_{kt}\\right)</div><div class=\"eqcap\">The fixed effects Poisson specification, with a unit effect and a calendar month effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\mathbb{E}\\!\\left[Y_{kt} \\mid \\alpha,\\gamma,D\\right] \\;=\\; \\exp\\!\\left(\\alpha_k + \\gamma_t + \\beta\\, D_{kt}\\right)</code></details></div>\n<div class=\"eqwrap\" id=\"eq-treatind\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>=</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>k</mi><mo>&#160;</mo><mi>treated</mi><mo>}</mo><mo>&#183;</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>t</mi><mo>&gt;</mo><msub><mi>t</mi><mrow><mi>i</mi><mo>(</mo><mi>k</mi><mo>)</mo></mrow></msub><mo>}</mo></mrow></math><div class=\"mathfall\">D_{kt} \\;=\\; \\mathbf{1}\\{k \\text{ treated}\\}\\cdot\\mathbf{1}\\{t &gt; t_{i(k)}\\}</div><div class=\"eqcap\">The treatment indicator, one after installation at a treated unit and zero everywhere else.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>D_{kt} \\;=\\; \\mathbf{1}\\{k \\text{ treated}\\}\\cdot\\mathbf{1}\\{t &gt; t_{i(k)}\\}</code></details></div>\n<p>The month at event time zero is excluded, because an installation month is partly\ntreated. Inference uses the CRV1 cluster robust variance estimator with standard errors\nclustered by match group, in which a match group is a treated unit together with its own\ncomparison locations. The reported quantity is a rate ratio.</p>\n<div class=\"eqwrap\" id=\"eq-irr\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>IRR</mi><mo>=</mo><mi>exp</mi><mo>(</mo><mover><mi>&#946;</mi><mo>&#94;</mo></mover><mo>)</mo></mrow></math><div class=\"mathfall\">\\text{IRR} \\;=\\; \\exp(\\hat\\beta)</div><div class=\"eqcap\">The quantity reported from that specification, a rate ratio in which one means no effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{IRR} \\;=\\; \\exp(\\hat\\beta)</code></details></div>\n<p>Because the specification weights a unit by its expected count, high exposure corners\ndominate the estimate, and the quantity is the proportional change in the total count.\nThe published estimator gives the change at the mean corner instead, so the two answer\ndifferent questions and their magnitudes are not comparable.</p>"},"bh":{"title":"Adjustment for multiple subsets","body":"<p>Each outcome is estimated over m subsets, so a nominal p value does not control the\nfalse positive rate across the family. Benjamini and Hochberg adjustment is applied\nwithin each outcome, over the subsets, after sorting the p values in ascending order.</p>\n<div class=\"eqwrap\" id=\"eq-bh\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><msup><mi>p</mi><mi>BH</mi></msup><mo>(</mo><mi>k</mi><mo>)</mo></msub><mo>=</mo><munder><mi>min</mi><mrow><mi>j</mi><mo>&#8805;</mo><mi>k</mi></mrow></munder><mi>min</mi><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mfrac><mrow><mi>m</mi><msub><mi>p</mi><mo>(</mo><mi>j</mi><mo>)</mo></msub></mrow><mi>j</mi></mfrac></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">p^{\\text{BH}}_{(k)} \\;=\\; \\min_{j \\ge k}\\; \\min\\!\\left(1,\\; \\frac{m\\, p_{(j)}}{j}\\right)</div><div class=\"eqcap\">Benjamini and Hochberg adjustment within one outcome over m subsets.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>p^{\\text{BH}}_{(k)} \\;=\\; \\min_{j \\ge k}\\; \\min\\!\\left(1,\\; \\frac{m\\, p_{(j)}}{j}\\right)</code></details></div>\n<p>A cell is read only when the adjusted p value falls below 0.05, when the placebo is\nconsistent with no effect, and when at least 25 treated units contribute.</p>"},"mde":{"title":"The smallest detectable effect","body":"<p>A null is uninformative without the size of the effect the cell could have found. The\nminimum detectable effect at 80 per cent power follows from the standard error of the log\nrate ratio.</p>\n<div class=\"eqwrap\" id=\"eq-mde\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>MDE</mi><mo>=</mo><mn>100</mn><mo>(</mo><mrow><mn>1</mn><mo>&#8722;</mo><msup><mi>e</mi><mrow><mo>&#8722;</mo><mn>2.802</mn><mover><mi>se</mi><mo>&#94;</mo></mover></mrow></msup></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\text{MDE} \\;=\\; 100\\left(1 - e^{-2.802\\,\\widehat{\\text{se}}}\\right)</div><div class=\"eqcap\">The smallest effect the cell could detect at 80 per cent power, as a percentage.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{MDE} \\;=\\; 100\\left(1 - e^{-2.802\\,\\widehat{\\text{se}}}\\right)</code></details></div>\n<p>A null with a bound of 6 per cent excludes a moderate benefit. A null with a bound of\n60 per cent excludes almost nothing.</p>"},"aggratio":{"title":"The live estimate for a selection","body":"<p>A browser cannot fit a fixed effects Poisson specification, so a selection is\nestimated by the published arithmetic estimator, which is an exact computation from the per site\nsums the page carries.</p>\n<div class=\"eqwrap\" id=\"eq-arith\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</div><div class=\"eqcap\">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</code></details></div>\n<p>A descriptive aggregate rate ratio is shown beside it.</p>\n<div class=\"eqwrap\" id=\"eq-aggratio\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>RR</mi><mi>agg</mi></msub><mo>=</mo><mfrac><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>before</mi></msup><mi>i</mi></msub></mrow><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>before</mi></msup><mi>i</mi></msub></mrow></mfrac></mrow></math><div class=\"mathfall\">\\text{RR}_{\\text{agg}} \\;=\\; \\frac{\\sum_i T^{\\text{after}}_i \\big/ \\sum_i T^{\\text{before}}_i}{\\sum_i C^{\\text{after}}_i \\big/ \\sum_i C^{\\text{before}}_i}</div><div class=\"eqcap\">The descriptive aggregate rate ratio a browser can compute for any selection, carrying no unit effect and no calendar month effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{RR}_{\\text{agg}} \\;=\\; \\frac{\\sum_i T^{\\text{after}}_i \\big/ \\sum_i T^{\\text{before}}_i}{\\sum_i C^{\\text{after}}_i \\big/ \\sum_i C^{\\text{before}}_i}</code></details></div>\n<p>That ratio carries no unit effect, no calendar month effect and no cluster robust\nvariance, so it is not the modelled quantity the manuscript reports and it can disagree\nin sign with it. For hardened daylighting at a junction the aggregate ratio is about 0.72\nand the modelled estimate is about 1.15.</p>\n<p>Comparison intersections were matched once over the union of treated units, because a\nbrowser cannot rematch for an arbitrary selection, so a selection that coincides with a\npublished subset differs slightly from the published estimate for it.</p>"},"drift":{"title":"The pre treatment drift and the admission rule","body":"<p>The crash record at treated sites falls before installation, at 0.464 per cent per\nmonth at physical sites. Compounded over the 24 months of an after period, that drift\nalone produces a factor.</p>\n<div class=\"eqwrap\" id=\"eq-drift\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>trend</mi><mn>24</mn></msub><mo>=</mo><msup><mo>(</mo><mrow><mn>1</mn><mo>+</mo><mi>&#948;</mi></mrow><mo>)</mo><mn>24</mn></msup><mo>,</mo><mo>&#160;</mo><mi>share</mi><mo>=</mo><mfrac><mrow><mi>log</mi><msub><mi>trend</mi><mn>24</mn></msub></mrow><mrow><mi>log</mi><mover><mi>&#952;</mi><mo>&#94;</mo></mover></mrow></mfrac></mrow></math><div class=\"mathfall\">\\text{trend}_{24} = (1+\\delta)^{24}, \\qquad \\text{share} = \\frac{\\log \\text{trend}_{24}}{\\log \\hat\\theta}</div><div class=\"eqcap\">The compounded pre treatment drift, and the share of an estimate it accounts for.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{trend}_{24} = (1+\\delta)^{24}, \\qquad \\text{share} = \\frac{\\log \\text{trend}_{24}}{\\log \\hat\\theta}</code></details></div>\n<p>A cell is refused when the drift accounts for 60 per cent or more of the estimate, and\nwhen the placebo rejects no effect, and it is marked underpowered when the smallest\ndetectable effect exceeds 25 per cent.</p>"},"scales":{"title":"Two scales, never comparable in magnitude","body":"<p>The published specification and its extension to the full record report a difference in\ncounts per intersection per year, in which zero means no effect and a negative value\nmeans fewer crashes. The falsification tested specification reports a rate ratio, in\nwhich one means no effect and a value below one means fewer crashes.</p>\n<p>A value of 0.9 on the ratio scale and a value of minus 0.14 on the difference scale\ncannot be compared, ordered or averaged together. Each column group on this page carries\nits own scale in its header for that reason.</p>"},"cohorts":{"title":"The two published location lists","body":"<p>The city has published two location lists, a document covering January to August 2024\nand a spreadsheet covering 2025. Each is a cohort of locations rather than a treatment\ntype. The 2025 list holds sign only daylighting at 278 locations, e scooter corrals at\n190, street improvement projects at 141, turn calming outside a street improvement project\nat 88, bicycle corrals at 25, bikeshare at 5 and a direction change at 1.</p>\n<p>The 2024 list publishes no treatment type for any of its 271 records, so the class\nshown for a 2024 record is recovered from the inventory at the same corner. Tested against\nthe 2025 list, where the type is published, that recovery reproduces turn calming exactly\nand sign only daylighting on 80.6 per cent of records, and it fails on street improvement\nprojects at 7.1 per cent.</p>\n<p>The two lists are almost disjoint: 13 of the 271 records of the 2024 list lie within 50\nm of a 2025 record.</p>"},"turncalming":{"title":"Turn calming is eleven treatments","body":"<p>The inventory publishes eleven classes of turn calming, which differ in mechanism: a\nplastic curb line, a raised centre line, a lengthened median, a channelising island, a\nrubber bump, vertical posts of two kinds, a surface treatment, paint alone, and two\nclasses that record only the direction of the turn.</p>\n<p>Those last two classes carry the material string generic turn treatment and account for\n907 of 1491 records, which is 61 per cent. For most of the programme the city records that\na turn was treated and does not record what was installed. Any turn calming result is an\nestimate for that mixture.</p>"},"censoring":{"title":"Right censoring of recent work","body":"<p>An after period of a stated length can only be filled where that many months of crash\nrecord exist after an installation. The crash record ends 2026-05, so an installation in\n2025 cannot support 24 months of follow up.</p>\n<p>Each subset therefore receives the longest after period its own records can fill, and\nthat value is reported in every row. The 2025 published list supports 12 months and\nretains 173 of its 728 records. The 2024 list supports 24 months and retains all 271,\nwhile carrying a single imputed installation month for every one of them, so that design\ncannot separate the treatment from a citywide shock in that month except through the\ncomparison group.</p>"},"precleared":{"title":"Curb that was already clear","body":"<p>New York State law prohibits parking within 15 feet of a fire hydrant, and a bus stop\nis a no standing zone as long as a bus, so a corner carrying either was already daylighted\nin part before the programme reached it. At the working radius of 12 m, 20.5 per cent of\ndaylighted corners at a junction were already clear, against 16.6 per cent of\nintersections carrying no device.</p>\n<p>The observation belongs to the agency rather than to this study. Its January 2025 report\ncontains a hydrant zone analysis, defines a hydrant zone as hydrants and bus stops, and\nreports a 30 per cent higher normalised injury rate at 7558 such intersections. That\nanalysis compares intersections that have a hydrant zone against those that do not, so it\ncannot separate cleared curb from whatever caused a hydrant to be sited there. The test in\nthis study compares treated corners against other treated corners.</p>"},"provenance":{"title":"Provenance of the published analyses","body":"<p>No published analysis of daylighting carries a comparison group, a significance test\nand published locations at the same time. The January 2025 report has a comparison group\nand a significance test and publishes no locations. The Safety Treatment Evaluation it\nrelies on has neither a comparison group nor a significance test. The four case study\ncities in the report have published nothing.</p>\n<p>The analysis reproduced here is an agency report with no journal article and no\npreprint. Its comparison rule is given in one sentence, and resolving it into something\nimplementable required settling eight separate ambiguities. No attribution radius is\nstated, no confidence interval accompanies any estimate, and neither code nor data is\nreleased.</p>\n<p>The 756 analysed locations are not published, so the cohort reproduced here is rebuilt\nfrom other inventories: 98 hardened units against their 189, holding different objects.\nTheirs is 134 Citi Bike stations, 3 bicycle corrals, 33 turn calming projects, 14\nneckdowns and 5 enhanced crossings. Ours is 84 e scooter corrals, 15 rubber speed bumps\nand 4 bicycle islands. The reproduction shows that the published values are what the\npublished specification produces, and it does not show that the published locations were\nanalysed again.</p>"},"selection":{"title":"How sites are chosen","body":"<p>The city designates 304 Vision Zero priority intersections, being the intersections\nthat cumulatively account for 15 per cent of a borough's pedestrian killed or seriously\ninjured total. Treated corners are far more likely to be one than an intersection carrying\nno device: signage only at 3.6 times the rate of the comparison pool, hardened at 5.8\ntimes, and turn calming at 20.2 times.</p>\n<p>Co treatment is larger still. 65.5 per cent of hardened daylighting corners lie within\n40 m of a street improvement project corridor, against 20.7 per cent of the comparison\npool, and 76.8 per cent of turn calming corners lie on a retimed corridor against 19.7 per\ncent.</p>\n<p>A comparison group balanced on crash history and geometry is unbalanced on both of\nthese.</p>"},"designs":{"title":"The two designs, and which analysis uses which","body":"<p>Two designs appear throughout these pages, and each one is a pair of a comparison\ngroup and an estimator.</p>\n<p><b>The corridor DiD design</b> is the city's: the comparison group is up to three\nintersections carrying no daylighting along each street of the treated intersection\nwithin one mile, and the estimator is the unweighted mean of per unit changes in an\nannual rate, tested with a one sample t test. Specification 1, the published analysis,\nand specification 2, the same analysis on the extended record, both use it. Its\nestimate is a difference, so zero means no effect.</p>\n<p><b>The matched Poisson design</b> is this study's: the comparison group is three\nintersections per treated unit chosen by Mahalanobis matching on borough, geometry and\ntwo blocks of pre treatment crash history with the final pre year withheld, and the\nestimator is fixed effects Poisson with unit and calendar month effects, clustered on\nthe match group. Specification 3 uses it. Its estimate is a rate ratio, so one means no\neffect.</p>\n<p>Neither is the better instrument in general. Calibration on this crash record shows\neach attains roughly the nominal false positive rate in one regime of site selection\nand rejects far too often in the other, and each design's bias runs in the direction of\nthe estimate it reports: the corridor group produces false reductions on 34 to 88 per\ncent of null draws under selection on a transient increase, and the matched group\nproduces false increases on 78 per cent of null draws under selection on a persistent\nlevel. Across 40 subsets and 6 outcomes the two agree on direction in 118 of 233\nestimable cells, which is chance; the corridor DiD design returns 76 significant\nreductions, the matched Poisson design returns 0 significant reductions, and no cell is\ncalled a significant reduction by both.</p>"}};</script>
+<script>window.HELPTEXT = {"placebo":{"title":"The placebo test","body":"<p>The estimate is recomputed with one change: the installation date of every treated\nsite is moved back in time, far enough that the whole analysis window falls in months\nbefore anything was built. The corners, the comparison locations, the estimator and the\noutcome all stay as they were. Because no treatment exists anywhere in that window, the\nhonest answer is no effect.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_shift\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>s</mi><mo>=</mo><mi>max</mi><mo>(</mo><mrow><mi>pre</mi><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">s \\;=\\; \\max\\!\\left(\\text{pre},\\; \\text{post}+1\\right)</div><div class=\"eqcap\">The placebo displacement, chosen so the placebo window ends before installation.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>s \\;=\\; \\max\\!\\left(\\text{pre},\\; \\text{post}+1\\right)</code></details></div>\n<p>Moving the date back only by the length of the before period is not sufficient. Under\na before period of 24 months and an after period of 24 months, that displacement puts\nthe final month of the placebo window on the installation month itself, which is partly\ntreated. Taking the larger of the before period and one month more than the after period\nends the placebo window at month minus one, so every month of it lies strictly before\ninstallation.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_window\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mo>[</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>]</mo><mo>&#160;</mo><mo>&#160;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi><mo>+</mo><mi>post</mi><mo>&#8804;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mn>1</mn></mrow></math><div class=\"mathfall\">\\left[\\,t_i - s - \\text{pre},\\;\\; t_i - s + \\text{post}\\,\\right], \\qquad t_i - s + \\text{post} \\;\\le\\; t_i - 1</div><div class=\"eqcap\">The placebo window, every month of it before the installation month.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\left[\\,t_i - s - \\text{pre},\\;\\; t_i - s + \\text{post}\\,\\right], \\qquad t_i - s + \\text{post} \\;\\le\\; t_i - 1</code></details></div>\n<p>A cell is read only when the placebo is consistent with no effect.</p>\n<div class=\"eqwrap\" id=\"eq-placebo_test\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msup><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mi>plac</mi></msup><mo>=</mo><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>(</mo><mrow><msub><mi>t</mi><mi>i</mi></msub><mo>&#8594;</mo><msub><mi>t</mi><mi>i</mi></msub><mo>&#8722;</mo><mi>s</mi></mrow><mo>)</mo><mo>,</mo><mo>&#160;</mo><msup><mi>p</mi><mi>plac</mi></msup><mo>&#8805;</mo><mn>0.05</mn></mrow></math><div class=\"mathfall\">\\hat\\theta^{\\text{plac}} \\;=\\; \\hat\\theta\\big(t_i \\to t_i - s\\big), \\qquad \\text{admit the cell only if } p^{\\text{plac}} \\ge 0.05</div><div class=\"eqcap\">The placebo estimate and the condition a cell must satisfy to be read.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta^{\\text{plac}} \\;=\\; \\hat\\theta\\big(t_i \\to t_i - s\\big), \\qquad \\text{admit the cell only if } p^{\\text{plac}} \\ge 0.05</code></details></div>\n<p>Because a decrease can appear in a window that contains no treatment, a decrease in\nthe real window with a failing placebo is reliably present and reliably not caused by the\ninstallation. The p value answers whether a result could have arisen by chance. The\nplacebo answers whether the specification produces that result without a treatment, and\nthose are different questions.</p>"},"why_flagged":{"title":"Why a significant decrease can still be flagged","body":"<p>Suppose a cell returns a decrease at p below 0.01, and the placebo on months\ncontaining no treatment also returns a decrease of similar size. Both cannot be caused by\nthe treatment, because in the placebo window there was no treatment. So the\nspecification produces decreases at these corners whether or not anything is installed,\nand the decrease in the real window cannot be attributed to the installation.</p>\n<p>The city selects sites on a deteriorating crash record, and it selects them on its own\npublished risk criterion: treated corners are 3.6 to 20.2 times more likely to be a\ndesignated Vision Zero priority intersection than an intersection carrying no device. A\ncorner chosen because its count is high tends to fall afterwards whether or not it is\ntreated, which is regression to the mean, and a before and after comparison attributes\nthat fall to whatever was installed.</p>\n<p>A flagged cell is evidence of no effect and it is evidence of an effect in neither\ndirection. It is a cell in which the design cannot separate the treatment from the reason\nthe site was chosen.</p>"},"arith":{"title":"The published estimator","body":"<p>For a site i with installation month t_i, Y_i(a,b) counts the outcome inside 30 m of\ni over the months from t_i plus a up to t_i plus b, and R_i(a,b) expresses that count as\nan annual rate.</p>\n<div class=\"eqwrap\" id=\"eq-rate\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo><mo>=</mo><mfrac><mrow><mn>12</mn><msub><mi>Y</mi><mi>i</mi></msub><mo>(</mo><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><mo>)</mo></mrow><mrow><mi>b</mi><mo>&#8722;</mo><mi>a</mi></mrow></mfrac></mrow></math><div class=\"mathfall\">R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</div><div class=\"eqcap\">The outcome at one site, as an annual rate over a window of months.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>R_i(a,b) \\;=\\; \\frac{12\\, Y_i(a,b)}{b-a}</code></details></div>\n<div class=\"eqwrap\" id=\"eq-delta\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>=</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mi>post</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo><mo>&#8722;</mo><msub><mi>R</mi><mi>i</mi></msub><mo>(</mo><mrow><mo>&#8722;</mo><mi>pre</mi><mo>,</mo><mn>0</mn></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</div><div class=\"eqcap\">The change at one site, after minus before.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\Delta_i \\;=\\; R_i(1,\\;\\text{post}+1) \\;-\\; R_i(-\\text{pre},\\;0)</code></details></div>\n<p>The estimate is the unweighted mean over treated sites of the change at the site minus\nthe mean change at that site's own comparison locations, tested against zero.</p>\n<div class=\"eqwrap\" id=\"eq-arith\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</div><div class=\"eqcap\">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</code></details></div>\n<div class=\"eqwrap\" id=\"eq-ttest\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>t</mi><mo>=</mo><mfrac><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mrow><msub><mi>s</mi><mi>d</mi></msub><mo>/</mo><msqrt><mi>n</mi></msqrt></mrow></mfrac></mrow></math><div class=\"mathfall\">t \\;=\\; \\frac{\\hat\\theta}{s_d/\\sqrt{n}}</div><div class=\"eqcap\">The test the published estimator uses, a two sided one sample t test on n minus 1 degrees of freedom.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>t \\;=\\; \\frac{\\hat\\theta}{s_d/\\sqrt{n}}</code></details></div>\n<p>Every treated site enters with weight one over n whatever its crash count, so the\nquantity estimated is the change at the mean treated corner. The scale is a difference in\ncounts per intersection per year, in which zero means no effect.</p>"},"fepois":{"title":"The fixed effects Poisson specification","body":"<p>The panel holds every unit k, treated and comparison together, and every calendar\nmonth t. A unit effect absorbs the level at a corner and a calendar month effect absorbs\na citywide shock common to that month.</p>\n<div class=\"eqwrap\" id=\"eq-fepois\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi mathvariant='double-struck'>E</mi><mo>[</mo><msub><mi>Y</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>&#8739;</mo><mi>&#945;</mi><mo>,</mo><mi>&#947;</mi><mo>,</mo><mi>D</mi><mo>]</mo><mo>=</mo><mi>exp</mi><mo>(</mo><mrow><msub><mi>&#945;</mi><mi>k</mi></msub><mo>+</mo><msub><mi>&#947;</mi><mi>t</mi></msub><mo>+</mo><mi>&#946;</mi><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\mathbb{E}\\!\\left[Y_{kt} \\mid \\alpha,\\gamma,D\\right] \\;=\\; \\exp\\!\\left(\\alpha_k + \\gamma_t + \\beta\\, D_{kt}\\right)</div><div class=\"eqcap\">The fixed effects Poisson specification, with a unit effect and a calendar month effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\mathbb{E}\\!\\left[Y_{kt} \\mid \\alpha,\\gamma,D\\right] \\;=\\; \\exp\\!\\left(\\alpha_k + \\gamma_t + \\beta\\, D_{kt}\\right)</code></details></div>\n<div class=\"eqwrap\" id=\"eq-treatind\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>D</mi><mrow><mi>k</mi><mi>t</mi></mrow></msub><mo>=</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>k</mi><mo>&#160;</mo><mi>treated</mi><mo>}</mo><mo>&#183;</mo><mn mathvariant='bold'>1</mn><mo>{</mo><mi>t</mi><mo>&gt;</mo><msub><mi>t</mi><mrow><mi>i</mi><mo>(</mo><mi>k</mi><mo>)</mo></mrow></msub><mo>}</mo></mrow></math><div class=\"mathfall\">D_{kt} \\;=\\; \\mathbf{1}\\{k \\text{ treated}\\}\\cdot\\mathbf{1}\\{t &gt; t_{i(k)}\\}</div><div class=\"eqcap\">The treatment indicator, one after installation at a treated unit and zero everywhere else.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>D_{kt} \\;=\\; \\mathbf{1}\\{k \\text{ treated}\\}\\cdot\\mathbf{1}\\{t &gt; t_{i(k)}\\}</code></details></div>\n<p>The month at event time zero is excluded, because an installation month is partly\ntreated. Inference uses the CRV1 cluster robust variance estimator with standard errors\nclustered by match group, in which a match group is a treated unit together with its own\ncomparison locations. The reported quantity is a rate ratio.</p>\n<div class=\"eqwrap\" id=\"eq-irr\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>IRR</mi><mo>=</mo><mi>exp</mi><mo>(</mo><mover><mi>&#946;</mi><mo>&#94;</mo></mover><mo>)</mo></mrow></math><div class=\"mathfall\">\\text{IRR} \\;=\\; \\exp(\\hat\\beta)</div><div class=\"eqcap\">The quantity reported from that specification, a rate ratio in which one means no effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{IRR} \\;=\\; \\exp(\\hat\\beta)</code></details></div>\n<p>Because the specification weights a unit by its expected count, high exposure corners\ndominate the estimate, and the quantity is the proportional change in the total count.\nThe published estimator gives the change at the mean corner instead, so the two answer\ndifferent questions and their magnitudes are not comparable.</p>"},"bh":{"title":"Adjustment for multiple subsets","body":"<p>Each outcome is estimated over m subsets, so a nominal p value does not control the\nfalse positive rate across the family. Benjamini and Hochberg adjustment is applied\nwithin each outcome, over the subsets, after sorting the p values in ascending order.</p>\n<div class=\"eqwrap\" id=\"eq-bh\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><msup><mi>p</mi><mi>BH</mi></msup><mo>(</mo><mi>k</mi><mo>)</mo></msub><mo>=</mo><munder><mi>min</mi><mrow><mi>j</mi><mo>&#8805;</mo><mi>k</mi></mrow></munder><mi>min</mi><mo>(</mo><mrow><mn>1</mn><mo>,</mo><mfrac><mrow><mi>m</mi><msub><mi>p</mi><mo>(</mo><mi>j</mi><mo>)</mo></msub></mrow><mi>j</mi></mfrac></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">p^{\\text{BH}}_{(k)} \\;=\\; \\min_{j \\ge k}\\; \\min\\!\\left(1,\\; \\frac{m\\, p_{(j)}}{j}\\right)</div><div class=\"eqcap\">Benjamini and Hochberg adjustment within one outcome over m subsets.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>p^{\\text{BH}}_{(k)} \\;=\\; \\min_{j \\ge k}\\; \\min\\!\\left(1,\\; \\frac{m\\, p_{(j)}}{j}\\right)</code></details></div>\n<p>A cell is read only when the adjusted p value falls below 0.05, when the placebo is\nconsistent with no effect, and when at least 25 treated units contribute.</p>"},"mde":{"title":"Minimum detectable effect (80 per cent power)","body":"<p>A null is uninformative without the size of the effect the cell could have found. The\nminimum detectable effect at 80 per cent power follows from the standard error of the log\nrate ratio.</p>\n<div class=\"eqwrap\" id=\"eq-mde\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mi>MDE</mi><mo>=</mo><mn>100</mn><mo>(</mo><mrow><mn>1</mn><mo>&#8722;</mo><msup><mi>e</mi><mrow><mo>&#8722;</mo><mn>2.802</mn><mover><mi>se</mi><mo>&#94;</mo></mover></mrow></msup></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\text{MDE} \\;=\\; 100\\left(1 - e^{-2.802\\,\\widehat{\\text{se}}}\\right)</div><div class=\"eqcap\">The smallest effect the cell could detect at 80 per cent power, as a percentage.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{MDE} \\;=\\; 100\\left(1 - e^{-2.802\\,\\widehat{\\text{se}}}\\right)</code></details></div>\n<p>A null with a bound of 6 per cent excludes a moderate benefit. A null with a bound of\n60 per cent excludes almost nothing.</p>"},"aggratio":{"title":"The live estimate for a selection","body":"<p>A browser cannot fit a fixed effects Poisson specification, so a selection is\nestimated by the published arithmetic estimator, which is an exact computation from the per site\nsums the page carries.</p>\n<div class=\"eqwrap\" id=\"eq-arith\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class=\"mathfall\">\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</div><div class=\"eqcap\">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\hat\\theta \\;=\\; \\frac{1}{n}\\sum_{i=1}^{n}\\left(\\Delta_i \\;-\\; \\frac{1}{|C_i|}\\sum_{j\\in C_i}\\Delta_j\\right)</code></details></div>\n<p>A descriptive aggregate rate ratio is shown beside it.</p>\n<div class=\"eqwrap\" id=\"eq-aggratio\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>RR</mi><mi>agg</mi></msub><mo>=</mo><mfrac><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>before</mi></msup><mi>i</mi></msub></mrow><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>before</mi></msup><mi>i</mi></msub></mrow></mfrac></mrow></math><div class=\"mathfall\">\\text{RR}_{\\text{agg}} \\;=\\; \\frac{\\sum_i T^{\\text{after}}_i \\big/ \\sum_i T^{\\text{before}}_i}{\\sum_i C^{\\text{after}}_i \\big/ \\sum_i C^{\\text{before}}_i}</div><div class=\"eqcap\">The descriptive aggregate rate ratio a browser can compute for any selection, carrying no unit effect and no calendar month effect.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{RR}_{\\text{agg}} \\;=\\; \\frac{\\sum_i T^{\\text{after}}_i \\big/ \\sum_i T^{\\text{before}}_i}{\\sum_i C^{\\text{after}}_i \\big/ \\sum_i C^{\\text{before}}_i}</code></details></div>\n<p>That ratio carries no unit effect, no calendar month effect and no cluster robust\nvariance, so it is not the modelled quantity the manuscript reports and it can disagree\nin sign with it. For hardened daylighting at a junction the aggregate ratio is about 0.72\nand the modelled estimate is about 1.15.</p>\n<p>Comparison intersections were matched once over the union of treated units, because a\nbrowser cannot rematch for an arbitrary selection, so a selection that coincides with a\npublished subset differs slightly from the published estimate for it.</p>"},"drift":{"title":"The pre treatment drift and the admission rule","body":"<p>The crash record at treated sites falls before installation, at 0.464 per cent per\nmonth at physical sites. Compounded over the 24 months of an after period, that drift\nalone produces a factor.</p>\n<div class=\"eqwrap\" id=\"eq-drift\"><math display=\"block\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>trend</mi><mn>24</mn></msub><mo>=</mo><msup><mo>(</mo><mrow><mn>1</mn><mo>+</mo><mi>&#948;</mi></mrow><mo>)</mo><mn>24</mn></msup><mo>,</mo><mo>&#160;</mo><mi>share</mi><mo>=</mo><mfrac><mrow><mi>log</mi><msub><mi>trend</mi><mn>24</mn></msub></mrow><mrow><mi>log</mi><mover><mi>&#952;</mi><mo>&#94;</mo></mover></mrow></mfrac></mrow></math><div class=\"mathfall\">\\text{trend}_{24} = (1+\\delta)^{24}, \\qquad \\text{share} = \\frac{\\log \\text{trend}_{24}}{\\log \\hat\\theta}</div><div class=\"eqcap\">The compounded pre treatment drift, and the share of an estimate it accounts for.</div><details class=\"eqsrc\"><summary>LaTeX source</summary><code>\\text{trend}_{24} = (1+\\delta)^{24}, \\qquad \\text{share} = \\frac{\\log \\text{trend}_{24}}{\\log \\hat\\theta}</code></details></div>\n<p>A cell is refused when the drift accounts for 60 per cent or more of the estimate, and\nwhen the placebo rejects no effect, and it is marked underpowered when the smallest\ndetectable effect exceeds 25 per cent.</p>"},"scales":{"title":"Two scales, never comparable in magnitude","body":"<p>The published specification and its extension to the full record report a difference in\ncounts per intersection per year, in which zero means no effect and a negative value\nmeans fewer crashes. The falsification tested specification reports a rate ratio, in\nwhich one means no effect and a value below one means fewer crashes.</p>\n<p>A value of 0.9 on the ratio scale and a value of minus 0.14 on the difference scale\ncannot be compared, ordered or averaged together. Each column group on this page carries\nits own scale in its header for that reason.</p>"},"cohorts":{"title":"The two published location lists","body":"<p>The city has published two location lists, a document covering January to August 2024\nand a spreadsheet covering 2025. Each is a cohort of locations rather than a treatment\ntype. The 2025 list holds sign only daylighting at 278 locations, e scooter corrals at\n190, street improvement projects at 141, turn calming outside a street improvement project\nat 88, bicycle corrals at 25, bikeshare at 5 and a direction change at 1.</p>\n<p>The 2024 list publishes no treatment type for any of its 271 records, so the class\nshown for a 2024 record is recovered from the inventory at the same corner. Tested against\nthe 2025 list, where the type is published, that recovery reproduces turn calming exactly\nand sign only daylighting on 80.6 per cent of records, and it fails on street improvement\nprojects at 7.1 per cent.</p>\n<p>The two lists are almost disjoint: 13 of the 271 records of the 2024 list lie within 50\nm of a 2025 record.</p>"},"turncalming":{"title":"Turn calming is eleven treatments","body":"<p>The inventory publishes eleven classes of turn calming, which differ in mechanism: a\nplastic curb line, a raised centre line, a lengthened median, a channelising island, a\nrubber bump, vertical posts of two kinds, a surface treatment, paint alone, and two\nclasses that record only the direction of the turn.</p>\n<p>Those last two classes carry the material string generic turn treatment and account for\n907 of 1491 records, which is 61 per cent. For most of the programme the city records that\na turn was treated and does not record what was installed. Any turn calming result is an\nestimate for that mixture.</p>"},"censoring":{"title":"Right censoring of recent work","body":"<p>An after period of a stated length can only be filled where that many months of crash\nrecord exist after an installation. The crash record ends 2026-05, so an installation in\n2025 cannot support 24 months of follow up.</p>\n<p>Each subset therefore receives the longest after period its own records can fill, and\nthat value is reported in every row. The 2025 published list supports 12 months and\nretains 173 of its 728 records. The 2024 list supports 24 months and retains all 271,\nwhile carrying a single imputed installation month for every one of them, so that design\ncannot separate the treatment from a citywide shock in that month except through the\ncomparison group.</p>"},"precleared":{"title":"Curb that was already clear","body":"<p>New York State law prohibits parking within 15 feet of a fire hydrant, and a bus stop\nis a no standing zone as long as a bus, so a corner carrying either was already daylighted\nin part before the programme reached it. At the working radius of 12 m, 20.5 per cent of\ndaylighted corners at a junction were already clear, against 16.6 per cent of\nintersections carrying no device.</p>\n<p>The observation belongs to the agency rather than to this study. Its January 2025 report\ncontains a hydrant zone analysis, defines a hydrant zone as hydrants and bus stops, and\nreports a 30 per cent higher normalised injury rate at 7558 such intersections. That\nanalysis compares intersections that have a hydrant zone against those that do not, so it\ncannot separate cleared curb from whatever caused a hydrant to be sited there. The test in\nthis study compares treated corners against other treated corners.</p>"},"provenance":{"title":"Provenance of the published analyses","body":"<p>No published analysis of daylighting carries a comparison group, a significance test\nand published locations at the same time. The January 2025 report has a comparison group\nand a significance test and publishes no locations. The Safety Treatment Evaluation it\nrelies on has neither a comparison group nor a significance test. The four case study\ncities in the report have published nothing.</p>\n<p>The analysis reproduced here is an agency report with no journal article and no\npreprint. Its comparison rule is given in one sentence, and resolving it into something\nimplementable required settling eight separate ambiguities. No attribution radius is\nstated, no confidence interval accompanies any estimate, and neither code nor data is\nreleased.</p>\n<p>The 756 analysed locations are not published, so the cohort reproduced here is rebuilt\nfrom other inventories: 98 hardened units against their 189, holding different objects.\nTheirs is 134 Citi Bike stations, 3 bicycle corrals, 33 turn calming projects, 14\nneckdowns and 5 enhanced crossings. Ours is 84 e scooter corrals, 15 rubber speed bumps\nand 4 bicycle islands. The reproduction shows that the published values are what the\npublished specification produces, and it does not show that the published locations were\nanalysed again.</p>"},"selection":{"title":"How sites are chosen","body":"<p>The city designates 304 Vision Zero priority intersections, being the intersections\nthat cumulatively account for 15 per cent of a borough's pedestrian killed or seriously\ninjured total. Treated corners are far more likely to be one than an intersection carrying\nno device: signage only at 3.6 times the rate of the comparison pool, hardened at 5.8\ntimes, and turn calming at 20.2 times.</p>\n<p>Co treatment is larger still. 65.5 per cent of hardened daylighting corners lie within\n40 m of a street improvement project corridor, against 20.7 per cent of the comparison\npool, and 76.8 per cent of turn calming corners lie on a retimed corridor against 19.7 per\ncent.</p>\n<p>A comparison group balanced on crash history and geometry is unbalanced on both of\nthese.</p>"},"tost":{"title":"Equivalence test on the placebo (TOST)","body":"<p>The placebo question is not whether the pre period difference is exactly zero,\nwhich a large sample always refuses, but whether it is inside a band too small to\nmatter. That is an equivalence question, and the standard procedure is Schuirmann's\ntwo one sided tests (TOST, Schuirmann 1987): with b the log placebo rate ratio, s its\nstandard error and delta = log(1.1) the bound, p<sub>TOST</sub> = max(1 &#8722;\n&#934;((b + delta)/s), &#934;((b &#8722; delta)/s)), and p<sub>TOST</sub> &lt; 0.05\ndeclares the placebo equivalent to no effect within 10 per cent each way.</p>\n<p>On the current estimates 11 of 235 placebos are equivalent at that bound. The\nsensitivity analysis of Rambachan and Roth (2023), which bounds the post period\nestimate by how far parallel trends may fail, is the natural next step and is listed\nin STATISTICAL_ASSESSMENT.md.</p>"},"bayes":{"title":"The hierarchical Bayesian reading","body":"<p>Per outcome, the log rate ratios are modelled as draws from a common normal\npopulation: b<sub>i</sub> given theta<sub>i</sub> is Normal(theta<sub>i</sub>,\ns<sub>i</sub><sup>2</sup>) and theta<sub>i</sub> is Normal(mu, tau<sup>2</sup>), with\ntau<sup>2</sup> by DerSimonian and Laird (1986). The posterior for each subset is\nnormal in closed form, and the table reports its median rate ratio, the 95 per cent\ncredible interval, and Pr(IRR &lt; 1), the posterior probability of a reduction.\nShrinkage answers the same multiplicity problem the Benjamini and Hochberg correction\nanswers, from the estimation side: forty noisy subsets borrow strength and extreme\ncells are pulled toward the family mean in proportion to their noise.</p>\n<p>Read it with one caveat: the model shrinks the raw estimates, so it inherits any\ndesign bias in them. Family means sit slightly above one on every outcome with many\nfailing placebos, which is the signature of comparison groups regressing to the mean\nrather than of treatments causing harm; the calibration measures that mechanism at 78\nper cent false increases under selection on a persistent level.</p>"},"designs":{"title":"The two designs, and which analysis uses which","body":"<p>Two designs appear throughout these pages, and each one is a pair of a comparison\ngroup and an estimator.</p>\n<p><b>The corridor DiD design</b> is the city's: the comparison group is up to three\nintersections carrying no daylighting along each street of the treated intersection\nwithin one mile, and the estimator is the unweighted mean of per unit changes in an\nannual rate, tested with a one sample t test. Specification 1, the published analysis,\nand specification 2, the same analysis on the extended record, both use it. Its\nestimate is a difference, so zero means no effect.</p>\n<p><b>The matched Poisson design</b> is this study's: the comparison group is three\nintersections per treated unit chosen by Mahalanobis matching on borough, geometry and\ntwo blocks of pre treatment crash history with the final pre year withheld, and the\nestimator is fixed effects Poisson with unit and calendar month effects, clustered on\nthe match group. Specification 3 uses it. Its estimate is a rate ratio, so one means no\neffect.</p>\n<p>Neither is the better instrument in general. Calibration on this crash record shows\neach attains roughly the nominal false positive rate in one regime of site selection\nand rejects far too often in the other, and each design's bias runs in the direction of\nthe estimate it reports: the corridor group produces false reductions on 34 to 88 per\ncent of null draws under selection on a transient increase, and the matched group\nproduces false increases on 78 per cent of null draws under selection on a persistent\nlevel. Across 44 subsets and 6 outcomes the two agree on direction in 135 of 257\nestimable cells; the corridor DiD design returns 87 significant reductions and\nthe matched Poisson design 12, and the 6 cells both call a reduction are all\nthe leading pedestrian interval positive control, which is the instrument test\nsucceeding. Among the daylighting and turn calming subsets themselves the\ncounts are 76, 0 and 0.</p>"}};</script>
 <script>/* ---------------------------------------------------- help popovers and math
    One popover element is reused by every control. Hovering opens it, clicking pins
    it so a reader can select the text inside, Escape and a click outside close it.
@@ -3080,13 +3323,20 @@ Object.assign(window.HELPTEXT, { lab: { title:
   "change in the annual rate at the corner minus the mean change at its " +
   "comparison locations, averaged and tested with a one sample t test, plus " +
   "the placebo with the installation displaced max(pre, post+1) months back. " +
-  "Fixed effects Poisson with clustered variance is not recomputed here.</p>" +
+  "The model selector also offers this paper's model itself: Poisson pseudo " +
+  "maximum likelihood with unit and calendar month fixed effects and CR1 cluster " +
+  "robust variance, fitted in the page on the matched comparison group and " +
+  "validated against pyfixest to 1e-11 (src/validate_ppml_js.py). The region " +
+  "control restricts the treated units to chosen boroughs or a bounding box " +
+  "before either estimator runs.</p>" +
   "<p>Comparison locations were assigned once over the union of treated " +
   "units, so a selection that coincides with a pipeline subset differs at the " +
   "margin from the table above.</p>" } });
 Object.assign(window.HELPTEXT, { placebo_switch: { title:
   "The placebo requirement switch",
-  body: "<p>On, which is the default, a cell whose placebo rejects no effect is " +
+  body: "<p>Off by default: the effect verdict is computed from multiplicity " +
+  "control and the unit floor alone, and the placebo is a chip beside it. On, a " +
+  "cell whose placebo rejects no effect is " +
   "excluded from reading, whatever its p value. Off, the placebo becomes a " +
   "warning tag and the reading keeps multiplicity control and the 25 unit floor " +
   "only.</p><p>The switch exists because a test that excludes 117 of 235 cells " +
@@ -3208,6 +3458,200 @@ Object.assign(window.HELPTEXT, {
     return s;
   }
 
+/* ------------------------------------------------------------------ PPML
+   Poisson pseudo maximum likelihood with unit and calendar month fixed effects,
+   one treatment regressor, and CR1 cluster robust variance on the match group.
+
+   The algorithm is iteratively reweighted least squares in which each weighted
+   least squares step absorbs the two fixed effects by alternating weighted
+   demeaning (the Frisch-Waugh step of Correia, Guimaraes and Zylkin's ppmlhdfe,
+   specialised to one regressor). With a single regressor the WLS solve is a
+   scalar division, so the whole fit is a few hundred vector passes and runs in
+   milliseconds on panels of this size.
+
+   Model:  E[y_it | a_i, g_t, D] = exp(a_i + g_t + beta * D_it)
+   Update: eta = offsetted linear predictor; mu = exp(eta); z = eta + (y-mu)/mu
+           demean z and D by weights mu over units and months alternately
+           beta = sum(mu * zt * Dt) / sum(mu * Dt * Dt)
+   CR1:    with Xt the demeaned regressor and e = y - mu,
+           bread = sum(mu * Xt^2); meat = sum over clusters of
+           (sum_{it in c} Xt_it * e_it)^2, times G/(G-1);
+           se = sqrt(meat) / bread.                                        */
+function ppmlFit(rows, opts) {
+  // rows: {y, unit, month, treat, cluster}; opts: {maxIter, tol}
+  var maxIter = (opts && opts.maxIter) || 60;
+  var tol = (opts && opts.tol) || 1e-9;
+  var n = rows.length;
+  var units = new Map(), months = new Map(), clusters = new Map();
+  var ui = new Int32Array(n), mi = new Int32Array(n), ci = new Int32Array(n);
+  var y = new Float64Array(n), Dv = new Float64Array(n);
+  for (var i = 0; i < n; i++) {
+    var r = rows[i];
+    if (!units.has(r.unit)) units.set(r.unit, units.size);
+    if (!months.has(r.month)) months.set(r.month, months.size);
+    if (!clusters.has(r.cluster)) clusters.set(r.cluster, clusters.size);
+    ui[i] = units.get(r.unit); mi[i] = months.get(r.month);
+    ci[i] = clusters.get(r.cluster);
+    y[i] = r.y; Dv[i] = r.treat;
+  }
+  var U = units.size, M = months.size, G = clusters.size;
+
+  // a unit whose outcome is all zero is perfectly predicted by its own fixed
+  // effect at minus infinity and contributes nothing; drop such units, and
+  // likewise all zero months (the separation handling of ppmlhdfe, minimal form)
+  var uSum = new Float64Array(U), mSum = new Float64Array(M);
+  for (i = 0; i < n; i++) { uSum[ui[i]] += y[i]; mSum[mi[i]] += y[i]; }
+  var keep = new Uint8Array(n), nk = 0;
+  for (i = 0; i < n; i++) {
+    keep[i] = (uSum[ui[i]] > 0 && mSum[mi[i]] > 0) ? 1 : 0;
+    nk += keep[i];
+  }
+  if (nk < n) {
+    var rows2 = [];
+    for (i = 0; i < n; i++) if (keep[i]) rows2.push(rows[i]);
+    if (!rows2.length) return null;
+    return ppmlFit(rows2, opts);
+  }
+
+  var eta = new Float64Array(n);
+  var ybar = 0; for (i = 0; i < n; i++) ybar += y[i];
+  ybar /= n;
+  var eta0 = Math.log(Math.max(ybar, 1e-8));
+  for (i = 0; i < n; i++) eta[i] = eta0;
+  var beta = 0, mu = new Float64Array(n);
+  var z = new Float64Array(n), Dt = new Float64Array(n);
+  var wu = new Float64Array(U), wm = new Float64Array(M);
+  var su = new Float64Array(U), sm = new Float64Array(M);
+
+  function demean(v, w) {
+    // alternating weighted projection onto the two fixed effect spaces
+    for (var pass = 0; pass < 80; pass++) {
+      su.fill(0); wu.fill(0);
+      for (var i = 0; i < n; i++) { su[ui[i]] += w[i] * v[i]; wu[ui[i]] += w[i]; }
+      for (i = 0; i < U; i++) su[i] = wu[i] > 0 ? su[i] / wu[i] : 0;
+      var change = 0;
+      for (i = 0; i < n; i++) { v[i] -= su[ui[i]]; }
+      sm.fill(0); wm.fill(0);
+      for (i = 0; i < n; i++) { sm[mi[i]] += w[i] * v[i]; wm[mi[i]] += w[i]; }
+      for (i = 0; i < M; i++) sm[i] = wm[i] > 0 ? sm[i] / wm[i] : 0;
+      for (i = 0; i < n; i++) {
+        v[i] -= sm[mi[i]];
+        change += Math.abs(sm[mi[i]]) + Math.abs(su[ui[i]]);
+      }
+      if (change / n < 1e-12) break;
+    }
+  }
+
+  var ll0 = -Infinity;
+  for (var it = 0; it < maxIter; it++) {
+    var ll = 0;
+    for (i = 0; i < n; i++) {
+      mu[i] = Math.exp(eta[i]);
+      if (mu[i] < 1e-12) mu[i] = 1e-12;
+      ll += y[i] * eta[i] - mu[i];
+      z[i] = eta[i] + (y[i] - mu[i]) / mu[i];
+      Dt[i] = Dv[i];
+    }
+    var zt = z.slice();
+    demean(zt, mu);
+    demean(Dt, mu);
+    var num = 0, den = 0;
+    for (i = 0; i < n; i++) { num += mu[i] * zt[i] * Dt[i]; den += mu[i] * Dt[i] * Dt[i]; }
+    if (den <= 0) return null;
+    var betaNew = num / den;
+    // the fixed effects update rides along: eta = z - (zt - Dt*beta), i.e. the
+    // projected part of z plus the regressor's contribution
+    for (i = 0; i < n; i++) eta[i] = z[i] - zt[i] + Dt[i] * betaNew;
+    if (Math.abs(ll - ll0) < tol * (Math.abs(ll0) + 1) && it > 2) {
+      beta = betaNew; break;
+    }
+    ll0 = ll; beta = betaNew;
+  }
+
+  // CR1 cluster robust variance on the final weights
+  for (i = 0; i < n; i++) { mu[i] = Math.exp(eta[i]); Dt[i] = Dv[i]; }
+  demean(Dt, mu);
+  var bread = 0;
+  var cs = new Float64Array(G);
+  for (i = 0; i < n; i++) {
+    bread += mu[i] * Dt[i] * Dt[i];
+    cs[ci[i]] += Dt[i] * (y[i] - mu[i]);
+  }
+  var meat = 0;
+  for (i = 0; i < G; i++) meat += cs[i] * cs[i];
+  meat *= G / Math.max(1, G - 1);
+  if (bread <= 0) return null;
+  var se = Math.sqrt(meat) / bread;
+  var zstat = se > 0 ? beta / se : 0;
+  var p = 2 * (1 - normCdf(Math.abs(zstat)));
+  return { beta: beta, irr: Math.exp(beta), se: se,
+           lo: Math.exp(beta - 1.959964 * se), hi: Math.exp(beta + 1.959964 * se),
+           p: p, n_obs: n, n_units: U, n_months: M, n_clusters: G };
+}
+
+function normCdf(x) {
+  // Abramowitz and Stegun 7.1.26, adequate at the 1e-7 level used here
+  var t = 1 / (1 + 0.2316419 * Math.abs(x));
+  var d = 0.3989422804014327 * Math.exp(-x * x / 2);
+  var p = d * t * (0.319381530 + t * (-0.356563782 + t * (1.781477937
+          + t * (-1.821255978 + t * 1.330274429))));
+  return x > 0 ? 1 - p : p;
+}
+
+/* ------------------------------------------------- the PPML runner for the lab */
+function labRegionFilter(units) {
+  var sel = Array.prototype.slice.call(
+    document.getElementById("lab-region").selectedOptions || []).map(function (o) {
+      return o.value; });
+  var bb = (document.getElementById("lab-bbox").value || "").trim();
+  var box = null;
+  if (bb) {
+    var q = bb.split(",").map(Number);
+    if (q.length === 4 && q.every(isFinite)) box = q;
+  }
+  return units.filter(function (u) {
+    if (sel.length && sel.indexOf(u.b) < 0) return false;
+    if (box && !(u.lon >= box[0] && u.lat >= box[1]
+                 && u.lon <= box[2] && u.lat <= box[3])) return false;
+    return true;
+  });
+}
+
+function labPpml(units, out, pre, post, a, b, shift) {
+  var lo = M.month_zero;
+  var recEnd = LAB_REC_END - lo;
+  var rows = [], used = 0, censored = 0, noctrl = 0;
+  for (var i = 0; i < units.length; i++) {
+    var u = units[i];
+    var t0 = u.t0 - lo - shift;
+    if (u.t0 - lo < a || u.t0 - lo > b) continue;
+    if (t0 - pre < 0 || t0 + post > recEnd) { censored++; continue; }
+    var d = u.d[out];
+    if (!d || !d.mc || !d.mc.length) { noctrl++; continue; }
+    used++;
+    var series = [["T", d.t]].concat(d.mc.map(function (mc, k) {
+      return ["C" + k, mc]; }));
+    for (var s = 0; s < series.length; s++) {
+      var tag = series[s][0], smap = {};
+      var sp = series[s][1];
+      for (var q = 0; q < sp.length; q += 2) smap[sp[q]] = sp[q + 1];
+      for (var rel = -pre; rel <= post; rel++) {
+        if (rel === 0) continue;
+        var m = t0 + rel;
+        if (m < 0) continue;
+        rows.push({ y: smap[m] || 0, unit: u.u + ":" + tag, month: m,
+                    treat: (tag === "T" && rel >= 1) ? 1 : 0, cluster: u.u });
+      }
+    }
+  }
+  if (used < 3) return { n: used, censored: censored, noctrl: noctrl };
+  var f = ppmlFit(rows, {});
+  if (!f) return { n: used, censored: censored, noctrl: noctrl };
+  f.n = used; f.censored = censored; f.noctrl = noctrl;
+  return f;
+}
+/* end ppml engine */
+
   function estimate(units, out, rule, pre, post, a, b, shift) {
     var lo = M.month_zero;
     var recEnd = LAB_REC_END - lo;             // record end as an index
@@ -3268,34 +3712,65 @@ Object.assign(window.HELPTEXT, {
     if (!av || !bv) { body.innerHTML = "<p class='rule'>choose both months</p>"; return; }
     var lo = M.month_zero;
     var a = ymIndex(av) - lo, b = ymIndex(bv) - lo;
-    var units = selectedUnits();
+    var units = labRegionFilter(selectedUnits());
     var shift = Math.max(pre, post + 1);
-    var main = estimate(units, out, rule, pre, post, a, b, 0);
-    var plac = estimate(units, out, rule, pre, post, a, b, shift);
+    var model = document.getElementById("lab-model").value;
+    if (model === "ppml" && rule !== "m") {
+      body.innerHTML = "<p class='rule'>The PPML model needs each comparison "
+        + "intersection as its own panel unit, and only the matched comparison "
+        + "group ships those series. Choose the matched comparison group, or "
+        + "the mean difference model for the corridor group.</p>";
+      return;
+    }
+    var main = model === "ppml"
+      ? labPpml(units, out, pre, post, a, b, 0)
+      : estimate(units, out, rule, pre, post, a, b, 0);
+    var plac = model === "ppml"
+      ? labPpml(units, out, pre, post, a, b, shift)
+      : estimate(units, out, rule, pre, post, a, b, shift);
     var nm = rule === "c" ? "corridor DiD comparison group"
                           : "matched comparison group";
+    var isP = model === "ppml";
+    var fm = function (x) { return x == null ? "n.a." : (isP ? x.toFixed(3) : fmt(x)); };
     var h = "";
-    h += "<table><thead><tr><th></th><th>estimate</th><th>95% interval</th>"
+    if (isP) {
+      h += "<p class='rule'>Poisson pseudo maximum likelihood, unit and calendar "
+         + "month fixed effects, CR1 cluster robust on the match group; the "
+         + "estimate is an incidence rate ratio, 1 means no effect. Engine "
+         + "validated against pyfixest to 1e-11 on this repository's panels "
+         + "(src/validate_ppml_js.py).</p>";
+    }
+    h += "<table><thead><tr><th></th><th>" + (isP ? "IRR" : "estimate")
+       + "</th><th>95% interval</th>"
        + "<th>two sided p</th><th>units</th></tr></thead><tbody>";
-    if (main.est == null) {
+    if ((isP ? main.irr : main.est) == null) {
       h += "<tr><td>estimate</td><td colspan='4'>" + main.n
          + " units admitted; too few to estimate. " + main.censored
          + " set aside because the window does not exist in the record.</td></tr>";
     } else {
-      h += "<tr><td>estimate</td><td>" + fmt(main.est) + "</td><td>["
-         + fmt(main.lo95) + ", " + fmt(main.hi95) + "]</td><td>" + fmt(main.p, 4)
+      var mv = isP ? main.irr : main.est,
+          ml = isP ? main.lo : main.lo95, mh = isP ? main.hi : main.hi95;
+      var pv = plac == null ? null : (isP ? plac.irr : plac.est),
+          pl = plac == null ? null : (isP ? plac.lo : plac.lo95),
+          ph = plac == null ? null : (isP ? plac.hi : plac.hi95);
+      h += "<tr><td>estimate</td><td>" + fm(mv) + "</td><td>["
+         + fm(ml) + ", " + fm(mh) + "]</td><td>" + fmt(main.p, 4)
          + "</td><td>" + main.n + "</td></tr>";
       h += "<tr><td>placebo, installation displaced " + shift + " months back"
-         + "</td><td>" + fmt(plac.est) + "</td><td>"
-         + (plac.est == null ? "n.a." : "[" + fmt(plac.lo95) + ", " + fmt(plac.hi95) + "]")
-         + "</td><td>" + (plac.est == null ? "n.a." : fmt(plac.p, 4))
-         + "</td><td>" + plac.n + "</td></tr>";
+         + "</td><td>" + fm(pv) + "</td><td>"
+         + (pv == null ? "n.a." : "[" + fm(pl) + ", " + fm(ph) + "]")
+         + "</td><td>" + (pv == null ? "n.a." : fmt(plac.p, 4))
+         + "</td><td>" + (plac ? plac.n : 0) + "</td></tr>";
     }
     h += "</tbody></table>";
-    h += "<p class='rule'>Scale: a difference in counts per intersection per year; "
-       + "zero means no effect. Estimator: the unweighted mean over units of the "
-       + "change at the corner minus the mean change at its " + nm
-       + ", tested with a one sample t test on n&minus;1 degrees of freedom. "
+    h += "<p class='rule'>" + (isP
+       ? "Scale: an incidence rate ratio; one means no effect. Cluster count "
+         + (main.n_clusters || "n.a.") + ", observations "
+         + (main.n_obs ? main.n_obs.toLocaleString() : "n.a.") + ". "
+       : "Scale: a difference in counts per intersection per year; "
+         + "zero means no effect. Estimator: the unweighted mean over units of the "
+         + "change at the corner minus the mean change at its " + nm
+         + ", tested with a one sample t test on n&minus;1 degrees of freedom. ")
        + main.censored + " units set aside because the chosen window does not "
        + "exist in their record" + (main.noctrl ? ", " + main.noctrl
        + " because they carry no comparison location under this rule" : "")
@@ -3337,6 +3812,16 @@ Object.assign(window.HELPTEXT, {
     });
   }
 
+  (function () {
+    var os = document.getElementById("lab-out");
+    if (os && !os.options.length) {
+      Object.keys(OUTLABELS).forEach(function (k) {
+        var e = document.createElement("option");
+        e.value = k; e.textContent = OUTLABELS[k];
+        os.appendChild(e);
+      });
+    }
+  })();
   document.getElementById("lab-run").addEventListener("click", function () {
     ensureLoaded(run);
   });
