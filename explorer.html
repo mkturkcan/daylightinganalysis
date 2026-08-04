@@ -101,6 +101,39 @@
   .tri[data-state="part"]{border-color:var(--green)}
   .tri[data-state="part"]::before{content:"";width:9px;height:9px;
     border-radius:2px;background:var(--green);display:block}
+  /* ---- the right rail as a secondary sidebar */
+  .layout.norail{grid-template-columns:264px 1fr 0}
+  .layout.norail>.panel:last-of-type{display:none}
+  #railhandle{position:absolute;top:10px;right:10px;z-index:12;
+    display:flex;gap:6px}
+  #railhandle button{border:1px solid var(--axis);background:var(--panel);
+    color:var(--ink);border-radius:7px;padding:5px 10px;cursor:pointer;
+    font:inherit;font-size:var(--fs-s);box-shadow:0 2px 8px rgba(0,0,0,.18)}
+  #railhandle button:hover{border-color:var(--ink3)}
+  #railhandle .primary{background:var(--blue);border-color:var(--blue);
+    color:#fff;font-weight:650}
+  /* ---- the run analysis modal */
+  #runmodal{position:fixed;inset:0;z-index:60;display:none;
+    background:rgba(10,10,8,.55);align-items:flex-start;justify-content:center;
+    padding:5vh 16px}
+  #runmodal.on{display:flex}
+  #runbox{background:var(--panel);border:1px solid var(--axis);border-radius:12px;
+    max-width:980px;width:100%;max-height:88vh;overflow:auto;padding:16px 18px;
+    box-shadow:0 18px 60px rgba(0,0,0,.4)}
+  #runbox h2{margin:0 0 2px;font-size:calc(var(--fs-b) * 1.25)}
+  #runbox .settings{color:var(--ink3);font-size:var(--fs-s);margin:0 0 10px}
+  #runbox table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  #runbox th,#runbox td{text-align:left;padding:5px 8px;
+    border-bottom:1px solid var(--line);font-size:var(--fs-s);vertical-align:top}
+  #runbox th{color:var(--ink3);text-transform:uppercase;font-size:var(--fs-t);
+    letter-spacing:.04em}
+  #runbox td.num,#runbox th.num{text-align:right}
+  #runbox tr.combined td{border-top:2px solid var(--axis);font-weight:650}
+  #runbox .foot{color:var(--ink3);font-size:var(--fs-s);margin-top:10px;
+    max-width:80ch}
+  #runbox .bar{display:flex;gap:8px;margin-top:12px}
+  /* ---- the placebo presentation switch */
+  body.noplacebo [data-placebo]{display:none !important}
   .cnt{margin-left:auto;color:var(--ink3);font-size:var(--fs-s);
     font-variant-numeric:tabular-nums;padding-left:6px}
   input[type=text],select{width:100%;background:var(--bg);color:var(--ink);
@@ -278,7 +311,9 @@
       the estimates and the comparison of the study designs">Analysis</a>
     <button class="ghost" id="aboutbtn" type="button">About the data</button>
     <button class="ghost" id="basebtn" type="button" aria-pressed="true">Basemap</button>
-    <button class="ghost" id="themebtn" type="button">Dark</button>
+    <label class="ghost" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="placeboshow" checked> placebo diagnostics</label>
+      <button class="ghost" id="themebtn" type="button">Dark</button>
   </div>
 </header>
 
@@ -305,6 +340,21 @@
     <details class="grp" open>
       <summary>Treatments <span class="cnt" id="sumClasses"></span></summary>
       <div class="body">
+        <details class="grp" open>    <summary>Combine at one corner <span class="cnt" id="sumComb"></span></summary>
+      <div class="body">
+        <label class="row"><input type="checkbox" id="combine">
+          <span>Combine overlapping records</span></label>
+        <input type="range" id="combineM" min="5" max="60" value="20" step="5">
+        <div class="hint">within <b id="combineMlab">20</b> m</div>
+        <details class="prose">
+          <summary>Why one corner can carry two records</summary>
+          <p>A turn calming record and a record on a published daylighting list can be
+          one physical change filed twice, so counting both overstates how much of the
+          city is treated. A ring marks a corner whose records come from more than one
+          source.</p>
+        </details>
+      </div>
+    </details>
         <div class="hint">Every individual treatment, coloured by what was
         installed. The published lists are under Collections.</div>
         <div id="classes"></div>
@@ -337,7 +387,7 @@
       </div>
     </details>
 
-    <details class="grp">
+    <details class="grp" open>
       <summary>Context: curb already clear <span class="cnt" id="sumCtx"></span></summary>
       <div class="body">
         <div class="hint">Hydrants and bus stops prohibit parking by statute, so
@@ -380,22 +430,7 @@
       </div>
     </details>
 
-    <details class="grp">
-      <summary>Combine at one corner <span class="cnt" id="sumComb"></span></summary>
-      <div class="body">
-        <label class="row"><input type="checkbox" id="combine">
-          <span>Combine overlapping records</span></label>
-        <input type="range" id="combineM" min="5" max="60" value="20" step="5">
-        <div class="hint">within <b id="combineMlab">20</b> m</div>
-        <details class="prose">
-          <summary>Why one corner can carry two records</summary>
-          <p>A turn calming record and a record on a published daylighting list can be
-          one physical change filed twice, so counting both overstates how much of the
-          city is treated. A ring marks a corner whose records come from more than one
-          source.</p>
-        </details>
-      </div>
-    </details>
+    
 
     <details class="grp">
       <summary>Installed on or before <button class="qhelp" type="button"
@@ -430,7 +465,7 @@
     <div id="livebody"></div>
     <!-- the two equations this panel evaluates, copied from data/web/assets.html -->
     <details class="prose" id="howgrp"><summary>How this is computed</summary><div id="eqmain"><div class="eqwrap" id="eq-arith"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover><mi>&#952;</mi><mo>&#94;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>&#8721;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><mrow><msub><mo>&#916;</mo><mi>i</mi></msub><mo>&#8722;</mo><mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>C</mi><mi>i</mi></msub><mo>|</mo></mrow></mfrac><munder><mo>&#8721;</mo><mrow><mi>j</mi><mo>&#8712;</mo><msub><mi>C</mi><mi>i</mi></msub></mrow></munder><msub><mo>&#916;</mo><mi>j</mi></msub></mrow><mo>)</mo></mrow></math><div class="mathfall">\hat\theta \;=\; \frac{1}{n}\sum_{i=1}^{n}\left(\Delta_i \;-\; \frac{1}{|C_i|}\sum_{j\in C_i}\Delta_j\right)</div><div class="eqcap">The published estimator: the mean over treated sites of the change at the site minus the mean change at its own comparison locations.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\hat\theta \;=\; \frac{1}{n}\sum_{i=1}^{n}\left(\Delta_i \;-\; \frac{1}{|C_i|}\sum_{j\in C_i}\Delta_j\right)</code></details></div></div></details>
-    <details class="prose" id="placgrp"><summary id="placsum">Placebo details</summary><div id="liveplac"></div>
+    <details class="prose" id="placgrp" data-placebo><summary id="placsum">Placebo details</summary><div id="liveplac"></div>
     </details>
     <details class="prose" id="ratiogrp"><summary id="ratiosum">Descriptive before and after ratio</summary><div id="liveratio"></div>
     <div id="eqratio"><div class="eqwrap" id="eq-aggratio"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>RR</mi><mi>agg</mi></msub><mo>=</mo><mfrac><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>T</mi><mi>before</mi></msup><mi>i</mi></msub></mrow><mrow><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>after</mi></msup><mi>i</mi></msub><mo>/</mo><munder><mo>&#8721;</mo><mi>i</mi></munder><msub><msup><mi>C</mi><mi>before</mi></msup><mi>i</mi></msub></mrow></mfrac></mrow></math><div class="mathfall">\text{RR}_{\text{agg}} \;=\; \frac{\sum_i T^{\text{after}}_i \big/ \sum_i T^{\text{before}}_i}{\sum_i C^{\text{after}}_i \big/ \sum_i C^{\text{before}}_i}</div><div class="eqcap">The descriptive aggregate rate ratio a browser can compute for any selection, carrying no unit effect and no calendar month effect.</div><details class="eqsrc"><summary>LaTeX source</summary><code>\text{RR}_{\text{agg}} \;=\; \frac{\sum_i T^{\text{after}}_i \big/ \sum_i T^{\text{before}}_i}{\sum_i C^{\text{after}}_i \big/ \sum_i C^{\text{before}}_i}</code></details></div>
@@ -1247,6 +1282,10 @@ function wireChrome() {
   $("#baseattr").textContent = TILE_ATTR +
     ". The basemap is fetched from a public tile service, so this page needs a " +
     "network connection to show it; every layer still draws without one.";
+  $("#placeboshow").addEventListener("change", ev => {
+    document.body.classList.toggle("noplacebo", !ev.target.checked);
+    draw(); if (typeof live === "function") live();
+  });
   $("#themebtn").addEventListener("click", () => {
     const cur = document.documentElement.getAttribute("data-theme");
     const dark = cur ? cur === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
@@ -1255,6 +1294,8 @@ function wireChrome() {
     draw();
   });
   addEventListener("resize", () => { S.view = null; draw(); });
+  document.querySelector(".layout").classList.add("norail");
+  wireRun();
   wireMap();
 }
 
@@ -2261,7 +2302,7 @@ function live() {
       + 'rule (choose corridor comparison locations for the Act 2 design), and '
       + 'not the Act 3 model') + '</div>';
   if (refused) {
-    h += '<div class="warnband">placebo window shows a spurious effect: do not '
+    h += '<div class="warnband" data-placebo>placebo window shows a spurious effect: do not '
       + 'read this estimate as causal</div>';
   }
   h += '<div class="hero' + (refused ? " refused" : "") + '">'
@@ -2333,10 +2374,10 @@ function liveAdmitTag(pp) {
   if (pp == null || !isFinite(pp))
     return '<span class="tag">placebo not defined</span>';
   return pp < 0.05
-    ? '<span class="tag bad" title="on months before any installation the same '
+    ? '<span class="tag bad" data-placebo title="on months before any installation the same '
       + 'computation reports a change, so the design finds an effect where none '
       + 'can exist">placebo window shows a spurious effect</span>'
-    : '<span class="tag">placebo consistent with no effect</span>';
+    : '<span class="tag" data-placebo>placebo consistent with no effect</span>';
 }
 /* The things the selection asks for that the arithmetic cannot honour, counted in a
    summary line and stated in full one click away. */
@@ -2414,6 +2455,189 @@ function mapNotes(sel) {
 }
 
 /* --------------------------------------------------------------- map events */
+
+/* ------------------------------------------------------------- run analysis
+   One estimator, already used by the live panel, applied per contributing
+   subset and to the combined selection. Returns null under three units. */
+function estimateUnits(units, y, rule, shifted) {
+  const meta = S.umeta || {};
+  const pre = meta.pre || 36, post = meta.post || 24;
+  const w = shifted ? "p" : "m";
+  const deltas = [];
+  for (const u of units) {
+    const d = (u.d || {})[y];
+    const cell = d && d[w];
+    const cg = cell && cell[rule];
+    if (!cell || !cg || !cg.n) continue;
+    deltas.push(12 * (cell.ta / post - cell.tp / pre)
+                - 12 * (cg.ca / post - cg.cp / pre));
+  }
+  const n = deltas.length;
+  if (n < 3) return { n: n };
+  const mean = deltas.reduce((a, b) => a + b, 0) / n;
+  const sd = Math.sqrt(deltas.reduce((a, b) => a + (b - mean) * (b - mean), 0)
+                       / (n - 1));
+  const se = sd / Math.sqrt(n);
+  const t = se > 0 ? mean / se : 0;
+  const p = se > 0 ? 2 * (1 - tCdfApprox(Math.abs(t), n - 1)) : 1;
+  return { n: n, est: mean, se: se, lo: mean - 1.96 * se, hi: mean + 1.96 * se,
+           t: t, p: p };
+}
+function tCdfApprox(t, df) {
+  // normal approximation with a Cornish-Fisher style df correction, adequate
+  // for the display precision here (two decimal p at df >= 20)
+  const z = t * (1 - 1 / (4 * df)) / Math.sqrt(1 + t * t / (2 * df));
+  const a = 0.2316419, k = 1 / (1 + a * Math.abs(z));
+  const d = 0.3989422804014327 * Math.exp(-z * z / 2);
+  const pz = d * k * (0.319381530 + k * (-0.356563782 + k * (1.781477937
+             + k * (-1.821255978 + k * 1.330274429))));
+  return z > 0 ? 1 - pz : pz;
+}
+
+function runAnalysis() {
+  const y = S.lout || (S.umeta && S.umeta.outcomes && S.umeta.outcomes[0]);
+  const rule = S.crule || S.rule || "m";
+  const sel = mapSelection();
+  const units = sel.units;
+  const cat = (S.umeta || {}).subsets || [];
+  const showPlac = !document.body.classList.contains("noplacebo");
+  const rows = [];
+  const perSubset = new Map();
+  for (const u of units) {
+    for (const i of (u.s || [])) {
+      if (!perSubset.has(i)) perSubset.set(i, []);
+      perSubset.get(i).push(u);
+    }
+  }
+  for (const [i, us] of perSubset) {
+    if (!subsetActive(S.subsel[i])) continue;
+    if (us.length < 3) continue;
+    const est = estimateUnits(us, y, rule, false);
+    if (est.est == null) continue;
+    const pl = showPlac ? estimateUnits(us, y, rule, true) : null;
+    rows.push({ label: (cat[i] || {}).label || ("subset " + i),
+                note: (cat[i] || {}).note || "", est: est, pl: pl,
+                combined: false });
+  }
+  rows.sort((a, b) => a.est.p - b.est.p);
+  const all = estimateUnits(units, y, rule, false);
+  if (all.est != null) {
+    rows.push({ label: "Combined: every selected unit", note: "",
+                est: all, pl: showPlac ? estimateUnits(units, y, rule, true)
+                                       : null,
+                combined: true });
+  }
+
+  // ---------------------------------------------------------------- render
+  const fmt = x => x == null ? "n.a." : (x >= 0 ? "+" : "") + x.toFixed(4);
+  const fp2 = x => x == null ? "n.a." : x < 0.0001 ? "<0.0001" : x.toFixed(4);
+  const nm = rule === "c" ? "corridor comparison locations"
+                          : "matched comparison intersections";
+  $("#runsettings").textContent =
+    outLabel(y) + "; " + nm + "; "
+    + ((S.umeta || {}).pre || 36) + " months before and "
+    + ((S.umeta || {}).post || 24) + " after installation; "
+    + units.length.toLocaleString() + " treated intersections in the selection"
+    + (S.poly || S.bbox ? "; restricted to the drawn area" : "; whole city")
+    + ". Mean difference estimator (the DOT design's), computed in this page.";
+  let h = "<table><thead><tr><th>treatment group</th><th class='num'>units</th>"
+    + "<th class='num'>estimate</th><th class='num'>95% interval</th>"
+    + "<th class='num'>p</th>"
+    + (showPlac ? "<th class='num' data-placebo>placebo</th>"
+       + "<th class='num' data-placebo>placebo p</th>" : "")
+    + "</tr></thead><tbody>";
+  for (const r of rows) {
+    h += "<tr" + (r.combined ? " class='combined'" : "") + ">"
+      + "<td title=\"" + esc(r.note) + "\">" + esc(r.label) + "</td>"
+      + "<td class='num'>" + r.est.n.toLocaleString() + "</td>"
+      + "<td class='num'>" + fmt(r.est.est) + "</td>"
+      + "<td class='num'>[" + fmt(r.est.lo) + ", " + fmt(r.est.hi) + "]</td>"
+      + "<td class='num'>" + fp2(r.est.p) + "</td>";
+    if (showPlac) {
+      const pl = r.pl || {};
+      h += "<td class='num' data-placebo>"
+        + (pl.est == null ? "n.a." : fmt(pl.est)) + "</td>"
+        + "<td class='num' data-placebo>"
+        + (pl.est == null ? "n.a." : fp2(pl.p)) + "</td>";
+    }
+    h += "</tr>";
+  }
+  h += "</tbody></table>";
+  if (!rows.length) {
+    h = "<p class='hint'>No treatment group in the selection carries three or "
+      + "more units with a comparison group under this rule. Widen the area or "
+      + "switch on more treatments.</p>";
+  }
+  $("#runbody").innerHTML = h;
+  $("#runfoot").textContent =
+    "Scale: a difference in " + outLabel(y) + " per treated intersection per "
+    + "year; zero means no effect, negative means fewer. A unit can belong to "
+    + "several groups, so group rows overlap and do not sum to the combined row. "
+    + (showPlac
+       ? "The placebo re-runs the same computation with every installation "
+         + "displaced into pre treatment months; a small placebo p means the "
+         + "design finds an effect where none can exist, and the estimate "
+         + "should not be read as causal."
+       : "Placebo diagnostics are hidden by the header switch.")
+    + " The modelled per subset estimates of the manuscript are in the "
+    + "statistical companion.";
+  S.runRows = rows.map(r => ({
+    group: r.label, units: r.est.n, estimate: r.est.est, lo: r.est.lo,
+    hi: r.est.hi, p: r.est.p,
+    placebo: r.pl && r.pl.est != null ? r.pl.est : "",
+    placebo_p: r.pl && r.pl.est != null ? r.pl.p : "" }));
+  $("#runmodal").classList.add("on");
+}
+
+function wireRun() {
+  const map = $("#map");
+  const holder = map && map.parentElement;
+  if (!holder) return;
+  holder.style.position = "relative";
+  const bar = document.createElement("div");
+  bar.id = "railhandle";
+  const run = document.createElement("button");
+  run.className = "primary"; run.type = "button";
+  run.textContent = "Run analysis";
+  run.title = "estimate every selected treatment group inside the current area, "
+    + "in this page";
+  run.addEventListener("click", runAnalysis);
+  const rail = document.createElement("button");
+  rail.type = "button";
+  rail.id = "railbtn";
+  rail.setAttribute("aria-expanded", "false");
+  rail.textContent = "\u25E8 Results";
+  rail.title = "open the results panel";
+  rail.addEventListener("click", () => {
+    const lay = document.querySelector(".layout");
+    const closed = lay.classList.toggle("norail");
+    rail.setAttribute("aria-expanded", String(!closed));
+    rail.title = closed ? "open the results panel" : "close the results panel";
+    S.view = null; draw();
+  });
+  bar.append(run, rail);
+  holder.appendChild(bar);
+
+  $("#runclose").addEventListener("click",
+    () => $("#runmodal").classList.remove("on"));
+  $("#runmodal").addEventListener("click", ev => {
+    if (ev.target === $("#runmodal")) $("#runmodal").classList.remove("on");
+  });
+  addEventListener("keydown", ev => {
+    if (ev.key === "Escape") $("#runmodal").classList.remove("on");
+  });
+  $("#runtsv").addEventListener("click", () => {
+    const rows = S.runRows || [];
+    const head = ["group", "units", "estimate", "lo95", "hi95", "p",
+                  "placebo", "placebo_p"];
+    const tsv = [head.join("\t")].concat(rows.map(r =>
+      head.map(k => r[k]).join("\t"))).join("\n");
+    navigator.clipboard && navigator.clipboard.writeText(tsv);
+    $("#runtsv").textContent = "Copied";
+    setTimeout(() => { $("#runtsv").textContent = "Copy as TSV"; }, 1200);
+  });
+}
+
 function wireMap() {
   const c = $("#map");
   c.addEventListener("pointermove", ev => {
@@ -2975,6 +3199,21 @@ load().catch(e => { $("#metaline").textContent = "Could not load data: " + e.mes
   } catch (e) { document.documentElement.classList.add("nomathml"); }
 })();</script>
 <!-- page local topics: the sentences this page carries that no shared topic covers -->
+
+<div id="runmodal" role="dialog" aria-modal="true" aria-label="analysis results">
+  <div id="runbox">
+    <h2 id="runtitle">Analysis of the current selection</h2>
+    <p class="settings" id="runsettings"></p>
+    <div id="runbody"></div>
+    <p class="foot" id="runfoot"></p>
+    <div class="bar">
+      <button class="ghost" id="runtsv" type="button">Copy as TSV</button>
+      <span style="flex:1"></span>
+      <button class="ghost" id="runclose" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 Object.assign(window.HELPTEXT, {
   controls: {

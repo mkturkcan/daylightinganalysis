@@ -306,7 +306,10 @@
   .c-n{min-width:38px}
   .c-e1{min-width:66px}.c-p1{min-width:52px}
   .c-est{min-width:52px}.c-p{min-width:58px}.c-pl{min-width:58px}.c-mde{min-width:44px}
-  .c-read{min-width:172px}
+  .c-read{min-width:150px}
+  .qhelp.txt{width:auto;height:auto;border:0;border-radius:0;background:none;
+    padding:0;font:inherit;font-weight:650;color:inherit;cursor:help;
+    text-decoration:underline dotted var(--ink3);text-underline-offset:3px}
   .c-read .tag{white-space:normal;line-height:1.25}
   button.tgl{flex:none;width:15px;height:15px;padding:0;border-radius:4px;
     border:1px solid var(--axis);background:transparent;color:var(--ink3);
@@ -388,6 +391,10 @@
       <p class="rule" id="orderline"></p>
       <p class="rule" id="scaleline"></p>
       <div class="toolbar">
+        <label class="ghost" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="placeboshow" checked>
+          show placebo diagnostics
+        </label>
         <label class="ghost" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" id="placeboreq">
           placebo requirement
@@ -943,7 +950,7 @@ const FILES = ["meta", "subsets", "outcomes", "cells", "spec1", "calibration",
                "paths", "agreement", "methods", "limitations"];
 const P = {};
 const S = {
-  placeboReq: false, out: null, rule: "c", sel: new Set(), q: "",
+  placeboReq: false, showPlacebo: true, out: null, rule: "c", sel: new Set(), q: "",
             sort: { key: "evidence", dir: 1 }, units: null, unitsErr: null,
             open: new Set() };
 
@@ -1615,7 +1622,14 @@ function renderTable() {
   // carries the topic of the two scales
   const groupHead = (n, title, scaleTxt, cls, span, topic) => {
     const x = th(null, cls, span);
-    const t = el("span", "gtitle", n + ". " + title);
+    const t = el("span", "gtitle");
+    const tb = el("button", "qhelp txt", n + ". " + title);
+    tb.type = "button";
+    tb.setAttribute("data-help", "speccfg" + (n - 1));
+    tb.setAttribute("aria-expanded", "false");
+    tb.setAttribute("aria-label", "settings of " + title);
+    tb.title = "hover for this specification's settings";
+    t.appendChild(tb);
     if (topic) t.appendChild(qh(topic, title));
     x.appendChild(t);
     const sc = el("span", "gscale", scaleTxt);
@@ -1630,12 +1644,16 @@ function renderTable() {
   gr.appendChild(sortTh("Units (spec 3)", "units", "num c-n", null, null));
   gr.lastChild.title = "treated units entering this paper's matched Poisson; specifications 1 and 2 use their own unit counts, shown in the row detail";
   gr.lastChild.rowSpan = 2;
-  gr.appendChild(groupHead(1, nmOf(0), "difference, no effect is 0", "g1", 4,
-    "arith"));
-  gr.appendChild(groupHead(2, nmOf(1), "difference, no effect is 0", "g2", 4,
-    null));
-  gr.appendChild(groupHead(3, nmOf(2), "rate ratio, no effect is 1", "g3", 5,
-    "fepois"));
+  // group widths, the single source for header and body alike:
+  // estimate + p (+ placebo when shown), and group 3 adds Pr(IRR<1)
+  const GW = { g1: S.showPlacebo ? 3 : 2, g2: S.showPlacebo ? 3 : 2,
+               g3: S.showPlacebo ? 4 : 3 };
+  gr.appendChild(groupHead(1, nmOf(0), "difference, no effect is 0", "g1",
+    GW.g1, "arith"));
+  gr.appendChild(groupHead(2, nmOf(1), "difference, no effect is 0", "g2",
+    GW.g2, null));
+  gr.appendChild(groupHead(3, "This paper\u2019s method (Act 3)",
+    "rate ratio, no effect is 1", "g3", GW.g3, "fepois"));
   const rd = th("Verdict", "c-read", null, 2);
   gr.appendChild(rd);
   thead.appendChild(gr);
@@ -1655,12 +1673,12 @@ function renderTable() {
     sr.appendChild(sortTh("p", kp, cls + " num " + cp, ptopic,
       "adjustment for multiple subsets"));
     const wantQ = cls === "g3";           // one ? per topic, on group 3
-    const pl = kpl ? sortTh("Placebo", kpl, cls + " num c-pl",
-                            wantQ ? "placebo" : null, "the placebo test")
-                   : th("Placebo", cls + " num c-pl");
-    sr.appendChild(pl);
-    sr.appendChild(sortTh(mdelab, kmde, cls + " num c-mde",
-      wantQ ? "mde" : null, "the minimum detectable effect"));
+    if (S.showPlacebo) {
+      const pl = kpl ? sortTh("Placebo", kpl, cls + " num c-pl",
+                              wantQ ? "placebo" : null, "the placebo test")
+                     : th("Placebo", cls + " num c-pl");
+      sr.appendChild(pl);
+    }
     if (hasEB) {
       sr.appendChild(sortTh("Pr(IRR<1)", "s3pr", cls + " num c-pr", "bayes",
         "the hierarchical Bayesian reading"));
@@ -1673,7 +1691,7 @@ function renderTable() {
   if (!rows.length) {
     const tr = el("tr");
     const td = el("td", null, "No subset is selected. Choose one on the left.");
-    td.colSpan = 16;
+    td.colSpan = S.showPlacebo ? 13 : 10;
     tr.appendChild(td); tb.appendChild(tr);
   }
   rows.forEach(c => addRow(tb, c, om, MX));
@@ -1738,6 +1756,15 @@ function detailFor(c, om, s1) {
     const a = c.spec1_absent || {};
     put(k1, a.tag || "no published value",
         a.why || "The published specification carries no value for this cell.");
+    if (c.pub_diff != null) {
+      put(k1, "our computation on the published window",
+        fdiff(c.pub_diff) + ", 95 per cent interval " + fdiff(c.pub_lo)
+        + " to " + fdiff(c.pub_hi) + ", p " + fp(c.pub_p) + ", on "
+        + fint(c.pub_n) + " units installed 2019 to 2021");
+      const pw1 = plainDiff(c.pub_diff, c.pub_p, null,
+        { post: 24 }, om, "published design");
+      if (pw1) put(k1, "in plain words", pw1);
+    }
   } else {
     const ratio = (P.spec1.unit_count_ratio || {})[s1.row];
     put(k1, "estimate", fdiff(s1.dot_did, 2) + ", as published, no interval published");
@@ -1746,8 +1773,14 @@ function detailFor(c, om, s1) {
     put(k1, "p", fp(s1.dot_p) + " as published, " + fp(s1.our_p) + " reproduced");
     put(k1, "placebo", fdiff(s1.placebo_did) + ", p " + fp(s1.placebo_p)
       + "; no placebo is published, so this one is run on the reproduction");
-    put(k1, "smallest detectable", fdiff(s1.our_mde)
+    put(k1, "detection floor (MDE, 80% power)", fdiff(s1.our_mde)
       + ", the smallest difference the reproduction could detect at 80 per cent power");
+    {
+      const pw1 = plainDiff(s1.our_did, s1.our_p,
+        s1.our_mde == null ? null : Math.abs(s1.our_mde),
+        { post: 24 }, om, "published design");
+      if (pw1) put(k1, "in plain words", pw1);
+    }
     put(k1, "units", fint(s1.dot_n) + " locations as published, " + fint(s1.our_n)
       + " units reproduced, " + fint(s1.our_control_locations)
       + " comparison locations");
@@ -1773,8 +1806,14 @@ function detailFor(c, om, s1) {
     put(k2, "placebo", fdiff(c.dot_placebo) + ", p " + fp(c.dot_placebo_p)
       + (c.dot_placebo_p != null && c.dot_placebo_p < 0.05
           ? "; the placebo rejects no effect" : ""));
-    put(k2, "smallest detectable", fdiff(c.dot_mde)
+    put(k2, "detection floor (MDE, 80% power)", fdiff(c.dot_mde)
       + ", at 80 per cent power, two sided");
+    {
+      const pw2 = plainDiff(c.dot_diff, c.dot_p,
+        c.dot_mde == null ? null : Math.abs(c.dot_mde), c, om,
+        "extended DOT design");
+      if (pw2) put(k2, "in plain words", pw2);
+    }
     put(k2, "units", fint(c.dot_n) + " units with a comparison, "
       + fint(c.dot_controls) + " corridor comparison locations");
   }
@@ -1798,6 +1837,11 @@ function detailFor(c, om, s1) {
       + "two sided");
     put(k3, "units", fint(c.n_units) + " treated units, three matched comparison "
       + "intersections each, drawn from " + fint(c.pool_candidates) + " candidates");
+    put(k3, "detection floor (MDE, 80% power)",
+        c.mde_pct == null || !isFinite(c.mde_pct) ? "not computable"
+          : "\u00B1" + nf(c.mde_pct, 0) + " per cent");
+    const pw3 = plainRatio(c.irr, c.p_bh, c.mde_pct, c, om);
+    if (pw3) put(k3, "in plain words", pw3);
     let pv2 = c.verdict;
     if (/^null, bounded at \d+ per cent/.test(pv2)) {
       pv2 += " (the interval covers 1; a true effect of that size or larger "
@@ -1875,6 +1919,67 @@ function admissibleUnder(c, s1) {
   return adm;
 }
 
+
+/* ------------------------------------------------- plain words for a spec row
+   A sentence a non expert can read: what the estimate means for this outcome
+   over this window, how certain it is, and what the design could and could not
+   have detected. Written from the same fields the cells show. */
+function plainDiff(est, p, mde, c, om, groupName) {
+  if (est == null) return null;
+  const yrs = (c.post || 24) / 12;
+  const oneIn = p != null && p > 0 ? Math.round(1 / p) : null;
+  const dir = est < 0 ? "fewer" : "more";
+  let t = "In plain words: about " + Math.abs(est).toFixed(2) + " " + dir + " "
+    + om.unit + " per treated intersection per year than its comparison "
+    + "locations, over the " + (c.post || 24) + " months after installation ("
+    + (Math.abs(est) * yrs).toFixed(2) + " " + dir + " over the whole window). ";
+  if (p != null) {
+    t += p < 0.001
+      ? "A difference this large would arise by chance less than once in 1,000 "
+        + "tries, so the " + groupName + " calls it statistically significant. "
+      : p < 0.05
+      ? "It would arise by chance about once in " + oneIn + " tries, which "
+        + "clears the usual 5 per cent bar. "
+      : "It could easily arise by chance (about once in "
+        + (oneIn == null ? "a few" : oneIn) + " tries), so it is not "
+        + "statistically distinguishable from no effect. ";
+  }
+  if (mde != null && isFinite(mde)) {
+    t += "Detection floor: this sample could only reliably notice a true "
+      + "change bigger than \u00B1" + Math.abs(mde).toFixed(2) + " " + om.unit
+      + " per intersection per year. For scale, a corner that gains one "
+      + "crash every ten years moves by 0.10 per year, so a real effect of "
+      + "that size " + (Math.abs(mde) > 0.1 ? "would be MISSED here"
+                        : "would be visible here")
+      + "; a null from this row is not proof of no effect, only of no effect "
+      + "bigger than the floor.";
+  }
+  return t;
+}
+function plainRatio(irr, pbh, mdePct, c, om) {
+  if (irr == null) return null;
+  const pct = Math.abs(1 - irr) * 100;
+  const dir = irr < 1 ? "lower" : "higher";
+  let t = "In plain words: the rate of " + om.unit + " at treated intersections "
+    + "was " + pct.toFixed(0) + " per cent " + dir + " than at their matched "
+    + "comparison intersections, over the " + (c.post || 24)
+    + " months after installation. ";
+  if (pbh != null) {
+    t += pbh < 0.05
+      ? "After correcting for the many subsets tested, this stays "
+        + "statistically significant. "
+      : "After correcting for the many subsets tested, it is not "
+        + "statistically distinguishable from no effect. ";
+  }
+  if (mdePct != null && isFinite(mdePct)) {
+    t += "Detection floor: only a true change of \u00B1" + mdePct.toFixed(0)
+      + " per cent or more would reliably show up here. Established treatments "
+      + "move crashes by 10 to 40 per cent, so a floor above 40 means even a "
+      + "strong real effect could hide in this row.";
+  }
+  return t;
+}
+
 function addRow(tb, c, om, MX) {
   const tr = el("tr");
   const det = el("tr", "det");
@@ -1908,10 +2013,34 @@ function addRow(tb, c, om, MX) {
   // -------- specification 1, the published one
   if (!s1) {
     const a = c.spec1_absent || {};
-    const cell = spanCell("g1", a.tag || "no published value");
-    if (a.why) cell.title = a.why;
-    cell.classList.add("missing");
-    tr.appendChild(cell);
+    if (c.pub_diff != null) {
+      const e1 = estCell("g1 c-e1", fdiff(c.pub_diff),
+        Math.abs(c.pub_diff) / MX.s1, c.pub_diff > 0, false, false);
+      const dm = el("span", "small");
+      dm.style.display = "block";
+      dm.textContent = "our computation; " + (a.tag || "not in DOT report");
+      dm.title = (a.why || "") + " The value shown is this study's own run of "
+        + "the published design (installations 2019 to 2021, 24 months each "
+        + "side, corridor comparisons) on this subset.";
+      e1.appendChild(dm);
+      tr.appendChild(e1);
+      tr.appendChild(numCell("g1 c-p1", fp(c.pub_p),
+        fint(c.pub_n) + " units"));
+      if (S.showPlacebo) {
+        const pl1 = numCell("g1 c-pl", "n.a.", "");
+        pl1.title = "no placebo is computable on the published window: the "
+          + "crash record it uses leaves no untreated months";
+        tr.appendChild(pl1);
+      }
+    } else {
+      const cell = spanCell("g1", a.tag || "no published value");
+      cell.colSpan = S.showPlacebo ? 3 : 2;
+      if (a.why) cell.title = (a.why || "") + " No installations fall in the "
+        + "published window of 2019 to 2021, so not even this study's own "
+        + "computation exists for it.";
+      cell.classList.add("missing");
+      tr.appendChild(cell);
+    }
   } else {
     const adm1 = s1.our_p != null && s1.our_p < 0.05
       && !(s1.placebo_p != null && s1.placebo_p < 0.05);
@@ -1921,33 +2050,39 @@ function addRow(tb, c, om, MX) {
       s1.our_did == null ? null : s1.our_did > 0, adm1, ref1,
       "pub. " + fdiff(s1.dot_did, 2)));
     tr.appendChild(numCell("g1 c-p1", fp(s1.our_p), "pub. " + fp(s1.dot_p)));
-    tr.appendChild(numCell("g1 c-pl", fdiff(s1.placebo_did), "p " + fp(s1.placebo_p)));
-    tr.appendChild(numCell("g1 c-mde", "\u00B1" + nf(Math.abs(s1.our_mde), 4)));
+    if (S.showPlacebo) tr.appendChild(numCell("g1 c-pl", fdiff(s1.placebo_did), "p " + fp(s1.placebo_p)));
+
   }
 
   // -------- specification 2, the same components on the extended record
   if (c.dot_diff == null) {
-    tr.appendChild(spanCell("g2", "not identified"));
+    const ni2 = spanCell("g2", "not identified");
+    ni2.colSpan = S.showPlacebo ? 3 : 2;
+    tr.appendChild(ni2);
   } else {
     const r2 = c.spec2_reading || {};
     const ref2 = c.dot_placebo_p != null && c.dot_placebo_p < 0.05;
-    tr.appendChild(estCell("g2 c-est", fdiff(c.dot_diff),
-      Math.abs(c.dot_diff) / MX.s2, c.dot_diff > 0, adm2(c), S.placeboReq && ref2));
+    const e2 = estCell("g2 c-est", fdiff(c.dot_diff),
+      Math.abs(c.dot_diff) / MX.s2, c.dot_diff > 0, adm2(c), S.placeboReq && ref2);
+    e2.title = plainDiff(c.dot_diff, c.dot_p, null, c, om,
+      "extended DOT design") || "";
+    tr.appendChild(e2);
     tr.appendChild(numCell("g2 c-p", fp(c.dot_p)));
-    tr.appendChild(numCell("g2 c-pl", fdiff(c.dot_placebo), "p " + fp(c.dot_placebo_p)));
-    tr.appendChild(numCell("g2 c-mde", c.dot_mde == null ? "n.a." : "\u00B1" + nf(Math.abs(c.dot_mde), 4)));
+    if (S.showPlacebo) tr.appendChild(numCell("g2 c-pl", fdiff(c.dot_placebo), "p " + fp(c.dot_placebo_p)));
+
   }
 
   // -------- specification 3, the falsification tested one
   if (c.irr == null) {
     const ni3 = spanCell("g3", "not identified");
-    ni3.colSpan = 5;
+    ni3.colSpan = S.showPlacebo ? 4 : 3;
     tr.appendChild(ni3);
   } else {
     const r3 = c.spec3_reading || {};
     const e3 = estCell("g3 c-est", fratio(c.irr),
       Math.abs(Math.log(c.irr)) / MX.s3, c.irr > 1, adm3(c), refuses3(c));
-    if (placeboFails3(c)) {
+    e3.title = plainRatio(c.irr, c.p_bh, null, c, om) || "";
+    if (S.showPlacebo && placeboFails3(c)) {
       const pf = el("span", "small");
       pf.style.display = "block";
       pf.textContent = "placebo fails ("
@@ -1956,9 +2091,8 @@ function addRow(tb, c, om, MX) {
     }
     tr.appendChild(e3);
     tr.appendChild(numCell("g3 c-p", fp(c.p), "(" + fp(c.p_bh) + ")"));
-    tr.appendChild(numCell("g3 c-pl", fratio(c.placebo_irr), "p " + fp(c.placebo_p)));
-    tr.appendChild(numCell("g3 c-mde",
-      c.mde_pct == null || !isFinite(c.mde_pct) ? "n.a." : nf(c.mde_pct, 0)));
+    if (S.showPlacebo) tr.appendChild(numCell("g3 c-pl", fratio(c.placebo_irr), "p " + fp(c.placebo_p)));
+
     const prv = c.prob_reduction;
     const prtxt = prv == null ? "n.a."
       : prv < 0.005 ? "<0.01" : prv > 0.995 ? ">0.99" : nf(prv, 2);
@@ -1985,12 +2119,12 @@ function addRow(tb, c, om, MX) {
   } else {
     rd.appendChild(tagFor(c.spec3_reading));
   }
-  if (c.placebo_flag === "fails" || placeboFails3(c)) {
+  if (S.showPlacebo && (c.placebo_flag === "fails" || placeboFails3(c))) {
     const w = el("span", "tag warn", "placebo fails");
     w.title = "the placebo rejects no effect at p " + fp(c.placebo_p)
       + (c.placebo_tost_p != null ? "; TOST equivalence p " + fp(c.placebo_tost_p) : "");
     rd.appendChild(w);
-  } else if (c.placebo_tost_p != null && c.placebo_tost_p < 0.05) {
+  } else if (S.showPlacebo && c.placebo_tost_p != null && c.placebo_tost_p < 0.05) {
     const w = el("span", "tag ok", "placebo equivalent (TOST)");
     w.title = "Schuirmann two one sided tests against bounds of 10 per cent each "
       + "way: p_TOST " + fp(c.placebo_tost_p) + ", so the placebo is "
@@ -2006,7 +2140,7 @@ function addRow(tb, c, om, MX) {
   const a = el("span", "small",
     nums.length
       ? "significant after adjustment under " + nums.join(", ")
-        + (failsP ? "; placebo fails" : "")
+        + (S.showPlacebo && failsP ? "; placebo fails" : "")
       : "no significant finding");
   a.title = adm.length ? "significant under: " + adm.join("; ")
                        : "no specification returns a significant finding here";
@@ -2155,7 +2289,7 @@ function renderLive() {
     + `difference in ${om.unit} per intersection per year, where no effect is `
     + `0; minimum detectable difference ±${nf(Math.abs(L.main.mde), 4)} `
     + `at 80 per cent power`));
-  tiles.appendChild(tile("Its placebo",
+  if (S.showPlacebo) tiles.appendChild(tile("Its placebo",
     L.placebo ? fdiff(L.placebo.est) : "n.a.",
     L.placebo ? `p ${fp(L.placebo.p)} on the same units with t_i `
       + `moved back ${P.meta.settings.placebo_shift} months`
@@ -3088,8 +3222,37 @@ function fillFunnel() {
   }
 }
 
+
+/* ------------------------------------------- hover configuration per group
+   The group title opens the specification's settings table: what record, what
+   installations, what window, what comparison rule, what estimator, what
+   placebo, what multiplicity control. The rows come from the methods payload,
+   so this popover and the methodology section cannot disagree. */
+function registerSpecTopics() {
+  if (bad("methods")) return;
+  window.HELPTEXT = window.HELPTEXT || {};
+  P.methods.specifications.forEach((sp, i) => {
+    let rows = "";
+    for (const [k, v] of (sp.components || [])) {
+      rows += "<tr><td style='color:var(--ink3);padding-right:12px;"
+        + "vertical-align:top;white-space:nowrap'>" + esc(k) + "</td><td>"
+        + esc(v) + "</td></tr>";
+    }
+    window.HELPTEXT["speccfg" + i] = {
+      title: sp.name + " \u2014 settings",
+      body: "<p>" + esc(sp.whose || "") + " " + esc(sp.coverage || "")
+        + "</p><table style='border-collapse:collapse;font-size:12.5px;"
+        + "line-height:1.45'>" + rows + "</table>"
+        + "<p class='hint'>The ? beside the title explains the estimator's "
+        + "mathematics; this table is the configuration it ran under.</p>",
+    };
+  });
+}
+
 function renderAll() {
+  registerSpecTopics();
   fillFunnel();
+  buildStrip();
   renderTable();
   renderAgreement();
   renderLive();
@@ -3121,6 +3284,15 @@ function wire() {
     S.sel.clear();
     P.subsets.families.forEach(f => S.sel.add(f.members[0]));
     writeHash(); buildSubsets(); renderAll();
+  });
+  $("#placeboshow").addEventListener("change", ev => {
+    S.showPlacebo = ev.target.checked;
+    if (!S.showPlacebo && S.placeboReq) {
+      S.placeboReq = false;
+      $("#placeboreq").checked = false;
+    }
+    $("#placeboreq").disabled = !S.showPlacebo;
+    renderAll();
   });
   $("#placeboreq").addEventListener("change", ev => {
     S.placeboReq = ev.target.checked;
@@ -3756,7 +3928,8 @@ function labPpml(units, out, pre, post, a, b, shift) {
       h += "<tr><td>estimate</td><td>" + fm(mv) + "</td><td>["
          + fm(ml) + ", " + fm(mh) + "]</td><td>" + fmt(main.p, 4)
          + "</td><td>" + main.n + "</td></tr>";
-      h += "<tr><td>placebo, installation displaced " + shift + " months back"
+      if (!S.showPlacebo) plac = null;
+      if (plac) h += "<tr><td>placebo, installation displaced " + shift + " months back"
          + "</td><td>" + fm(pv) + "</td><td>"
          + (pv == null ? "n.a." : "[" + fm(pl) + ", " + fm(ph) + "]")
          + "</td><td>" + (pv == null ? "n.a." : fmt(plac.p, 4))
